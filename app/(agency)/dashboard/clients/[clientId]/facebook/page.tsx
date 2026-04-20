@@ -1,5 +1,9 @@
 import { notFound } from "next/navigation";
 import { Suspense } from "react";
+
+/** Always read latest client row after OAuth redirect (avoid stale RSC cache showing "Connect Facebook"). */
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
 import { AgencyLayout } from "@/components/layouts/AgencyLayout";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { loadClientHeroContext } from "@/lib/client-hero";

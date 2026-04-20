@@ -198,7 +198,7 @@ export async function POST(req: Request, { params }: { params: { leadId: string 
 
     const { data: mgr } = await supabase
       .from("users")
-      .select("id, name, email, phone, notification_prefs")
+      .select("id, name, email, phone")
       .eq("client_id", (updated as { client_id: string }).client_id)
       .eq("role", "CLIENT_MANAGER")
       .eq("is_active", true)
@@ -207,7 +207,7 @@ export async function POST(req: Request, { params }: { params: { leadId: string 
 
     const { data: clientRow } = await supabase
       .from("clients")
-      .select("name, twilio_whatsapp_override")
+      .select("name, twilio_whatsapp_override, manager_notification_prefs")
       .eq("id", (updated as { client_id: string }).client_id)
       .maybeSingle();
 
@@ -232,7 +232,7 @@ export async function POST(req: Request, { params }: { params: { leadId: string 
           : null,
         (clientRow?.twilio_whatsapp_override as string | null) ?? null,
         (clientRow?.name as string) ?? "Client",
-        mgr ? getManagerPrefs((mgr as { notification_prefs?: unknown }).notification_prefs) : null
+        parseManagerPrefs((clientRow as { manager_notification_prefs?: unknown } | null)?.manager_notification_prefs)
       )
     );
   }

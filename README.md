@@ -123,3 +123,12 @@ Implementation: `lib/messaging/twilio.ts` (`sendWhatsApp`). Delivery attempts ar
 ```bash
 npm run build
 ```
+
+
+Field	Value
+Email
+admin@leadstaq.com
+Password
+admin123
+Role
+AGENCY_ADMIN

@@ -16,6 +16,22 @@ export type FacebookClientSnapshot = {
   last_lead_received_at: string | null;
 };
 
+/** Stable key so we re-sync `snap` when RSC passes new `initial` after OAuth (object reference may not change). */
+function facebookInitialSignature(i: FacebookClientSnapshot): string {
+  return [
+    i.fb_access_token ?? "",
+    i.fb_ad_account_id ?? "",
+    i.fb_page_id ?? "",
+    i.fb_form_id ?? "",
+    i.fb_token_expired_at ?? "",
+    i.fb_access_token_expires_at ?? "",
+    i.fb_page_name ?? "",
+    i.fb_form_name ?? "",
+    String(i.fb_webhook_verified),
+    i.last_lead_received_at ?? "",
+  ].join("\0");
+}
+
 type PageRow = { id: string; name: string };
 type FormRow = { id: string; name: string; status?: string };
 type AdAccountRow = { id: string; name: string; accountId: string };
@@ -105,6 +121,23 @@ export function FacebookConnectPanel({
   const [backfillLoading, setBackfillLoading] = useState(false);
   const [backfillMessage, setBackfillMessage] = useState<string | null>(null);
   const singleAdAutoTried = useRef(false);
+  const oauthReturnRefreshDone = useRef(false);
+
+  const initialSig = useMemo(
+    () => facebookInitialSignature(initial),
+    [
+      initial.fb_access_token,
+      initial.fb_ad_account_id,
+      initial.fb_page_id,
+      initial.fb_form_id,
+      initial.fb_token_expired_at,
+      initial.fb_access_token_expires_at,
+      initial.fb_page_name,
+      initial.fb_form_name,
+      initial.fb_webhook_verified,
+      initial.last_lead_received_at,
+    ]
+  );
 
   const hasToken = Boolean(snap.fb_access_token);
   const hasAdAccount = Boolean(snap.fb_ad_account_id);
@@ -120,7 +153,18 @@ export function FacebookConnectPanel({
   useEffect(() => {
     setSnap(initial);
     singleAdAutoTried.current = false;
-  }, [initial]);
+  }, [initialSig, initial]);
+
+  const stepParam = searchParams.get("step");
+  useEffect(() => {
+    if (stepParam !== "adaccount" || oauthReturnRefreshDone.current) return;
+    oauthReturnRefreshDone.current = true;
+    router.refresh();
+  }, [stepParam, router]);
+
+  useEffect(() => {
+    oauthReturnRefreshDone.current = false;
+  }, [clientId]);
 
   useEffect(() => {
     const e = searchParams.get("fbError");

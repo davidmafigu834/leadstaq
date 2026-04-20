@@ -134,6 +134,8 @@ Public landing lead submission remains **`POST /api/leads/submit`** (browser); n
 | “Connection expired” in UI | Reconnect OAuth; check Meta app permissions and that the Page user still grants access. |
 | Backfill 502 + `tokenExpired` | Reconnect; Page token may be invalid. |
 | Backfill 429 | Wait one minute between backfills for the same client. |
+| **fb_user_access_token / schema cache** error on connect | The **clients** table is missing Facebook columns from migration **004** (duplicate-safe repair in **015**). In Supabase **SQL Editor**, run `supabase/migrations/015_ensure_fb_user_access_token.sql`, then reconnect. If it still fails briefly, run `NOTIFY pgrst, 'reload schema';` or restart the project to refresh PostgREST. |
+| OAuth finishes but UI still shows **Connect Facebook** | Deploy includes a **no-store** redirect from the OAuth callback and a **forced dynamic** Facebook page so the client row reloads. If it still happens: hard-refresh the tab; confirm the callback URL in the browser network tab returned **302** to `/facebook?step=adaccount` (not `/login` or `/dashboard?fbError=…`). |
 
 ## Code map (for developers)
 

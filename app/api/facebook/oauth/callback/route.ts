@@ -13,7 +13,9 @@ function redirectToFacebookTab(req: Request, clientId: string, query: Record<str
   for (const [k, v] of Object.entries(query)) {
     u.searchParams.set(k, v);
   }
-  return NextResponse.redirect(u);
+  const res = NextResponse.redirect(u);
+  res.headers.set("Cache-Control", "no-store, no-cache, must-revalidate");
+  return res;
 }
 
 export async function GET(req: Request) {
