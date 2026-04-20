@@ -63,7 +63,7 @@ Lead management for marketing agencies and their service-business clients. Built
 | `FACEBOOK_REDIRECT_URI` | Must match app settings exactly, e.g. `https://your-app.vercel.app/api/facebook/oauth/callback` |
 | `FACEBOOK_WEBHOOK_VERIFY_TOKEN` | Same value configured on the Meta webhook |
 | `FACEBOOK_API_VERSION` | Graph API version (default `v19.0`) |
-| `CRON_SECRET` | `Authorization: Bearer` for `/api/cron/check-leads` |
+| `CRON_SECRET` | `Authorization: Bearer` for cron routes in production (set on Vercel; Vercel Cron sends it automatically) |
 
 For outbound email, verify the sending domain for `SENDGRID_FROM_EMAIL` in SendGrid (SPF and DKIM records) so messages authenticate correctly.
 
@@ -111,9 +111,10 @@ Implementation: `lib/messaging/twilio.ts` (`sendWhatsApp`). Delivery attempts ar
 
 ## Deploy (Vercel)
 
-- `vercel.json` schedules `/api/cron/check-leads` every 30 minutes.
-- Set all env vars in the Vercel project.
-- Configure `NEXTAUTH_URL` to your production URL.
+- **Hobby (free):** Vercel only allows cron expressions that run **at most once per day**. This repo uses a single daily job: `vercel.json` → `/api/cron/daily` at **06:00 UTC**, which runs **uncontacted-lead checks** and **follow-up reminders** in one request.
+- Set **`CRON_SECRET`** in the Vercel project environment. Vercel Cron will send `Authorization: Bearer <CRON_SECRET>` automatically.
+- For **more frequent** uncontacted checks (e.g. every 30 minutes) without upgrading Vercel, use a free external cron (e.g. [cron-job.org](https://cron-job.org)) to `GET` your deployed URL **`/api/cron/check-leads`** with the same `Authorization: Bearer <CRON_SECRET>` header.
+- Set all other env vars in the Vercel project and configure **`NEXTAUTH_URL`** to your production URL.
 
 ## Build
 

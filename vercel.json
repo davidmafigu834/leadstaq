@@ -1,11 +1,7 @@
 {
   "crons": [
     {
-      "path": "/api/cron/check-leads",
-      "schedule": "*/30 * * * *"
-    },
-    {
-      "path": "/api/cron/follow-up-reminders",
+      "path": "/api/cron/daily",
       "schedule": "0 6 * * *"
     }
   ]
