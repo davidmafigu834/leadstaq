@@ -23,6 +23,7 @@ export default async function ClientTeamPage({ params }: { params: { clientId: s
         name={client.name as string}
         industry={client.industry as string}
         publicLandingUrl={getPublicLandingPageUrl(client.slug as string)}
+        hero={hero}
       >
         <div className="border border-border">
           <table className="w-full text-left text-sm">

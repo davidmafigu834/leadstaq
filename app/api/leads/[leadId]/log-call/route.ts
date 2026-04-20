@@ -232,7 +232,7 @@ export async function POST(req: Request, { params }: { params: { leadId: string 
           : null,
         (clientRow?.twilio_whatsapp_override as string | null) ?? null,
         (clientRow?.name as string) ?? "Client",
-        parseManagerPrefs((clientRow as { manager_notification_prefs?: unknown } | null)?.manager_notification_prefs)
+        getManagerPrefs((clientRow as { manager_notification_prefs?: unknown } | null)?.manager_notification_prefs)
       )
     );
   }

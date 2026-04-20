@@ -123,21 +123,7 @@ export function FacebookConnectPanel({
   const singleAdAutoTried = useRef(false);
   const oauthReturnRefreshDone = useRef(false);
 
-  const initialSig = useMemo(
-    () => facebookInitialSignature(initial),
-    [
-      initial.fb_access_token,
-      initial.fb_ad_account_id,
-      initial.fb_page_id,
-      initial.fb_form_id,
-      initial.fb_token_expired_at,
-      initial.fb_access_token_expires_at,
-      initial.fb_page_name,
-      initial.fb_form_name,
-      initial.fb_webhook_verified,
-      initial.last_lead_received_at,
-    ]
-  );
+  const initialSig = useMemo(() => facebookInitialSignature(initial), [initial]);
 
   const hasToken = Boolean(snap.fb_access_token);
   const hasAdAccount = Boolean(snap.fb_ad_account_id);
