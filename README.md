@@ -111,10 +111,12 @@ Implementation: `lib/messaging/twilio.ts` (`sendWhatsApp`). Delivery attempts ar
 
 ## Deploy (Vercel)
 
+- **NextAuth (login):** In production, **`NEXTAUTH_SECRET` is required**. If it is missing, sign-in shows `/api/auth/error` — *“There is a problem with the server configuration.”* Generate one locally: `openssl rand -base64 32`, add it under Vercel → Project → Settings → Environment Variables, then redeploy.
+- Set **`NEXTAUTH_URL`** to your live site origin with **no path**, e.g. `https://leadstaq.tech` (must match how users open the app; avoid `http://` or a wrong host).
 - **Hobby (free):** Vercel only allows cron expressions that run **at most once per day**. This repo uses a single daily job: `vercel.json` → `/api/cron/daily` at **06:00 UTC**, which runs **uncontacted-lead checks** and **follow-up reminders** in one request.
 - Set **`CRON_SECRET`** in the Vercel project environment. Vercel Cron will send `Authorization: Bearer <CRON_SECRET>` automatically.
 - For **more frequent** uncontacted checks (e.g. every 30 minutes) without upgrading Vercel, use a free external cron (e.g. [cron-job.org](https://cron-job.org)) to `GET` your deployed URL **`/api/cron/check-leads`** with the same `Authorization: Bearer <CRON_SECRET>` header.
-- Set all other env vars in the Vercel project and configure **`NEXTAUTH_URL`** to your production URL.
+- Set all other env vars in the Vercel project (including **`NEXT_PUBLIC_SUPABASE_URL`** and **`SUPABASE_SERVICE_ROLE_KEY`**).
 
 ## Build
 
