@@ -1,0 +1,122 @@
+# Leadstaq
+
+Lead management for marketing agencies and their service-business clients. Built with **Next.js 14 (App Router)**, **TypeScript**, **Tailwind CSS**, **Supabase (PostgreSQL)**, **NextAuth.js**, and **Zustand**.
+
+## Prerequisites
+
+- Node.js 18+
+- A [Supabase](https://supabase.com) project (PostgreSQL)
+
+## Setup
+
+1. **Clone and install**
+
+   ```bash
+   npm install
+   ```
+
+2. **Database**
+
+   - In the Supabase SQL editor, run the SQL in `supabase/migrations/001_initial_schema.sql`.
+   - Optionally use the connection string as `DATABASE_URL` for external tools (Drizzle/pgAdmin). The app uses the Supabase JS client with `NEXT_PUBLIC_SUPABASE_URL` and `SUPABASE_SERVICE_ROLE_KEY`.
+
+3. **Environment**
+
+   Copy `.env.example` to `.env.local` and fill in values.
+
+4. **Seed**
+
+   ```bash
+   npm run seed
+   ```
+
+   Default admin (after seed): `admin@leadstaq.com` / `admin123`.
+
+5. **Storage buckets (Supabase Dashboard)**
+
+   Create buckets: `client-logos`, `landing-page-images`, `lead-attachments`. Use signed URLs for private files (see `lib/storage.ts`).
+
+6. **Run**
+
+   ```bash
+   npm run dev
+   ```
+
+   Open [http://localhost:3000](http://localhost:3000).
+
+## Environment variables
+
+| Variable | Purpose |
+|----------|---------|
+| `NEXT_PUBLIC_SUPABASE_URL` | Supabase project URL |
+| `SUPABASE_SERVICE_ROLE_KEY` | Server-only key for API routes and seed |
+| `DATABASE_URL` | Postgres URL (optional; for migrations/tools) |
+| `NEXTAUTH_SECRET` | Session encryption |
+| `NEXTAUTH_URL` | Public app URL (e.g. `https://your-app.vercel.app`) |
+| `NEXT_PUBLIC_APP_DOMAIN` | Apex domain for subdomain routing (e.g. `leadstaq.com`) |
+| `TWILIO_*` | WhatsApp (account, token, `TWILIO_WHATSAPP_FROM`) |
+| `TWILIO_CONTENT_SID_*` | Approved WhatsApp Content template SIDs (`HX…`) — see below |
+| `DEFAULT_COUNTRY_CODE` | ISO country for parsing local phones (e.g. `ZW`) |
+| `SENDGRID_API_KEY` | SendGrid API key (server-only) |
+| `SENDGRID_FROM_EMAIL` | Verified sender address (e.g. `notifications@yourdomain.com`) |
+| `FACEBOOK_APP_ID` / `FACEBOOK_APP_SECRET` | Meta app (Login + Marketing API) |
+| `FACEBOOK_REDIRECT_URI` | Must match app settings exactly, e.g. `https://your-app.vercel.app/api/facebook/oauth/callback` |
+| `FACEBOOK_WEBHOOK_VERIFY_TOKEN` | Same value configured on the Meta webhook |
+| `FACEBOOK_API_VERSION` | Graph API version (default `v19.0`) |
+| `CRON_SECRET` | `Authorization: Bearer` for `/api/cron/check-leads` |
+
+For outbound email, verify the sending domain for `SENDGRID_FROM_EMAIL` in SendGrid (SPF and DKIM records) so messages authenticate correctly.
+
+## Add a new client
+
+1. Sign in as agency admin.
+2. Insert or create a **Client** row (via seed or Supabase) with a unique `slug`.
+3. Configure **Form** (`/dashboard/clients/[clientId]/form`) and **Landing** (`/dashboard/clients/[clientId]/landing-page`).
+4. Assign **Client manager** and **Salespeople** users with `client_id` set.
+
+## Facebook Lead Ads
+
+1. Create a Meta app with **Facebook Login** and the permissions used by Leadstaq (`leads_retrieval`, `pages_show_list`, `pages_read_engagement`, `pages_manage_metadata`, `business_management`).
+2. In the app’s **Facebook Login** settings, add **Valid OAuth Redirect URIs**: the same value as `FACEBOOK_REDIRECT_URI` (for production, e.g. `https://app.leadstaq.com/api/facebook/oauth/callback`).
+3. Set `FACEBOOK_APP_ID`, `FACEBOOK_APP_SECRET`, `FACEBOOK_REDIRECT_URI`, `FACEBOOK_WEBHOOK_VERIFY_TOKEN`, and optionally `FACEBOOK_API_VERSION` in your environment.
+4. Configure the **Webhooks** product: callback `https://your-domain/api/facebook/webhook`, verify token = `FACEBOOK_WEBHOOK_VERIFY_TOKEN`, subscribe to `leadgen` at the **Page** level (the in-app flow subscribes the app when you select a Page).
+5. As agency admin, open **Dashboard → Client → Facebook** and run **Connect with Facebook**, then pick the Page and Lead Form. No manual database edits are required.
+
+## Twilio WhatsApp Content templates (production)
+
+Outbound WhatsApp outside a user’s 24-hour session must use **Meta-approved** templates. Leadstaq sends via Twilio’s **Content API** (`contentSid` + `contentVariables`). In **Twilio Console → Messaging → Content → Content Template Builder**, create and submit for WhatsApp approval four templates whose bodies match these placeholders (variable numbers must match):
+
+1. **`new_lead_salesperson`** (Utility, English)  
+   `New lead {{1}}.` / `Phone: {{2}}` / `Budget: {{3}}` / `Source: {{4}}` / `View: {{5}}`
+
+2. **`new_lead_manager`**  
+   `New lead assigned to {{1}} for {{2}}. Log in to view your pipeline.`
+
+3. **`deal_won`**  
+   `Deal won by {{1}} — {{2}}, {{3}}.`
+
+4. **`follow_up_reminder`**  
+   `Follow-up reminder: Call {{1}} today. {{2}} | {{3}}` / `View: {{4}}`
+
+After approval, copy each template’s **`HX…` SID** into `.env.local`:
+
+- `TWILIO_CONTENT_SID_NEW_LEAD_SALESPERSON`
+- `TWILIO_CONTENT_SID_NEW_LEAD_MANAGER`
+- `TWILIO_CONTENT_SID_DEAL_WON`
+- `TWILIO_CONTENT_SID_FOLLOW_UP_REMINDER`
+
+If these are **unset**, the app falls back to **freeform `body`** messages (fine for the **Twilio WhatsApp sandbox** in development). Production must set all four.
+
+Implementation: `lib/messaging/twilio.ts` (`sendWhatsApp`). Delivery attempts are recorded in the **`message_logs`** table (run migration `012_message_logs.sql`).
+
+## Deploy (Vercel)
+
+- `vercel.json` schedules `/api/cron/check-leads` every 30 minutes.
+- Set all env vars in the Vercel project.
+- Configure `NEXTAUTH_URL` to your production URL.
+
+## Build
+
+```bash
+npm run build
+```

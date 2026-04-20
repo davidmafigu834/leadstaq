@@ -1,0 +1,109 @@
+import { getServerSession } from "next-auth";
+import { authOptions } from "@/lib/auth";
+import { createAdminClient } from "@/lib/supabase/admin";
+import type { UserRole } from "@/types";
+
+export const CLIENT_MANAGER_READ_ONLY = "Client managers have read-only access";
+
+/** API routes: require signed-in agency admin. */
+export async function requireAgencyAdmin(): Promise<
+  { ok: true; userId: string } | { error: string; status: number }
+> {
+  const session = await getServerSession(authOptions);
+  if (!session?.userId) {
+    return { error: "Unauthorized", status: 401 };
+  }
+  if (session.role !== "AGENCY_ADMIN") {
+    return { error: "Forbidden", status: 403 };
+  }
+  return { ok: true, userId: session.userId };
+}
+
+type LeadScope = {
+  client_id: string;
+  assigned_to_id: string | null;
+};
+
+export async function canModifyLead(leadId: string): Promise<
+  | { allowed: true; lead: LeadScope; userId: string; role: UserRole }
+  | { allowed: false; reason: string; status: 401 | 403 | 404 }
+> {
+  const session = await getServerSession(authOptions);
+  if (!session?.userId) {
+    return { allowed: false, reason: "Unauthorized", status: 401 };
+  }
+  if (session.role === "CLIENT_MANAGER") {
+    return { allowed: false, reason: CLIENT_MANAGER_READ_ONLY, status: 403 };
+  }
+
+  const supabase = createAdminClient();
+  const { data: lead } = await supabase
+    .from("leads")
+    .select("client_id, assigned_to_id")
+    .eq("id", leadId)
+    .maybeSingle();
+
+  if (!lead) {
+    return { allowed: false, reason: "Not found", status: 404 };
+  }
+
+  const scope: LeadScope = {
+    client_id: lead.client_id as string,
+    assigned_to_id: (lead.assigned_to_id as string | null) ?? null,
+  };
+
+  if (session.role === "AGENCY_ADMIN") {
+    return { allowed: true, lead: scope, userId: session.userId, role: session.role };
+  }
+
+  if (session.role === "SALESPERSON") {
+    if (scope.assigned_to_id !== session.userId) {
+      return { allowed: false, reason: "Forbidden", status: 403 };
+    }
+    return { allowed: true, lead: scope, userId: session.userId, role: session.role };
+  }
+
+  return { allowed: false, reason: "Forbidden", status: 403 };
+}
+
+/** Read access: wrong scope returns notFound (404) to avoid leaking lead existence. */
+export async function canReadLead(leadId: string): Promise<
+  | { ok: true }
+  | { ok: false; status: 401 | 404 }
+> {
+  const session = await getServerSession(authOptions);
+  if (!session?.userId) {
+    return { ok: false, status: 401 };
+  }
+
+  const supabase = createAdminClient();
+  const { data: lead } = await supabase
+    .from("leads")
+    .select("client_id, assigned_to_id")
+    .eq("id", leadId)
+    .maybeSingle();
+
+  if (!lead) {
+    return { ok: false, status: 404 };
+  }
+
+  if (session.role === "AGENCY_ADMIN") {
+    return { ok: true };
+  }
+
+  if (session.role === "CLIENT_MANAGER") {
+    if (lead.client_id !== session.clientId) {
+      return { ok: false, status: 404 };
+    }
+    return { ok: true };
+  }
+
+  if (session.role === "SALESPERSON") {
+    if (lead.assigned_to_id !== session.userId) {
+      return { ok: false, status: 404 };
+    }
+    return { ok: true };
+  }
+
+  return { ok: false, status: 404 };
+}

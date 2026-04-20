@@ -1,0 +1,498 @@
+/* Scoped under .northfieldTemplate — theme via CSS variables set inline on root */
+
+.northfieldTemplate {
+  --paper: var(--template-paper, #efeae0);
+  --ink: var(--template-ink, #1a1815);
+  --accent: var(--template-accent, #ff6b1f);
+  min-height: 100vh;
+  background: var(--paper);
+  color: var(--ink);
+  position: relative;
+  overflow-x: hidden;
+}
+
+.northfieldTemplate::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  opacity: 0.07;
+  background-image: linear-gradient(var(--ink) 1px, transparent 1px),
+    linear-gradient(90deg, var(--ink) 1px, transparent 1px);
+  background-size: 24px 24px;
+  z-index: 0;
+}
+
+.nfInner {
+  position: relative;
+  z-index: 1;
+}
+
+.nfTopBar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem 1.5rem;
+  padding: 0.75rem clamp(1rem, 3vw, 2.5rem);
+  border-bottom: 1px solid color-mix(in srgb, var(--ink) 12%, transparent);
+  font-family: var(--font-jetbrains, ui-monospace, monospace);
+  font-size: 11px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.nfTopBar span {
+  opacity: 0.72;
+}
+
+.nfTopBar strong {
+  font-weight: 600;
+  opacity: 1;
+}
+
+.nfHero {
+  display: grid;
+  grid-template-columns: 1fr min(420px, 100%);
+  gap: clamp(1.5rem, 4vw, 3.5rem);
+  padding: clamp(1.5rem, 4vw, 3.5rem);
+  align-items: start;
+}
+
+@media (max-width: 960px) {
+  .nfHero {
+    grid-template-columns: 1fr;
+  }
+}
+
+.nfEyebrow {
+  font-family: var(--font-jetbrains, monospace);
+  font-size: 11px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  opacity: 0.55;
+  margin-bottom: 1rem;
+}
+
+.nfHeadline {
+  font-family: var(--font-fraunces, ui-serif, Georgia, serif);
+  font-weight: 500;
+  font-size: clamp(2.4rem, 5vw, 4.25rem);
+  line-height: 1.05;
+  letter-spacing: -0.02em;
+}
+
+.nfHeadline em {
+  font-style: italic;
+  color: var(--accent);
+  font-variation-settings: "SOFT" 100, "WONK" 1;
+}
+
+.nfUnderline {
+  background: linear-gradient(transparent 62%, color-mix(in srgb, var(--accent) 55%, transparent) 62%, color-mix(in srgb, var(--accent) 55%, transparent) 88%, transparent 88%);
+}
+
+.nfLede {
+  margin-top: 1.5rem;
+  max-width: 36rem;
+  font-size: 1rem;
+  line-height: 1.65;
+  opacity: 0.82;
+}
+
+.nfMeta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1.5rem 2rem;
+  margin-top: 2rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid color-mix(in srgb, var(--ink) 10%, transparent);
+}
+
+.nfMeta dt {
+  font-family: var(--font-jetbrains, monospace);
+  font-size: 10px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  opacity: 0.45;
+}
+
+.nfMeta dd {
+  margin: 0.25rem 0 0;
+  font-family: var(--font-fraunces, serif);
+  font-size: 1.35rem;
+}
+
+.nfQuoteCard {
+  background: var(--ink);
+  color: var(--paper);
+  border-radius: 12px;
+  padding: 1.5rem;
+  box-shadow: 0 18px 50px rgba(0, 0, 0, 0.12);
+}
+
+.nfQuoteTag {
+  display: inline-block;
+  font-family: var(--font-jetbrains, monospace);
+  font-size: 10px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--accent);
+  margin-bottom: 0.75rem;
+}
+
+.nfQuoteTitle {
+  font-family: var(--font-fraunces, serif);
+  font-size: 1.5rem;
+  margin-bottom: 0.35rem;
+}
+
+.nfQuoteSub {
+  font-size: 0.85rem;
+  opacity: 0.65;
+  margin-bottom: 1rem;
+}
+
+.nfMarqueeWrap {
+  overflow: hidden;
+  border-block: 1px solid color-mix(in srgb, var(--ink) 10%, transparent);
+  padding: 0.65rem 0;
+  background: color-mix(in srgb, var(--ink) 4%, var(--paper));
+}
+
+.nfMarquee {
+  display: flex;
+  gap: 3rem;
+  width: max-content;
+  animation: nfMarquee 38s linear infinite;
+}
+
+@keyframes nfMarquee {
+  0% {
+    transform: translateX(0);
+  }
+  100% {
+    transform: translateX(-50%);
+  }
+}
+
+.nfMarquee span {
+  font-family: var(--font-fraunces, serif);
+  font-size: clamp(1.1rem, 2vw, 1.35rem);
+  white-space: nowrap;
+}
+
+.nfMarquee em {
+  font-style: italic;
+  color: var(--accent);
+}
+
+.nfSection {
+  padding: clamp(2rem, 5vw, 4rem) clamp(1rem, 3vw, 2.5rem);
+}
+
+.nfSectionLabel {
+  font-family: var(--font-jetbrains, monospace);
+  font-size: 10px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  opacity: 0.45;
+  margin-bottom: 0.75rem;
+}
+
+.nfSectionTitle {
+  font-family: var(--font-fraunces, serif);
+  font-size: clamp(1.75rem, 3vw, 2.75rem);
+  line-height: 1.15;
+  max-width: 22ch;
+}
+
+.nfSectionTitle em {
+  font-style: italic;
+  color: var(--accent);
+}
+
+.nfStatsGrid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 1rem;
+  margin-top: 2rem;
+}
+
+@media (max-width: 900px) {
+  .nfStatsGrid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 520px) {
+  .nfStatsGrid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.nfStatCard {
+  border: 1px solid color-mix(in srgb, var(--ink) 12%, transparent);
+  border-radius: 10px;
+  padding: 1.25rem;
+  background: color-mix(in srgb, var(--paper) 92%, var(--ink));
+}
+
+.nfStatNum {
+  font-family: var(--font-fraunces, serif);
+  font-size: clamp(2rem, 4vw, 2.75rem);
+  line-height: 1;
+}
+
+.nfStatNum sup {
+  font-size: 0.45em;
+  vertical-align: super;
+  margin-left: 0.1em;
+  color: var(--accent);
+}
+
+.nfStatLabel {
+  margin-top: 0.75rem;
+  font-size: 0.85rem;
+  line-height: 1.45;
+  opacity: 0.72;
+}
+
+.nfServicesIntro {
+  max-width: 42rem;
+  margin-top: 1.25rem;
+  line-height: 1.65;
+  opacity: 0.78;
+}
+
+.nfServiceGrid {
+  display: grid;
+  gap: 1rem;
+  margin-top: 2rem;
+}
+
+@media (min-width: 720px) {
+  .nfServiceGrid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+.nfServiceCard {
+  border: 1px solid color-mix(in srgb, var(--ink) 12%, transparent);
+  border-radius: 12px;
+  padding: 1.35rem;
+  transition: border-color 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.nfServiceCard:hover {
+  border-color: color-mix(in srgb, var(--accent) 55%, var(--ink));
+  transform: translateY(-2px);
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.06);
+}
+
+.nfServiceNum {
+  font-family: var(--font-jetbrains, monospace);
+  font-size: 10px;
+  letter-spacing: 0.12em;
+  opacity: 0.45;
+  margin-bottom: 0.5rem;
+}
+
+.nfServiceTitle {
+  font-family: var(--font-fraunces, serif);
+  font-size: 1.35rem;
+}
+
+.nfServiceTitle em {
+  font-style: italic;
+  color: var(--accent);
+}
+
+.nfTags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+  margin-top: 0.85rem;
+}
+
+.nfTag {
+  font-family: var(--font-jetbrains, monospace);
+  font-size: 9px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  padding: 0.2rem 0.45rem;
+  border: 1px solid color-mix(in srgb, var(--ink) 18%, transparent);
+  border-radius: 4px;
+  opacity: 0.75;
+}
+
+.nfProjectsGrid {
+  display: grid;
+  gap: 1rem;
+  margin-top: 2rem;
+}
+
+@media (min-width: 900px) {
+  .nfProjectsGrid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+.nfProject {
+  position: relative;
+  border-radius: 12px;
+  overflow: hidden;
+  border: 1px solid color-mix(in srgb, var(--ink) 12%, transparent);
+  min-height: 280px;
+  background: color-mix(in srgb, var(--ink) 6%, var(--paper));
+}
+
+.nfProjectMedia {
+  position: absolute;
+  inset: 0;
+}
+
+.nfProjectWire {
+  position: absolute;
+  inset: 0;
+  opacity: 0.35;
+  background: repeating-linear-gradient(
+      0deg,
+      transparent,
+      transparent 11px,
+      color-mix(in srgb, var(--ink) 25%, transparent) 11px,
+      color-mix(in srgb, var(--ink) 25%, transparent) 12px
+    ),
+    repeating-linear-gradient(
+      90deg,
+      transparent,
+      transparent 11px,
+      color-mix(in srgb, var(--ink) 25%, transparent) 11px,
+      color-mix(in srgb, var(--ink) 25%, transparent) 12px
+    );
+  transition: opacity 0.25s ease;
+}
+
+.nfProject:hover .nfProjectWire {
+  opacity: 0.12;
+}
+
+.nfProjectBody {
+  position: relative;
+  z-index: 2;
+  padding: 1.25rem;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  background: linear-gradient(180deg, transparent 20%, color-mix(in srgb, var(--paper) 92%, transparent) 100%);
+}
+
+.nfProcess {
+  display: grid;
+  gap: 1rem;
+  margin-top: 2rem;
+}
+
+@media (min-width: 800px) {
+  .nfProcess {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+.nfProcessCard {
+  border-left: 3px solid var(--accent);
+  padding: 1rem 1rem 1rem 1.25rem;
+  background: color-mix(in srgb, var(--ink) 4%, var(--paper));
+}
+
+.nfTestimonial {
+  max-width: 52rem;
+  margin: 0 auto;
+  text-align: center;
+}
+
+.nfTestimonial q {
+  font-family: var(--font-fraunces, serif);
+  font-size: clamp(1.35rem, 2.5vw, 1.85rem);
+  line-height: 1.45;
+  font-style: normal;
+}
+
+.nfTestimonial em {
+  font-style: italic;
+  color: var(--accent);
+}
+
+.nfAvatar {
+  margin: 1.5rem auto 0;
+  width: 52px;
+  height: 52px;
+  border-radius: 999px;
+  border: 1px solid color-mix(in srgb, var(--ink) 15%, transparent);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-jetbrains, monospace);
+  font-size: 13px;
+}
+
+.nfCta {
+  margin: 2rem clamp(1rem, 3vw, 2.5rem) 3rem;
+  padding: clamp(1.75rem, 4vw, 2.5rem);
+  border-radius: 16px;
+  border: 1px solid color-mix(in srgb, var(--ink) 12%, transparent);
+  text-align: center;
+  background: color-mix(in srgb, var(--ink) 5%, var(--paper));
+}
+
+.nfFooter {
+  padding: 2.5rem clamp(1rem, 3vw, 2.5rem) 2rem;
+  border-top: 1px solid color-mix(in srgb, var(--ink) 12%, transparent);
+}
+
+.nfFooterGrid {
+  display: grid;
+  gap: 1.5rem;
+}
+
+@media (min-width: 720px) {
+  .nfFooterGrid {
+    grid-template-columns: 1.4fr repeat(3, 1fr);
+  }
+}
+
+.nfFooterCol h4 {
+  font-family: var(--font-jetbrains, monospace);
+  font-size: 10px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  opacity: 0.45;
+  margin-bottom: 0.65rem;
+}
+
+.nfFooterCol a {
+  display: block;
+  font-size: 0.9rem;
+  opacity: 0.75;
+  margin-bottom: 0.35rem;
+  color: inherit;
+  text-decoration: none;
+}
+
+.nfFooterCol a:hover {
+  opacity: 1;
+  color: var(--accent);
+}
+
+.nfLegal {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  margin-top: 2rem;
+  font-family: var(--font-jetbrains, monospace);
+  font-size: 10px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  opacity: 0.45;
+}

@@ -1,0 +1,194 @@
+"use client";
+
+import Link from "next/link";
+import { signOut } from "next-auth/react";
+import { ChevronRight } from "lucide-react";
+import { ShellIcon } from "./shell-icons";
+import { ClientAvatar } from "@/components/ClientAvatar";
+import type { AppShellClientRow, AppShellNavItem } from "./app-shell-types";
+
+const AVATAR_TINT = [
+  "bg-[#D4FF4F] text-[#0A0B0D]",
+  "bg-orange-400 text-[#0A0B0D]",
+  "bg-sky-400 text-[#0A0B0D]",
+  "bg-rose-400 text-[#0A0B0D]",
+  "bg-violet-400 text-white",
+  "bg-emerald-400 text-[#0A0B0D]",
+];
+
+function clientTint(name: string) {
+  let h = 0;
+  for (let i = 0; i < name.length; i++) h = (h << 5) - h + name.charCodeAt(i);
+  return AVATAR_TINT[Math.abs(h) % AVATAR_TINT.length];
+}
+
+function initialsFromName(name: string): string {
+  const parts = name.trim().split(/\s+/).filter(Boolean);
+  if (parts.length === 0) return "?";
+  if (parts.length === 1) return parts[0]!.slice(0, 2).toUpperCase();
+  return `${parts[0]![0] ?? ""}${parts[parts.length - 1]![0] ?? ""}`.toUpperCase();
+}
+
+function NavRow({ item, navActive }: { item: AppShellNavItem; navActive: (href: string) => boolean }) {
+  const isActive = navActive(item.href);
+  return (
+    <Link
+      href={item.href}
+      className={`relative flex h-9 items-center justify-center gap-3 rounded-sm px-2 py-2 text-[13px] font-medium transition-colors layout:justify-start layout:px-3 ${
+        isActive
+          ? "text-[var(--accent)]"
+          : "text-[var(--text-on-dark-dim)] hover:bg-[var(--surface-sidebar-elevated)] hover:text-[var(--text-on-dark)]"
+      } `}
+    >
+      {isActive ? (
+        <span
+          className="pointer-events-none absolute bottom-0 left-0 top-0 w-[2px] bg-[var(--accent)]"
+          aria-hidden
+        />
+      ) : null}
+      <ShellIcon name={item.icon} className="h-4 w-4 shrink-0" />
+      <span className="hidden min-w-0 flex-1 truncate layout:inline">{item.label}</span>
+      {item.badge != null && item.badge > 0 ? (
+        <span className="hidden rounded-sm bg-[var(--accent)] px-1.5 py-0 font-mono text-[10px] font-medium text-[var(--accent-ink)] layout:inline">
+          {item.badge > 99 ? "99+" : item.badge}
+        </span>
+      ) : null}
+    </Link>
+  );
+}
+
+export function AgencySidebar({
+  homeHref,
+  roleLabel,
+  primaryNav,
+  secondaryNav,
+  clients,
+  userName,
+  userRoleLabel,
+  coBrand,
+  sidebarBrand,
+  navActive,
+}: {
+  homeHref: string;
+  roleLabel: string;
+  primaryNav: AppShellNavItem[];
+  secondaryNav: AppShellNavItem[];
+  clients?: AppShellClientRow[];
+  userName: string;
+  userRoleLabel: string;
+  coBrand?: string | null;
+  sidebarBrand?: { name: string; logoUrl: string | null } | null;
+  navActive: (href: string) => boolean;
+}) {
+  return (
+    <div className="flex h-full min-h-0 flex-1 flex-col">
+      <div className="shrink-0 px-3 pb-4 pt-6 layout:px-5">
+        <Link href={homeHref} className="flex items-center justify-center gap-2 layout:justify-start">
+          <span className="mt-1 h-1.5 w-1.5 shrink-0 bg-[var(--accent)] layout:hidden" aria-hidden />
+          <div className="hidden text-left layout:block">
+            {sidebarBrand ? (
+              <div className="mb-2 flex items-center gap-2.5">
+                {sidebarBrand.logoUrl ? (
+                  // eslint-disable-next-line @next/next/no-img-element -- client-supplied arbitrary URL
+                  <img
+                    src={sidebarBrand.logoUrl}
+                    alt={sidebarBrand.name}
+                    className="h-5 w-5 shrink-0 rounded object-cover"
+                  />
+                ) : (
+                  <div className="flex h-5 w-5 shrink-0 items-center justify-center rounded bg-[var(--accent)] text-[10px] font-medium text-[var(--accent-ink)]">
+                    {initialsFromName(sidebarBrand.name)}
+                  </div>
+                )}
+                <div className="h-3 w-px shrink-0 bg-white/20" aria-hidden />
+                <span className="font-display text-lg tracking-display text-[var(--text-on-dark)]">Leadstaq</span>
+              </div>
+            ) : (
+              <>
+                {coBrand ? (
+                  <div className="mb-1 font-mono text-[10px] uppercase tracking-wide text-[var(--text-on-dark-dim)]">
+                    {coBrand}
+                  </div>
+                ) : null}
+                <div className="font-display text-xl tracking-display text-[var(--text-on-dark)]">Leadstaq</div>
+              </>
+            )}
+            <div className="mt-1 font-mono text-[10px] uppercase tracking-wide text-[var(--text-on-dark-dim)]">
+              {roleLabel}
+            </div>
+          </div>
+        </Link>
+        <div className="mt-5 hidden h-px bg-[var(--surface-sidebar-border)] layout:block" />
+      </div>
+
+      <div className="min-h-0 flex-1 overflow-y-auto overflow-x-hidden overscroll-contain px-1 pb-2 [scrollbar-width:thin] [scrollbar-color:rgba(255,255,255,0.2)_transparent]">
+        <nav className="flex flex-col gap-0.5 px-2 layout:px-3">
+          {primaryNav.map((item) => (
+            <NavRow key={item.href} item={item} navActive={navActive} />
+          ))}
+        </nav>
+
+        <div className="mx-2 my-2 hidden h-px bg-[var(--surface-sidebar-border)] layout:mx-3 layout:block" />
+
+        <nav className="flex flex-col gap-0.5 px-2 pb-2 layout:px-3">
+          {secondaryNav.map((item) => (
+            <NavRow key={item.href} item={item} navActive={navActive} />
+          ))}
+        </nav>
+
+        {clients && clients.length > 0 ? (
+          <div className="hidden px-3 pb-2 pt-2 layout:block">
+            <div className="mt-4 mb-2 px-2 font-mono text-[11px] font-normal uppercase tracking-[0.08em] text-[var(--text-on-dark-dim)]">
+              Clients
+            </div>
+            <ul className="space-y-1 pr-1">
+              {clients.slice(0, 8).map((c) => (
+                <li key={c.id}>
+                  <Link
+                    href={`/dashboard/clients/${c.id}`}
+                    className="flex items-center gap-2 rounded-sm px-2 py-1.5 text-[13px] text-[var(--text-on-dark-dim)] transition-colors hover:bg-[var(--surface-sidebar-elevated)] hover:text-[var(--text-on-dark)]"
+                  >
+                    <span
+                      className={`flex h-6 w-6 shrink-0 items-center justify-center rounded-sm text-[10px] font-medium ${clientTint(c.name)}`}
+                    >
+                      {c.name
+                        .split(/\s+/)
+                        .map((w) => w[0])
+                        .join("")
+                        .slice(0, 2)
+                        .toUpperCase()}
+                    </span>
+                    <span className="min-w-0 flex-1 truncate">{c.name}</span>
+                    <span className="font-mono text-[10px] text-[var(--text-on-dark-dim)]">{c.leadCount}</span>
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </div>
+        ) : null}
+      </div>
+
+      <div className="shrink-0 border-t border-[var(--surface-sidebar-border)] pt-4">
+        <details className="group relative px-2 pb-2 layout:px-3">
+          <summary className="flex cursor-pointer list-none items-center justify-center gap-2 rounded-sm px-1 py-2 marker:hidden hover:bg-[var(--surface-sidebar-elevated)] layout:justify-start layout:px-2 [&::-webkit-details-marker]:hidden">
+            <ClientAvatar name={userName} size="sm" />
+            <div className="hidden min-w-0 flex-1 text-left layout:block">
+              <div className="truncate text-[13px] font-medium text-[var(--text-on-dark)]">{userName}</div>
+              <div className="truncate font-mono text-[11px] text-[var(--text-on-dark-dim)]">{userRoleLabel}</div>
+            </div>
+            <ChevronRight className="hidden h-4 w-4 shrink-0 text-[var(--text-on-dark-dim)] transition group-open:rotate-90 layout:block" />
+          </summary>
+          <div className="absolute bottom-full left-0 right-0 z-50 mb-1 rounded-sm border border-[var(--surface-sidebar-border)] bg-[var(--surface-sidebar-elevated)] py-1 shadow-md">
+            <button
+              type="button"
+              className="block w-full px-3 py-2 text-left text-[13px] text-[var(--text-on-dark)] hover:bg-[var(--surface-sidebar)]"
+              onClick={() => signOut({ callbackUrl: "/login" })}
+            >
+              Sign out
+            </button>
+          </div>
+        </details>
+      </div>
+    </div>
+  );
+}

@@ -1,0 +1,698 @@
+"use client";
+
+import { useEffect, useMemo, useRef, useState } from "react";
+import { DragDropContext, Draggable, Droppable, type DropResult } from "@hello-pangea/dnd";
+import { VerticalSettingsNav } from "@/components/settings/VerticalSettingsNav";
+import { ClientAvatar } from "@/components/ClientAvatar";
+
+const TABS = [
+  { id: "profile", label: "Profile" },
+  { id: "team", label: "Team" },
+  { id: "notifications", label: "Notifications" },
+  { id: "branding", label: "Branding" },
+  { id: "advanced", label: "Advanced" },
+];
+
+const INDUSTRY_SUGGESTIONS = [
+  "Construction",
+  "Solar",
+  "Legal",
+  "Real Estate",
+  "Medical",
+  "Cleaning",
+  "HVAC",
+  "Landscaping",
+  "Roofing",
+  "Plumbing",
+];
+
+const FONTS = [
+  { id: "inter", label: "Inter" },
+  { id: "dm-sans", label: "DM Sans" },
+  { id: "instrument-serif", label: "Instrument Serif" },
+  { id: "syne", label: "Syne" },
+];
+
+function normalizeSettingsTab(tab: string | null | undefined): string {
+  if (!tab) return "profile";
+  return TABS.some((t) => t.id === tab) ? tab : "profile";
+}
+
+type ClientRow = Record<string, unknown>;
+type UserRow = {
+  id: string;
+  name: string;
+  email: string;
+  phone: string | null;
+  is_active: boolean;
+  round_robin_order: number;
+};
+
+export function ClientSettingsClient({
+  clientId,
+  initialClient,
+  initialLanding,
+  initialSalespeople,
+  initialManager,
+  agencyDefaultHours,
+  initialTab,
+}: {
+  clientId: string;
+  initialClient: ClientRow;
+  initialLanding: Record<string, unknown> | null;
+  initialSalespeople: UserRow[];
+  initialManager: { id: string; name: string; email: string; phone: string | null } | null;
+  agencyDefaultHours: number;
+  initialTab?: string;
+}) {
+  const [tab, setTab] = useState(() => normalizeSettingsTab(initialTab));
+  const notificationsSectionRef = useRef<HTMLDivElement>(null);
+  const [toast, setToast] = useState<string | null>(null);
+  const [saving, setSaving] = useState(false);
+
+  const [client, setClient] = useState(initialClient);
+  const [sales, setSales] = useState(initialSalespeople);
+  const manager = initialManager;
+
+  const [profileForm, setProfileForm] = useState({
+    name: String(initialClient.name ?? ""),
+    industry: String(initialClient.industry ?? ""),
+    slug: String(initialClient.slug ?? ""),
+    logo_url: String(initialClient.logo_url ?? ""),
+    response_time_limit_hours: Number(initialClient.response_time_limit_hours ?? agencyDefaultHours),
+  });
+
+  const [notifForm, setNotifForm] = useState({
+    twilio_whatsapp_override: String(initialClient.twilio_whatsapp_override ?? ""),
+  });
+
+  const [brandForm, setBrandForm] = useState({
+    primary_color: String(initialClient.primary_color ?? "#00D4FF"),
+    font_choice: String((initialLanding?.font_choice as string) ?? "inter"),
+    custom_domain: String((initialLanding?.custom_domain as string) ?? ""),
+  });
+
+  const [deleteConfirm, setDeleteConfirm] = useState("");
+
+  const [inviteSalesOpen, setInviteSalesOpen] = useState(false);
+  const [inviteMgrOpen, setInviteMgrOpen] = useState(false);
+  const [inviteForm, setInviteForm] = useState({ name: "", email: "", phone: "" });
+  const [tempPass, setTempPass] = useState<string | null>(null);
+
+  const rrList = useMemo(
+    () => [...sales].filter((s) => s.is_active).sort((a, b) => a.round_robin_order - b.round_robin_order),
+    [sales]
+  );
+  const rrIndex = Number(client.round_robin_index ?? 0);
+  const nextUp = rrList.length ? rrList[rrIndex % rrList.length] : null;
+
+  useEffect(() => {
+    if (!toast) return;
+    const t = window.setTimeout(() => setToast(null), 4000);
+    return () => window.clearTimeout(t);
+  }, [toast]);
+
+  useEffect(() => {
+    if (tab !== "notifications") return;
+    const id = window.requestAnimationFrame(() => {
+      notificationsSectionRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+    });
+    return () => window.cancelAnimationFrame(id);
+  }, [tab]);
+
+  async function patchClient(body: Record<string, unknown>) {
+    const res = await fetch(`/api/clients/${clientId}`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(body),
+    });
+    const j = await res.json();
+    if (!res.ok) throw new Error(j.error ?? "Request failed");
+    if (j.client) setClient(j.client);
+    return j;
+  }
+
+  async function saveProfile() {
+    setSaving(true);
+    try {
+      await patchClient({
+        name: profileForm.name.trim(),
+        industry: profileForm.industry.trim(),
+        slug: profileForm.slug.trim(),
+        logo_url: profileForm.logo_url.trim() || null,
+        response_time_limit_hours: profileForm.response_time_limit_hours,
+      });
+      setToast("Saved profile.");
+    } catch (e) {
+      setToast(e instanceof Error ? e.message : "Error");
+    } finally {
+      setSaving(false);
+    }
+  }
+
+  async function saveNotifications() {
+    setSaving(true);
+    try {
+      await patchClient({
+        twilio_whatsapp_override: notifForm.twilio_whatsapp_override.trim() || null,
+      });
+      setToast("Saved notification settings.");
+    } catch (e) {
+      setToast(e instanceof Error ? e.message : "Error");
+    } finally {
+      setSaving(false);
+    }
+  }
+
+  async function saveBranding() {
+    setSaving(true);
+    try {
+      await patchClient({
+        primary_color: brandForm.primary_color,
+        font_choice: brandForm.font_choice,
+        custom_domain: brandForm.custom_domain.trim() || null,
+      });
+      setToast("Saved branding.");
+    } catch (e) {
+      setToast(e instanceof Error ? e.message : "Error");
+    } finally {
+      setSaving(false);
+    }
+  }
+
+  async function deleteClient() {
+    setSaving(true);
+    try {
+      await patchClient({ deleteConfirmName: deleteConfirm.trim() });
+      setToast("Client archived.");
+      window.location.href = "/dashboard/clients";
+    } catch (e) {
+      setToast(e instanceof Error ? e.message : "Error");
+    } finally {
+      setSaving(false);
+    }
+  }
+
+  async function onDragEnd(result: DropResult) {
+    if (!result.destination) return;
+    const items = Array.from(rrList);
+    const [removed] = items.splice(result.source.index, 1);
+    items.splice(result.destination.index, 0, removed);
+    const orderedUserIds = items.map((x) => x.id);
+    const res = await fetch(`/api/clients/${clientId}/sales-order`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ orderedUserIds }),
+    });
+    if (!res.ok) {
+      const j = await res.json();
+      setToast(j.error ?? "Reorder failed");
+      return;
+    }
+    setSales(items.map((u, i) => ({ ...u, round_robin_order: i })));
+    setToast("Rotation order updated.");
+  }
+
+  async function inviteSales() {
+    setSaving(true);
+    try {
+      const res = await fetch(`/api/clients/${clientId}/users`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          role: "SALESPERSON",
+          name: inviteForm.name,
+          email: inviteForm.email,
+          phone: inviteForm.phone,
+        }),
+      });
+      const j = await res.json();
+      if (!res.ok) throw new Error(j.error ?? "Failed");
+      setTempPass(j.temporaryPassword as string);
+      setInviteSalesOpen(false);
+      setInviteForm({ name: "", email: "", phone: "" });
+      window.location.reload();
+    } catch (e) {
+      setToast(e instanceof Error ? e.message : "Error");
+    } finally {
+      setSaving(false);
+    }
+  }
+
+  async function inviteManager() {
+    setSaving(true);
+    try {
+      const res = await fetch(`/api/clients/${clientId}/users`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          role: "CLIENT_MANAGER",
+          name: inviteForm.name,
+          email: inviteForm.email,
+          phone: inviteForm.phone,
+        }),
+      });
+      const j = await res.json();
+      if (!res.ok) throw new Error(j.error ?? "Failed");
+      setTempPass(j.temporaryPassword as string);
+      setInviteMgrOpen(false);
+      setInviteForm({ name: "", email: "", phone: "" });
+      window.location.reload();
+    } catch (e) {
+      setToast(e instanceof Error ? e.message : "Error");
+    } finally {
+      setSaving(false);
+    }
+  }
+
+  async function toggleSales(id: string, is_active: boolean) {
+    const res = await fetch(`/api/clients/${clientId}/users/${id}`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ is_active }),
+    });
+    if (!res.ok) {
+      const j = await res.json();
+      setToast(j.error ?? "Failed");
+      return;
+    }
+    setSales((prev) => prev.map((u) => (u.id === id ? { ...u, is_active } : u)));
+  }
+
+  async function removeSales(id: string) {
+    if (!window.confirm("Remove this salesperson?")) return;
+    const res = await fetch(`/api/clients/${clientId}/users/${id}`, { method: "DELETE" });
+    if (!res.ok) {
+      const j = await res.json();
+      setToast(j.error ?? "Failed");
+      return;
+    }
+    setSales((prev) => prev.filter((u) => u.id !== id));
+  }
+
+  return (
+    <div className="flex gap-10 pb-24">
+      <VerticalSettingsNav tabs={TABS} active={tab} onChange={setTab} />
+
+      <div className="min-w-0 flex-1">
+        {toast ? (
+          <div className="mb-4 rounded-md border border-border bg-surface-card-alt px-3 py-2 text-sm">{toast}</div>
+        ) : null}
+        {tempPass ? (
+          <div className="mb-4 rounded-md border border-amber-500/40 bg-amber-500/10 px-3 py-2 text-sm">
+            Temporary password: <code className="font-mono">{tempPass}</code>
+            <button type="button" className="ml-2 underline" onClick={() => setTempPass(null)}>
+              Dismiss
+            </button>
+          </div>
+        ) : null}
+
+        {tab === "profile" ? (
+          <div className="space-y-6">
+            <h2 className="font-display text-2xl">Profile</h2>
+            <p className="text-xs text-ink-tertiary">
+              Default response SLA from agency: {agencyDefaultHours}h (used when creating new clients).
+            </p>
+            <div className="grid max-w-lg gap-4">
+              <label className="block">
+                <span className="font-mono text-[10px] uppercase text-ink-tertiary">Client name</span>
+                <input
+                  className="mt-1 w-full rounded-md border border-border bg-surface-card px-3 py-2 text-sm"
+                  value={profileForm.name}
+                  onChange={(e) => setProfileForm((f) => ({ ...f, name: e.target.value }))}
+                />
+              </label>
+              <label className="block">
+                <span className="font-mono text-[10px] uppercase text-ink-tertiary">Industry</span>
+                <input
+                  className="mt-1 w-full rounded-md border border-border bg-surface-card px-3 py-2 text-sm"
+                  value={profileForm.industry}
+                  onChange={(e) => setProfileForm((f) => ({ ...f, industry: e.target.value }))}
+                  list="industry-suggestions"
+                />
+                <datalist id="industry-suggestions">
+                  {INDUSTRY_SUGGESTIONS.map((x) => (
+                    <option key={x} value={x} />
+                  ))}
+                </datalist>
+              </label>
+              <label className="block">
+                <span className="font-mono text-[10px] uppercase text-ink-tertiary">Subdomain slug</span>
+                <input
+                  className="mt-1 w-full rounded-md border border-border bg-surface-card px-3 py-2 font-mono text-sm"
+                  value={profileForm.slug}
+                  onChange={(e) => setProfileForm((f) => ({ ...f, slug: e.target.value.toLowerCase() }))}
+                />
+              </label>
+              <label className="block">
+                <span className="font-mono text-[10px] uppercase text-ink-tertiary">Logo URL</span>
+                <input
+                  className="mt-1 w-full rounded-md border border-border bg-surface-card px-3 py-2 text-sm"
+                  value={profileForm.logo_url}
+                  onChange={(e) => setProfileForm((f) => ({ ...f, logo_url: e.target.value }))}
+                />
+              </label>
+              <label className="block">
+                <span className="font-mono text-[10px] uppercase text-ink-tertiary">Response time limit (hours)</span>
+                <input
+                  type="number"
+                  min={1}
+                  max={168}
+                  className="mt-1 w-full rounded-md border border-border bg-surface-card px-3 py-2 text-sm"
+                  value={profileForm.response_time_limit_hours}
+                  onChange={(e) =>
+                    setProfileForm((f) => ({ ...f, response_time_limit_hours: Number(e.target.value) || 1 }))
+                  }
+                />
+              </label>
+            </div>
+            <div className="sticky bottom-0 border-t border-border bg-[var(--surface-page)] pt-4">
+              <button type="button" className="btn-primary" disabled={saving} onClick={() => void saveProfile()}>
+                Save
+              </button>
+            </div>
+
+            <div className="mt-12 border-t border-[var(--danger-border)] pt-8">
+              <h3 className="text-sm font-semibold text-[var(--danger-fg)]">Danger zone</h3>
+              <p className="mt-2 text-sm text-ink-secondary">
+                Type the client name <strong>{String(client.name)}</strong> to archive and hide this client.
+              </p>
+              <input
+                className="mt-3 max-w-md rounded-md border border-border px-3 py-2 text-sm"
+                placeholder="Client name"
+                value={deleteConfirm}
+                onChange={(e) => setDeleteConfirm(e.target.value)}
+              />
+              <button
+                type="button"
+                className="mt-3 block rounded-md border border-[var(--danger-border)] bg-[var(--danger-bg)] px-4 py-2 text-sm text-[var(--danger-fg)]"
+                disabled={saving || deleteConfirm.trim() !== String(client.name)}
+                onClick={() => void deleteClient()}
+              >
+                Delete client
+              </button>
+            </div>
+          </div>
+        ) : null}
+
+        {tab === "team" ? (
+          <div className="space-y-8">
+            <section>
+              <h3 className="font-mono text-[10px] uppercase text-ink-tertiary">Manager</h3>
+              {manager ? (
+                <div className="mt-2 flex flex-wrap items-center gap-4 rounded-lg border border-border bg-surface-card p-4">
+                  <ClientAvatar name={manager.name} size="md" />
+                  <div>
+                    <div className="font-medium">{manager.name}</div>
+                    <div className="font-mono text-xs text-ink-secondary">{manager.email}</div>
+                    <div className="text-xs text-ink-tertiary">{manager.phone ?? "—"}</div>
+                  </div>
+                  <button type="button" className="btn-ghost ml-auto text-sm" onClick={() => setInviteMgrOpen(true)}>
+                    Replace / invite
+                  </button>
+                </div>
+              ) : (
+                <button type="button" className="btn-primary mt-2" onClick={() => setInviteMgrOpen(true)}>
+                  Invite manager
+                </button>
+              )}
+            </section>
+
+            <section>
+              <div className="flex flex-wrap items-center justify-between gap-3">
+                <h3 className="font-mono text-[10px] uppercase text-ink-tertiary">Salespeople</h3>
+                <button type="button" className="btn-ghost text-sm" onClick={() => setInviteSalesOpen(true)}>
+                  Add salesperson
+                </button>
+              </div>
+
+              {rrList.filter((s) => s.is_active).length > 0 ? (
+                <div className="mt-4">
+                  <p className="text-sm text-ink-secondary">
+                    Next up: <span className="font-medium text-ink-primary">{nextUp?.name ?? "—"}</span>
+                  </p>
+                  <DragDropContext onDragEnd={(r) => void onDragEnd(r)}>
+                    <Droppable droppableId="rr" direction="horizontal">
+                      {(provided) => (
+                        <div
+                          ref={provided.innerRef}
+                          {...provided.droppableProps}
+                          className="mt-3 flex flex-wrap items-center gap-2"
+                        >
+                          {rrList.map((s, index) => (
+                            <Draggable key={s.id} draggableId={s.id} index={index}>
+                              {(p) => (
+                                <div
+                                  ref={p.innerRef}
+                                  {...p.draggableProps}
+                                  {...p.dragHandleProps}
+                                  className="flex items-center gap-1 rounded-full border border-border bg-surface-card px-2 py-1"
+                                >
+                                  <ClientAvatar name={s.name} size={28} />
+                                  <span className="max-w-[100px] truncate text-xs">{s.name}</span>
+                                </div>
+                              )}
+                            </Draggable>
+                          ))}
+                          {provided.placeholder}
+                        </div>
+                      )}
+                    </Droppable>
+                  </DragDropContext>
+                  <p className="mt-2 text-[11px] text-ink-tertiary">Drag to reorder round-robin rotation.</p>
+                </div>
+              ) : null}
+
+              <div className="mt-6 overflow-hidden rounded-lg border border-border">
+                <table className="w-full text-left text-sm">
+                  <thead className="border-b border-border bg-surface-card-alt font-mono text-[10px] uppercase text-ink-tertiary">
+                    <tr>
+                      <th className="px-3 py-2">Rep</th>
+                      <th className="px-3 py-2">Email</th>
+                      <th className="px-3 py-2">Phone</th>
+                      <th className="px-3 py-2">Active</th>
+                      <th className="px-3 py-2 text-right"> </th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {sales.map((s) => (
+                      <tr key={s.id} className="border-t border-border">
+                        <td className="px-3 py-2">
+                          <span className="flex items-center gap-2">
+                            <ClientAvatar name={s.name} size="sm" />
+                            {s.name}
+                          </span>
+                        </td>
+                        <td className="px-3 py-2 font-mono text-xs">{s.email}</td>
+                        <td className="px-3 py-2 text-xs">{s.phone ?? "—"}</td>
+                        <td className="px-3 py-2">
+                          <input
+                            type="checkbox"
+                            checked={s.is_active}
+                            onChange={(e) => void toggleSales(s.id, e.target.checked)}
+                          />
+                        </td>
+                        <td className="px-3 py-2 text-right">
+                          <button type="button" className="text-xs text-[var(--danger-fg)]" onClick={() => void removeSales(s.id)}>
+                            Delete
+                          </button>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </section>
+
+            {(inviteSalesOpen || inviteMgrOpen) && (
+              <div className="fixed inset-0 z-50 flex items-center justify-center bg-[var(--surface-overlay)] p-4">
+                <div className="w-full max-w-md rounded-lg border border-border bg-surface-card p-6 shadow-lg">
+                  <h3 className="font-display text-xl">{inviteSalesOpen ? "Invite salesperson" : "Invite manager"}</h3>
+                  <label className="mt-3 block text-sm">
+                    Name
+                    <input
+                      className="mt-1 w-full rounded-md border border-border px-3 py-2"
+                      value={inviteForm.name}
+                      onChange={(e) => setInviteForm((f) => ({ ...f, name: e.target.value }))}
+                    />
+                  </label>
+                  <label className="mt-3 block text-sm">
+                    Email
+                    <input
+                      className="mt-1 w-full rounded-md border border-border px-3 py-2"
+                      value={inviteForm.email}
+                      onChange={(e) => setInviteForm((f) => ({ ...f, email: e.target.value }))}
+                    />
+                  </label>
+                  <label className="mt-3 block text-sm">
+                    Phone (E.164)
+                    <input
+                      className="mt-1 w-full rounded-md border border-border px-3 py-2"
+                      value={inviteForm.phone}
+                      onChange={(e) => setInviteForm((f) => ({ ...f, phone: e.target.value }))}
+                      placeholder="+15551234567"
+                    />
+                  </label>
+                  <div className="mt-4 flex justify-end gap-2">
+                    <button
+                      type="button"
+                      className="btn-ghost"
+                      onClick={() => {
+                        setInviteSalesOpen(false);
+                        setInviteMgrOpen(false);
+                      }}
+                    >
+                      Cancel
+                    </button>
+                    <button
+                      type="button"
+                      className="btn-primary"
+                      disabled={saving}
+                      onClick={() => void (inviteSalesOpen ? inviteSales() : inviteManager())}
+                    >
+                      Create
+                    </button>
+                  </div>
+                </div>
+              </div>
+            )}
+          </div>
+        ) : null}
+
+        {tab === "notifications" ? (
+          <div
+            id="client-settings-notifications"
+            ref={notificationsSectionRef}
+            className="max-w-lg scroll-mt-24 space-y-6"
+          >
+            <h2 className="font-display text-2xl">Notifications</h2>
+            <p className="text-sm text-ink-secondary">
+              Client managers choose email and WhatsApp alerts per event on their{" "}
+              <strong className="text-ink-primary">Account</strong> page (client portal → Account).
+            </p>
+            <label className="block">
+              <span className="font-mono text-[10px] uppercase text-ink-tertiary">Twilio WhatsApp override</span>
+              <input
+                className="mt-1 w-full rounded-md border border-border bg-surface-card px-3 py-2 font-mono text-sm"
+                value={notifForm.twilio_whatsapp_override}
+                onChange={(e) => setNotifForm((f) => ({ ...f, twilio_whatsapp_override: e.target.value }))}
+                placeholder="Leave blank to use agency default"
+              />
+            </label>
+            <button type="button" className="btn-primary" disabled={saving} onClick={() => void saveNotifications()}>
+              Save
+            </button>
+          </div>
+        ) : null}
+
+        {tab === "branding" ? (
+          <div className="max-w-lg space-y-6">
+            <h2 className="font-display text-2xl">Branding</h2>
+            <label className="block">
+              <span className="font-mono text-[10px] uppercase text-ink-tertiary">Primary color</span>
+              <div className="mt-1 flex items-center gap-3">
+                <input
+                  type="color"
+                  value={brandForm.primary_color}
+                  onChange={(e) => setBrandForm((f) => ({ ...f, primary_color: e.target.value }))}
+                  className="h-10 w-14 cursor-pointer rounded border border-border bg-transparent p-0"
+                />
+                <input
+                  className="flex-1 rounded-md border border-border bg-surface-card px-3 py-2 font-mono text-sm"
+                  value={brandForm.primary_color}
+                  onChange={(e) => setBrandForm((f) => ({ ...f, primary_color: e.target.value }))}
+                />
+              </div>
+            </label>
+            <label className="block">
+              <span className="font-mono text-[10px] uppercase text-ink-tertiary">Landing page font</span>
+              <select
+                className="mt-1 w-full rounded-md border border-border bg-surface-card px-3 py-2 text-sm"
+                value={brandForm.font_choice}
+                onChange={(e) => setBrandForm((f) => ({ ...f, font_choice: e.target.value }))}
+              >
+                {FONTS.map((f) => (
+                  <option key={f.id} value={f.id}>
+                    {f.label}
+                  </option>
+                ))}
+              </select>
+            </label>
+            <label className="block">
+              <span className="font-mono text-[10px] uppercase text-ink-tertiary">Custom domain</span>
+              <input
+                className="mt-1 w-full rounded-md border border-border bg-surface-card px-3 py-2 text-sm"
+                value={brandForm.custom_domain}
+                onChange={(e) => setBrandForm((f) => ({ ...f, custom_domain: e.target.value }))}
+                placeholder="leads.client.com"
+              />
+            </label>
+            <p className="rounded-md border border-border bg-surface-card-alt p-3 text-xs text-ink-secondary">
+              Custom domains require a DNS CNAME to our infrastructure. Contact support to complete setup — this field
+              stores the intended hostname for when routing is enabled.
+            </p>
+            <button type="button" className="btn-primary" disabled={saving} onClick={() => void saveBranding()}>
+              Save
+            </button>
+          </div>
+        ) : null}
+
+        {tab === "advanced" ? (
+          <div className="space-y-6">
+            <h2 className="font-display text-2xl">Advanced</h2>
+            <button
+              type="button"
+              className="btn-ghost border border-border"
+              onClick={() => {
+                window.open(`/api/clients/${clientId}/export`, "_blank");
+              }}
+            >
+              Export all leads (CSV)
+            </button>
+            <div className="flex flex-wrap gap-3">
+              <button
+                type="button"
+                className="rounded-md border border-border px-4 py-2 text-sm"
+                disabled={saving || client.is_active === false}
+                onClick={async () => {
+                  setSaving(true);
+                  try {
+                    await patchClient({ is_active: false });
+                    setToast("Client paused — landing returns 404.");
+                    window.location.reload();
+                  } catch (e) {
+                    setToast(e instanceof Error ? e.message : "Error");
+                  } finally {
+                    setSaving(false);
+                  }
+                }}
+              >
+                Pause client
+              </button>
+              <button
+                type="button"
+                className="rounded-md border border-amber-500/40 px-4 py-2 text-sm text-amber-800"
+                disabled={saving || Boolean(client.is_archived)}
+                onClick={async () => {
+                  if (!window.confirm("Archive this client? It will disappear from lists.")) return;
+                  setSaving(true);
+                  try {
+                    await patchClient({ is_archived: true, is_active: false });
+                    setToast("Archived.");
+                    window.location.href = "/dashboard/clients";
+                  } catch (e) {
+                    setToast(e instanceof Error ? e.message : "Error");
+                  } finally {
+                    setSaving(false);
+                  }
+                }}
+              >
+                Archive client
+              </button>
+            </div>
+          </div>
+        ) : null}
+      </div>
+    </div>
+  );
+}
