@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useMemo, useState } from "react";
+import { ResponsiveTable, type ResponsiveTableColumn } from "@/components/ui/ResponsiveTable";
 import { ChevronDown } from "lucide-react";
 import { Cell, Pie, PieChart, ResponsiveContainer } from "recharts";
 import { ClientAvatar } from "@/components/ClientAvatar";
@@ -205,6 +206,68 @@ export function ClientDashboardView({
   const wonDelta = heroDeltaPct(report.deltas.wonCountPct, comparison.priorWonCount, report.headline.wonCount);
   const valueDelta = heroDeltaPct(report.deltas.wonValuePct, comparison.priorWonValue, report.headline.wonValue);
 
+  type TeamRow = ClientReportPayload["team"][number];
+
+  const teamColumns = useMemo<ResponsiveTableColumn<TeamRow>[]>(
+    () => [
+      {
+        key: "rep",
+        label: "Rep",
+        mobilePrimary: true,
+        render: (row) => (
+          <div className="flex items-center gap-3">
+            <ClientAvatar name={row.name} size="sm" />
+            <span className="font-medium text-ink-primary">{row.name}</span>
+          </div>
+        ),
+      },
+      {
+        key: "leads",
+        label: "Leads",
+        align: "right",
+        render: (row) => <span className="tabular-nums">{row.leads}</span>,
+      },
+      {
+        key: "contacted",
+        label: "Contacted",
+        align: "right",
+        render: (row) => {
+          const contactPct = row.leads > 0 ? Math.round((row.contacted / row.leads) * 100) : 0;
+          return <span className="tabular-nums">{contactPct}%</span>;
+        },
+      },
+      {
+        key: "won",
+        label: "Won",
+        align: "right",
+        render: (row) => <span className="tabular-nums">{row.won}</span>,
+      },
+      {
+        key: "wonValue",
+        label: "Won value",
+        align: "right",
+        render: (row) => <span className="tabular-nums">{formatCurrencyUsd(row.wonValue)}</span>,
+      },
+      {
+        key: "avg",
+        label: "Avg response",
+        align: "right",
+        render: (row) => (
+          <span className="text-ink-secondary">
+            {row.avgResponseMinutes != null ? `${Math.round(row.avgResponseMinutes)}m` : "—"}
+          </span>
+        ),
+      },
+      {
+        key: "spark",
+        label: "14d",
+        align: "right",
+        render: (row) => <TeamSparkline values={row.last14DaysLeads} />,
+      },
+    ],
+    []
+  );
+
   return (
     <div className="pb-16">
       {/* A — Hero */}
@@ -212,23 +275,25 @@ export function ClientDashboardView({
         className="grid min-h-[180px] grid-cols-1 overflow-hidden rounded-[10px] border border-black/10 md:grid-cols-[1.4fr_1fr_1fr]"
         style={{ background: "var(--accent)", color: "var(--accent-ink)" }}
       >
-        <div className="flex flex-col justify-center border-b border-black/15 px-8 py-8 md:border-b-0 md:border-r md:pr-8">
-          <div className="mb-3 font-mono text-[11px] uppercase tracking-[0.12em] opacity-70">Leads this month</div>
-          <div className="mb-3 font-display text-[80px] font-normal leading-[0.9] tracking-display">
+        <div className="flex flex-col justify-center border-b border-black/15 px-6 py-6 md:border-b-0 md:border-r md:px-8 md:py-8 md:pr-8">
+          <div className="mb-2 font-mono text-[10px] uppercase tracking-[0.12em] opacity-70 md:mb-3 md:text-[11px]">
+            Leads this month
+          </div>
+          <div className="mb-2 font-display text-[52px] font-normal leading-[0.9] tracking-display md:mb-3 md:text-[80px]">
             {report.headline.leads}
           </div>
           <DeltaPill value={leadsDelta} />
         </div>
-        <div className="flex flex-col justify-center border-b border-black/15 px-8 py-8 md:border-b-0 md:border-r md:px-8">
-          <div className="mb-3 font-mono text-[11px] uppercase tracking-[0.12em] opacity-70">Deals won</div>
-          <div className="mb-3 font-display text-[52px] font-normal leading-[0.95] tracking-display">
+        <div className="flex flex-col justify-center border-b border-black/15 px-6 py-6 md:border-b-0 md:border-r md:px-8 md:py-8">
+          <div className="mb-2 font-mono text-[10px] uppercase tracking-[0.12em] opacity-70 md:mb-3 md:text-[11px]">Deals won</div>
+          <div className="mb-2 font-display text-[40px] font-normal leading-[0.95] tracking-display md:mb-3 md:text-[52px]">
             {report.headline.wonCount}
           </div>
           <DeltaPill value={wonDelta} />
         </div>
-        <div className="flex flex-col justify-center px-8 py-8 md:pl-8">
-          <div className="mb-3 font-mono text-[11px] uppercase tracking-[0.12em] opacity-70">Revenue won</div>
-          <div className="mb-3 font-display text-[52px] font-normal leading-[0.95] tracking-display">
+        <div className="flex flex-col justify-center px-6 py-6 md:px-8 md:py-8 md:pl-8">
+          <div className="mb-2 font-mono text-[10px] uppercase tracking-[0.12em] opacity-70 md:mb-3 md:text-[11px]">Revenue won</div>
+          <div className="mb-2 font-display text-[40px] font-normal leading-[0.95] tracking-display md:mb-3 md:text-[52px]">
             {formatCompactCurrency(report.headline.wonValue)}
           </div>
           <DeltaPill value={valueDelta} />
@@ -275,7 +340,7 @@ export function ClientDashboardView({
       </section>
 
       {/* C — Sources + Response */}
-      <section className="mt-12 grid gap-8 lg:grid-cols-2">
+      <section className="mt-12 grid gap-8 md:grid-cols-2">
         <div>
           <div className="mb-5">
             <div className="mb-1 font-mono text-[11px] uppercase tracking-[0.1em] text-ink-tertiary">02 / Sources</div>
@@ -326,53 +391,15 @@ export function ClientDashboardView({
         {report.team.length === 0 ? (
           <p className="text-sm text-ink-secondary">No active salespeople yet.</p>
         ) : (
-          <div className="overflow-x-auto">
-            <table className="w-full min-w-[720px] text-sm">
-              <thead>
-                <tr className="border-b border-border font-mono text-[11px] uppercase text-ink-tertiary">
-                  <th className="pb-3 text-left">Rep</th>
-                  <th className="pb-3 text-right">Leads</th>
-                  <th className="pb-3 text-right">Contacted</th>
-                  <th className="pb-3 text-right">Won</th>
-                  <th className="pb-3 text-right">Won value</th>
-                  <th className="pb-3 text-right">Avg response</th>
-                  <th className="pb-3 text-right">14d</th>
-                </tr>
-              </thead>
-              <tbody>
-                {report.team.map((row, idx) => {
-                  const top = idx === 0;
-                  const contactPct = row.leads > 0 ? Math.round((row.contacted / row.leads) * 100) : 0;
-                  return (
-                    <tr
-                      key={row.userId}
-                      className={
-                        top
-                          ? "border-b border-border/80 bg-[rgba(212,255,79,0.08)]"
-                          : "border-b border-border/80"
-                      }
-                    >
-                      <td className="py-3">
-                        <div className="flex items-center gap-3">
-                          <ClientAvatar name={row.name} size="sm" />
-                          <span className="font-medium text-ink-primary">{row.name}</span>
-                        </div>
-                      </td>
-                      <td className="py-3 text-right tabular-nums">{row.leads}</td>
-                      <td className="py-3 text-right tabular-nums">{contactPct}%</td>
-                      <td className="py-3 text-right tabular-nums">{row.won}</td>
-                      <td className="py-3 text-right tabular-nums">{formatCurrencyUsd(row.wonValue)}</td>
-                      <td className="py-3 text-right text-ink-secondary">
-                        {row.avgResponseMinutes != null ? `${Math.round(row.avgResponseMinutes)}m` : "—"}
-                      </td>
-                      <td className="py-3 text-right">
-                        <TeamSparkline values={row.last14DaysLeads} />
-                      </td>
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
+          <div className="overflow-x-auto rounded-lg border border-border bg-surface-card p-2 md:border-0 md:bg-transparent md:p-0">
+            <ResponsiveTable
+              columns={teamColumns}
+              rows={report.team}
+              rowKey={(r) => r.userId}
+              rowClassName={(row) =>
+                report.team[0]?.userId === row.userId ? "bg-[rgba(212,255,79,0.08)]" : undefined
+              }
+            />
           </div>
         )}
       </section>

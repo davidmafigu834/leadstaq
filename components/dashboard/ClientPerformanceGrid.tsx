@@ -20,7 +20,7 @@ export function ClientPerformanceGrid({ rows }: { rows: ClientPerfRow[] }) {
         </Link>
       </div>
 
-      <div className="grid grid-cols-1 gap-6 min-[720px]:grid-cols-2 min-[1200px]:grid-cols-3">
+      <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 layout:grid-cols-3">
         {rows.map((r) => (
           <ClientCard key={r.id} row={r} />
         ))}

@@ -76,7 +76,7 @@ export function FormAnswersSection({ formData, lead, className }: Props) {
   return (
     <div className={["border-b border-border px-5 py-5", className].filter(Boolean).join(" ")}>
       <div className="mb-4 font-mono text-[11px] uppercase tracking-[0.1em] text-ink-tertiary">Form answers</div>
-      <dl className="grid grid-cols-2 gap-x-6 gap-y-4">
+      <dl className="grid grid-cols-1 gap-x-6 gap-y-4 sm:grid-cols-2">
         {entries.map((entry, i) => (
           <div key={`${entry.label}-${i}`} className={entry.value.length > 60 ? "col-span-2" : ""}>
             <dt className="mb-1 font-mono text-[11px] uppercase tracking-[0.08em] text-ink-tertiary">{entry.label}</dt>

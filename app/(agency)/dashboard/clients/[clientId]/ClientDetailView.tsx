@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { useEffect, useRef } from "react";
 import { ClientAvatar } from "@/components/ClientAvatar";
 import { PublicSlugCopy } from "@/components/clients/PublicSlugCopy";
 import type { ClientDetailHeroProps } from "@/lib/client-hero";
@@ -60,6 +61,11 @@ export function ClientDetailView({
 }) {
   const pathname = usePathname();
   const items = tabs(clientId);
+  const activeTabRef = useRef<HTMLAnchorElement | null>(null);
+
+  useEffect(() => {
+    activeTabRef.current?.scrollIntoView({ behavior: "smooth", block: "nearest", inline: "center" });
+  }, [pathname]);
 
   const notifStatus: "active" | "not_configured" =
     hero.notificationsEnvConfigured || Boolean(hero.twilioWhatsappOverride?.trim()) ? "active" : "not_configured";
@@ -107,19 +113,20 @@ export function ClientDetailView({
         </div>
       </header>
 
-      <nav className="flex flex-wrap gap-6 border-b border-border">
+      <nav className="-mx-4 flex snap-x snap-mandatory gap-1 overflow-x-auto border-b border-border px-4 scrollbar-hide">
         {items.map((t) => {
           const active = pathname === t.href;
           return (
             <Link
               key={t.href}
               href={t.href}
-              className={`relative pb-3 text-sm font-medium transition-colors ${
+              ref={active ? activeTabRef : undefined}
+              className={`relative shrink-0 snap-start whitespace-nowrap px-4 py-3 text-sm font-medium transition-colors ${
                 active ? "text-ink-primary" : "text-ink-secondary hover:text-ink-primary"
               }`}
             >
               {t.label}
-              {active ? <span className="absolute bottom-0 left-0 right-0 h-0.5 bg-[var(--accent)]" /> : null}
+              {active ? <span className="absolute bottom-0 left-2 right-2 h-0.5 bg-[var(--accent)]" /> : null}
             </Link>
           );
         })}

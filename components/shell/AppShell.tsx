@@ -50,14 +50,11 @@ export function AppShell({
   unreadNotifications?: number;
   notificationRole: UserRole;
   coBrand?: string | null;
-  /** Client manager: logo or initials chip beside Leadstaq wordmark. */
   sidebarBrand?: { name: string; logoUrl: string | null } | null;
   quickActionHref?: string;
   showQuickAction?: boolean;
-  /** When false, hides workspace search (e.g. embedded views). */
   showWorkspaceSearch?: boolean;
   hideHeader?: boolean;
-  /** Agency hero pages (Overview, Clients, …) use larger display title. */
   titleSize?: "hero" | "standard";
 }) {
   const pathname = usePathname();
@@ -67,6 +64,15 @@ export function AppShell({
   useEffect(() => {
     setMobileOpen(false);
   }, [pathname]);
+
+  useEffect(() => {
+    if (!mobileOpen) return;
+    const prev = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    return () => {
+      document.body.style.overflow = prev;
+    };
+  }, [mobileOpen]);
 
   function navActive(href: string) {
     if (href === "/dashboard") return pathname === "/dashboard";
@@ -80,8 +86,8 @@ export function AppShell({
   const hideSearch = showWorkspaceSearch === false;
   const titleClass =
     titleSize === "hero"
-      ? "font-display text-[40px] leading-[1.05] tracking-tight text-ink-primary"
-      : "font-display text-[28px] leading-tight tracking-display text-ink-primary";
+      ? "font-display text-[22px] leading-[1.05] tracking-tight text-ink-primary md:text-[28px] layout:text-[40px]"
+      : "font-display text-[18px] leading-tight tracking-display text-ink-primary md:text-[22px] layout:text-[28px]";
 
   const sidebar = (
     <AgencySidebar
@@ -99,38 +105,32 @@ export function AppShell({
   );
 
   return (
-    <div className="flex min-h-screen bg-surface-canvas md:h-[100dvh] md:max-h-[100dvh] md:min-h-0 md:overflow-hidden">
-      <div className="fixed left-0 right-0 top-0 z-40 flex h-14 items-center justify-between gap-2 border-b border-border bg-surface-canvas px-4 md:hidden">
-        <div className="flex min-w-0 flex-1 items-center">
-          <button
-            type="button"
-            className="shrink-0 rounded-sm p-2 text-ink-primary hover:bg-surface-card-alt"
-            onClick={() => setMobileOpen(true)}
-            aria-label="Open menu"
-          >
-            <Menu className="h-5 w-5" strokeWidth={1.5} />
-          </button>
-          <span className="ml-3 truncate font-display text-lg text-ink-primary">Leadstaq</span>
-        </div>
-        <NotificationBell initialUnread={unreadNotifications ?? 0} role={notificationRole} />
-      </div>
+    <div className="flex min-h-screen min-h-[100svh] bg-surface-canvas layout:h-[100dvh] layout:max-h-[100dvh] layout:min-h-0 layout:overflow-hidden">
+      <aside
+        className="fixed inset-y-0 left-0 z-20 hidden w-60 flex-col border-r border-[var(--surface-sidebar-border)] bg-surface-sidebar layout:flex"
+        aria-label="Workspace navigation"
+      >
+        <div className="flex min-h-0 flex-1 flex-col overflow-hidden">{sidebar}</div>
+      </aside>
 
       {mobileOpen ? (
         <>
           <button
             type="button"
-            className="fixed inset-0 z-50 bg-surface-overlay md:hidden"
+            className="fixed inset-0 z-50 bg-black/50 layout:hidden"
             aria-label="Close menu"
             onClick={() => setMobileOpen(false)}
           />
-          <aside className="fixed inset-y-0 left-0 z-50 flex w-60 flex-col overflow-hidden bg-surface-sidebar md:hidden">
-            <div className="flex justify-end p-2">
+          <aside className="fixed inset-y-0 left-0 z-[51] flex w-[280px] flex-col overflow-y-auto border-r border-[var(--surface-sidebar-border)] bg-surface-sidebar layout:hidden">
+            <div className="flex shrink-0 items-center justify-between border-b border-[var(--surface-sidebar-border)] p-4">
+              <span className="font-display text-lg text-[var(--text-on-dark)]">Menu</span>
               <button
                 type="button"
-                className="rounded-sm p-2 text-[var(--text-on-dark)] hover:bg-[var(--surface-sidebar-elevated)]"
+                className="flex h-8 w-8 items-center justify-center rounded-sm text-[var(--text-on-dark)] hover:bg-[var(--surface-sidebar-elevated)]"
                 onClick={() => setMobileOpen(false)}
+                aria-label="Close menu"
               >
-                <X className="h-5 w-5" />
+                <X className="h-4 w-4" strokeWidth={1.5} />
               </button>
             </div>
             <div className="flex min-h-0 flex-1 flex-col overflow-hidden">{sidebar}</div>
@@ -138,24 +138,28 @@ export function AppShell({
         </>
       ) : null}
 
-      <aside className="relative hidden h-screen max-h-screen w-16 shrink-0 flex-col overflow-hidden border-r border-[var(--surface-sidebar-border)] bg-surface-sidebar md:flex layout:w-60">
-        <div className="flex min-h-0 flex-1 flex-col">{sidebar}</div>
-      </aside>
-
-      <div className="flex min-h-screen flex-1 flex-col pt-14 md:min-h-0 md:overflow-hidden md:pt-0">
+      <div className="flex min-h-0 flex-1 flex-col layout:ml-60 layout:min-h-0 layout:overflow-hidden">
         {hideHeader ? null : (
-          <header className="z-30 flex min-h-16 shrink-0 flex-wrap items-center justify-between gap-4 bg-surface-canvas px-6 py-3 layout:px-10">
+          <header className="safe-top sticky top-0 z-30 flex min-h-14 shrink-0 flex-wrap items-center gap-3 border-b border-border bg-surface-canvas px-4 py-2.5 md:min-h-16 md:px-6 md:py-3 layout:px-10">
+            <button
+              type="button"
+              className="flex h-9 w-9 shrink-0 items-center justify-center rounded-md text-ink-primary transition-colors hover:bg-surface-card-alt layout:hidden"
+              onClick={() => setMobileOpen(true)}
+              aria-label="Open menu"
+            >
+              <Menu className="h-5 w-5" strokeWidth={1.5} />
+            </button>
             <div className="min-w-0 flex-1">
-              <div className="font-mono text-[11px] uppercase tracking-wide text-ink-tertiary">{breadcrumb}</div>
+              <div className="truncate font-mono text-[10px] uppercase tracking-[0.1em] text-ink-tertiary md:text-[11px]">
+                {breadcrumb}
+              </div>
               <h1 className={titleClass}>{pageTitle}</h1>
             </div>
-            <div className="hidden flex-wrap items-center gap-4 md:flex">
-              <AgencyHeaderClock />
-              {!hideSearch ? (
-                <div className="relative hidden lg:block">
-                  <GlobalSearch role={notificationRole} />
-                </div>
-              ) : null}
+            <div className="ml-auto flex shrink-0 flex-wrap items-center justify-end gap-2">
+              <div className="hidden items-center lg:flex">
+                <AgencyHeaderClock />
+              </div>
+              {!hideSearch ? <GlobalSearch role={notificationRole} /> : null}
               <NotificationBell initialUnread={unreadNotifications ?? 0} role={notificationRole} />
               {!hideQuick ? (
                 notificationRole === "AGENCY_ADMIN" ? (
@@ -163,29 +167,46 @@ export function AppShell({
                     <button
                       type="button"
                       onClick={() => setNewLeadOpen(true)}
-                      className="btn-primary hidden h-9 items-center gap-2 px-3.5 text-[13px] font-medium sm:inline-flex"
+                      className="btn-primary hidden h-9 items-center gap-2 px-3.5 text-[13px] font-medium md:inline-flex"
                     >
                       <Plus className="h-3.5 w-3.5" strokeWidth={1.5} />
                       New lead
                     </button>
+                    <button
+                      type="button"
+                      onClick={() => setNewLeadOpen(true)}
+                      className="btn-primary flex h-9 w-9 items-center justify-center md:hidden"
+                      aria-label="New lead"
+                    >
+                      <Plus className="h-4 w-4" strokeWidth={1.5} />
+                    </button>
                     <NewLeadModal open={newLeadOpen} onClose={() => setNewLeadOpen(false)} clients={clients ?? []} />
                   </>
                 ) : (
-                  <Link
-                    href={quickActionHref}
-                    className="btn-primary hidden h-9 items-center gap-2 px-3.5 text-[13px] font-medium sm:inline-flex"
-                  >
-                    <Plus className="h-3.5 w-3.5" strokeWidth={1.5} />
-                    + New lead
-                  </Link>
+                  <>
+                    <Link
+                      href={quickActionHref}
+                      className="btn-primary hidden h-9 items-center gap-2 px-3.5 text-[13px] font-medium md:inline-flex"
+                    >
+                      <Plus className="h-3.5 w-3.5" strokeWidth={1.5} />
+                      + New lead
+                    </Link>
+                    <Link
+                      href={quickActionHref}
+                      className="btn-primary flex h-9 w-9 items-center justify-center md:hidden"
+                      aria-label="New lead"
+                    >
+                      <Plus className="h-4 w-4" strokeWidth={1.5} />
+                    </Link>
+                  </>
                 )
               ) : null}
+              {actions ? <div className="flex flex-wrap items-center gap-2">{actions}</div> : null}
             </div>
-            {actions ? <div className="flex shrink-0 flex-wrap items-center gap-2">{actions}</div> : null}
           </header>
         )}
 
-        <main className="flex-1 px-6 py-8 layout:px-10 md:min-h-0 md:overflow-y-auto md:overflow-x-hidden md:overscroll-contain">
+        <main className="flex-1 overflow-x-hidden px-4 py-6 md:px-6 md:py-8 layout:min-h-0 layout:overflow-y-auto layout:overscroll-contain layout:px-10 layout:py-10">
           {children}
         </main>
       </div>

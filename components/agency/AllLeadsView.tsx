@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import { Download, Inbox, Search, SearchX } from "lucide-react";
+import { Download, Inbox, ListFilter, Search, SearchX } from "lucide-react";
 import { format } from "date-fns";
 import { ClientAvatar } from "@/components/ClientAvatar";
 import { StatusPill } from "@/components/StatusPill";
@@ -16,6 +16,7 @@ import {
 } from "@/lib/leads/all-leads";
 import { isLeadSlow } from "@/lib/leadStatus";
 import { formatCurrencyUsd, formatTimeAgo } from "@/lib/format";
+import { Sheet } from "@/components/ui/Sheet";
 
 type SalespersonOpt = { id: string; name: string; client_id: string | null };
 
@@ -46,7 +47,7 @@ function FilterPill({
     <button
       type="button"
       onClick={onClick}
-      className={`inline-flex items-center gap-2 rounded-full border px-3 py-1.5 text-[13px] font-medium transition-colors ${
+      className={`inline-flex shrink-0 items-center gap-2 rounded-full border px-3 py-1.5 text-[13px] font-medium transition-colors ${
         active
           ? "border-ink-primary bg-ink-primary text-[var(--surface-canvas)]"
           : "border-border bg-transparent text-ink-secondary hover:bg-surface-card-alt"
@@ -307,6 +308,7 @@ export function AllLeadsView({
   const [reassignOpen, setReassignOpen] = useState(false);
   const [reassignTo, setReassignTo] = useState("");
   const [reassignBusy, setReassignBusy] = useState(false);
+  const [filtersSheetOpen, setFiltersSheetOpen] = useState(false);
 
   async function handleBulkReassign() {
     if (!reassignTo || selectedIds.size === 0) return;
@@ -381,15 +383,27 @@ export function AllLeadsView({
             </p>
           </div>
           <div className="flex gap-2">
-            <button type="button" onClick={handleExportCsv} className="btn-secondary inline-flex h-9 items-center gap-2 px-3 text-[13px]">
+            <button
+              type="button"
+              onClick={handleExportCsv}
+              className="btn-secondary hidden h-9 items-center gap-2 px-3 text-[13px] md:inline-flex"
+            >
               <Download className="h-4 w-4" strokeWidth={1.5} />
               Export CSV
+            </button>
+            <button
+              type="button"
+              onClick={handleExportCsv}
+              className="btn-secondary flex h-11 w-11 items-center justify-center md:hidden"
+              aria-label="Export CSV"
+            >
+              <Download className="h-4 w-4" strokeWidth={1.5} />
             </button>
           </div>
         </div>
       </header>
 
-      <div className="mb-3 flex flex-wrap gap-2">
+      <div className="-mx-4 mb-3 flex gap-2 overflow-x-auto px-4 pb-1 scrollbar-hide md:mx-0 md:flex-wrap md:overflow-visible md:px-0">
         <FilterPill active={filters.status === "all"} count={counts.total} onClick={() => setStatus("all")}>
           All
         </FilterPill>
@@ -420,7 +434,17 @@ export function AllLeadsView({
         </FilterPill>
       </div>
 
-      <div className="mb-6 flex flex-wrap items-center gap-2">
+      <div className="mb-6 flex flex-col gap-3 md:flex-row md:flex-wrap md:items-center md:gap-2">
+        <button
+          type="button"
+          className="btn-ghost flex h-11 w-full shrink-0 items-center justify-center gap-2 px-3 text-[13px] md:hidden"
+          onClick={() => setFiltersSheetOpen(true)}
+        >
+          <ListFilter className="h-4 w-4" strokeWidth={1.5} />
+          Filters
+        </button>
+
+        <div className="hidden flex-wrap items-center gap-2 md:flex">
         <MultiDropdown
           label="Clients"
           summary={draftClients.length ? `${draftClients.length} selected` : "Any"}
@@ -549,19 +573,173 @@ export function AllLeadsView({
             </label>
           ))}
         </MultiDropdown>
+        </div>
 
-        <div className="flex-1" />
-        <div className="relative w-full min-w-[200px] max-w-xs sm:w-64">
+        <div className="relative w-full min-w-0 md:ml-auto md:w-64 md:max-w-xs">
           <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-ink-tertiary" />
           <input
             type="search"
+            inputMode="search"
+            autoComplete="off"
             placeholder="Search by name, phone, email"
             value={searchInput}
             onChange={(e) => setSearchInput(e.target.value)}
-            className="input-base h-9 w-full pl-9"
+            className="input-base h-11 w-full pl-9 text-base md:h-9 md:text-sm"
           />
         </div>
       </div>
+
+      <Sheet
+        open={filtersSheetOpen}
+        onClose={() => setFiltersSheetOpen(false)}
+        title="Filters"
+        footer={
+          <div className="safe-bottom flex gap-2 p-4">
+            <button
+              type="button"
+              className="btn-ghost h-11 flex-1 rounded-md border border-border text-sm"
+              onClick={() => {
+                setDraftClients([]);
+                setDraftSources([]);
+                setDraftAssignees([]);
+                setDraftRange("all");
+                setDraftFrom("");
+                setDraftTo("");
+              }}
+            >
+              Clear
+            </button>
+            <button
+              type="button"
+              className="btn-primary h-11 flex-1 text-sm"
+              onClick={() => {
+                replaceUrl({
+                  ...filters,
+                  clientIds: draftClients,
+                  sources: draftSources,
+                  assigneeIds: draftAssignees,
+                  dateRange: draftRange,
+                  from: draftRange === "custom" ? draftFrom || undefined : undefined,
+                  to: draftRange === "custom" ? draftTo || undefined : undefined,
+                  page: 1,
+                });
+                setFiltersSheetOpen(false);
+              }}
+            >
+              Apply
+            </button>
+          </div>
+        }
+      >
+        <div className="flex flex-col gap-6">
+          <div>
+            <div className="mb-2 font-mono text-[11px] uppercase tracking-wide text-ink-tertiary">Clients</div>
+            <div className="max-h-48 space-y-1 overflow-y-auto rounded-md border border-border p-2">
+              {clients.map((c) => (
+                <label key={c.id} className="flex min-h-11 cursor-pointer items-center gap-2 px-1 py-2 text-[13px] hover:bg-surface-card-alt">
+                  <input
+                    type="checkbox"
+                    className="h-4 w-4 rounded border-border"
+                    checked={draftClients.includes(c.id)}
+                    onChange={() =>
+                      setDraftClients((prev) =>
+                        prev.includes(c.id) ? prev.filter((x) => x !== c.id) : [...prev, c.id]
+                      )
+                    }
+                  />
+                  {c.name}
+                </label>
+              ))}
+            </div>
+          </div>
+          <div>
+            <div className="mb-2 font-mono text-[11px] uppercase tracking-wide text-ink-tertiary">Source</div>
+            <div className="space-y-1 rounded-md border border-border p-2">
+              {(["FACEBOOK", "LANDING_PAGE", "MANUAL"] as const).map((s) => (
+                <label key={s} className="flex min-h-11 cursor-pointer items-center gap-2 px-1 py-2 text-[13px] hover:bg-surface-card-alt">
+                  <input
+                    type="checkbox"
+                    className="h-4 w-4 rounded border-border"
+                    checked={draftSources.includes(s)}
+                    onChange={() =>
+                      setDraftSources((prev) => (prev.includes(s) ? prev.filter((x) => x !== s) : [...prev, s]))
+                    }
+                  />
+                  {sourceLabel(s)}
+                </label>
+              ))}
+            </div>
+          </div>
+          <div>
+            <div className="mb-2 font-mono text-[11px] uppercase tracking-wide text-ink-tertiary">Date range</div>
+            <div className="space-y-1 rounded-md border border-border p-2">
+              {(["all", "this_month", "last_month", "90d", "custom"] as const).map((r) => (
+                <label key={r} className="flex min-h-11 cursor-pointer items-center gap-2 px-1 py-2 text-[13px] hover:bg-surface-card-alt">
+                  <input type="radio" name="sheet-dr" checked={draftRange === r} onChange={() => setDraftRange(r)} />
+                  {r === "all"
+                    ? "All time"
+                    : r === "this_month"
+                      ? "This month"
+                      : r === "last_month"
+                        ? "Last month"
+                        : r === "90d"
+                          ? "Last 90 days"
+                          : "Custom"}
+                </label>
+              ))}
+            </div>
+            {draftRange === "custom" ? (
+              <div className="mt-3 space-y-2">
+                <input
+                  type="date"
+                  className="input-base h-11 w-full text-base"
+                  value={draftFrom}
+                  onChange={(e) => setDraftFrom(e.target.value)}
+                />
+                <input
+                  type="date"
+                  className="input-base h-11 w-full text-base"
+                  value={draftTo}
+                  onChange={(e) => setDraftTo(e.target.value)}
+                />
+              </div>
+            ) : null}
+          </div>
+          <div>
+            <div className="mb-2 font-mono text-[11px] uppercase tracking-wide text-ink-tertiary">Assigned</div>
+            <div className="max-h-48 space-y-1 overflow-y-auto rounded-md border border-border p-2">
+              <label className="flex min-h-11 cursor-pointer items-center gap-2 px-1 py-2 text-[13px] hover:bg-surface-card-alt">
+                <input
+                  type="checkbox"
+                  className="h-4 w-4 rounded border-border"
+                  checked={draftAssignees.includes("__unassigned__")}
+                  onChange={() =>
+                    setDraftAssignees((prev) =>
+                      prev.includes("__unassigned__") ? prev.filter((x) => x !== "__unassigned__") : [...prev, "__unassigned__"]
+                    )
+                  }
+                />
+                Unassigned
+              </label>
+              {salespeople.map((u) => (
+                <label key={u.id} className="flex min-h-11 cursor-pointer items-center gap-2 px-1 py-2 text-[13px] hover:bg-surface-card-alt">
+                  <input
+                    type="checkbox"
+                    className="h-4 w-4 rounded border-border"
+                    checked={draftAssignees.includes(u.id)}
+                    onChange={() =>
+                      setDraftAssignees((prev) =>
+                        prev.includes(u.id) ? prev.filter((x) => x !== u.id) : [...prev, u.id]
+                      )
+                    }
+                  />
+                  {u.name}
+                </label>
+              ))}
+            </div>
+          </div>
+        </div>
+      </Sheet>
 
       {hasActiveFilters ? (
         <div className="mb-4 flex flex-wrap items-center gap-2 border-b border-border pb-4">
@@ -636,86 +814,168 @@ export function AllLeadsView({
       ) : null}
 
       {!emptyFiltered && !emptyAll ? (
-        <div className="overflow-x-auto">
-          <table className="w-full min-w-[960px] border-collapse text-left">
-            <thead>
-              <tr className="border-b border-border">
-                <th className="w-10 py-3 pl-2">
+        <>
+          <div className="space-y-2 md:hidden">
+            {initialRows.map((lead) => (
+              <div
+                key={lead.id}
+                className="relative rounded-lg border border-border bg-surface-card"
+              >
+                <div
+                  className="absolute left-3 top-3 z-10 flex h-9 w-9 items-center justify-center"
+                  onClick={(e) => e.stopPropagation()}
+                  onPointerDown={(e) => e.stopPropagation()}
+                >
                   <input
                     type="checkbox"
                     className="h-4 w-4 rounded border-border"
-                    checked={allSelected}
-                    ref={(el) => {
-                      if (el) el.indeterminate = someSelected && !allSelected;
-                    }}
-                    onChange={toggleSelectAll}
-                    aria-label="Select all on page"
+                    checked={selectedIds.has(lead.id)}
+                    onChange={() => toggleOne(lead.id)}
+                    aria-label={`Select ${lead.name ?? "lead"}`}
                   />
-                </th>
-                <SortableHeader field="name" label="Name" />
-                <SortableHeader field="client" label="Client" />
-                <th className="header-cell py-3 text-[11px] font-mono uppercase tracking-wide text-ink-tertiary">Source</th>
-                <th className="header-cell py-3 text-[11px] font-mono uppercase tracking-wide text-ink-tertiary">Budget</th>
-                <th className="header-cell py-3 text-[11px] font-mono uppercase tracking-wide text-ink-tertiary">Status</th>
-                <th className="header-cell py-3 text-[11px] font-mono uppercase tracking-wide text-ink-tertiary">Assigned</th>
-                <SortableHeader field="last_activity" label="Last activity" />
-                <SortableHeader field="deal_value" label="Deal value" align="right" />
-                <SortableHeader field="created_at" label="Created" />
-              </tr>
-            </thead>
-            <tbody>
-              {initialRows.map((lead) => (
-                <tr
-                  key={lead.id}
-                  className="cursor-pointer border-b border-border hover:bg-surface-card-alt"
+                </div>
+                <button
+                  type="button"
+                  className="w-full pl-12 pr-4 py-3 text-left active:bg-surface-card-alt"
                   onClick={() => openLead(lead.id)}
                 >
-                  <td className="py-3 pl-2" onClick={(e) => e.stopPropagation()}>
+                  <div className="text-sm font-medium text-ink-primary">{lead.name || "—"}</div>
+                  <div className="font-mono text-xs text-ink-tertiary">{lead.phone || "—"}</div>
+                  <div className="mt-2 flex items-center gap-2">
+                    <ClientAvatar name={lead.clients?.name ?? "—"} size={20} src={lead.clients?.logo_url} />
+                    <span className="text-sm text-ink-secondary">{lead.clients?.name ?? "—"}</span>
+                  </div>
+                  <div className="mt-3 grid grid-cols-2 gap-x-3 gap-y-2 border-t border-border pt-3">
+                    <div>
+                      <div className="font-mono text-[10px] uppercase tracking-wide text-ink-tertiary">Source</div>
+                      <div className="font-mono text-xs text-ink-primary">{sourceLabel(lead.source)}</div>
+                    </div>
+                    <div>
+                      <div className="font-mono text-[10px] uppercase tracking-wide text-ink-tertiary">Budget</div>
+                      <div className="font-mono text-sm text-ink-primary">{lead.budget || "—"}</div>
+                    </div>
+                    <div>
+                      <div className="font-mono text-[10px] uppercase tracking-wide text-ink-tertiary">Status</div>
+                      <div className="mt-0.5">
+                        <StatusPill status={lead.status} />
+                      </div>
+                    </div>
+                    <div>
+                      <div className="font-mono text-[10px] uppercase tracking-wide text-ink-tertiary">Assigned</div>
+                      <div className="mt-0.5 flex items-center gap-2">
+                        {lead.assigned_to ? (
+                          <>
+                            <ClientAvatar name={lead.assigned_to.name} size={20} src={lead.assigned_to.avatar_url} />
+                            <span className="text-sm">{firstName(lead.assigned_to.name)}</span>
+                          </>
+                        ) : (
+                          <span className="text-xs text-ink-tertiary">Unassigned</span>
+                        )}
+                      </div>
+                    </div>
+                    <div className="col-span-2">
+                      <div className="font-mono text-[10px] uppercase tracking-wide text-ink-tertiary">Last activity</div>
+                      <div className="mt-0.5 text-sm text-ink-secondary">
+                        <LastActivityCell row={lead} />
+                      </div>
+                    </div>
+                    <div>
+                      <div className="font-mono text-[10px] uppercase tracking-wide text-ink-tertiary">Deal value</div>
+                      <div className="font-mono text-sm tabular-nums text-ink-primary">
+                        {lead.deal_value != null ? formatCurrencyUsd(lead.deal_value) : "—"}
+                      </div>
+                    </div>
+                    <div>
+                      <div className="font-mono text-[10px] uppercase tracking-wide text-ink-tertiary">Created</div>
+                      <div className="text-sm text-ink-secondary">{formatTimeAgo(lead.created_at)}</div>
+                    </div>
+                  </div>
+                </button>
+              </div>
+            ))}
+          </div>
+
+          <div className="hidden overflow-x-auto md:block">
+            <table className="w-full min-w-[960px] border-collapse text-left">
+              <thead>
+                <tr className="border-b border-border">
+                  <th className="w-10 py-3 pl-2">
                     <input
                       type="checkbox"
                       className="h-4 w-4 rounded border-border"
-                      checked={selectedIds.has(lead.id)}
-                      onChange={() => toggleOne(lead.id)}
-                      aria-label={`Select ${lead.name ?? "lead"}`}
+                      checked={allSelected}
+                      ref={(el) => {
+                        if (el) el.indeterminate = someSelected && !allSelected;
+                      }}
+                      onChange={toggleSelectAll}
+                      aria-label="Select all on page"
                     />
-                  </td>
-                  <td className="py-3">
-                    <div className="text-sm font-medium text-ink-primary">{lead.name || "—"}</div>
-                    <div className="font-mono text-xs text-ink-tertiary">{lead.phone || "—"}</div>
-                  </td>
-                  <td className="py-3">
-                    <div className="flex items-center gap-2">
-                      <ClientAvatar name={lead.clients?.name ?? "—"} size={20} src={lead.clients?.logo_url} />
-                      <span className="text-sm">{lead.clients?.name ?? "—"}</span>
-                    </div>
-                  </td>
-                  <td className="py-3 font-mono text-xs uppercase text-ink-secondary">{sourceLabel(lead.source)}</td>
-                  <td className="py-3 font-mono text-sm text-ink-primary">{lead.budget || "—"}</td>
-                  <td className="py-3">
-                    <StatusPill status={lead.status} />
-                  </td>
-                  <td className="py-3">
-                    {lead.assigned_to ? (
-                      <div className="flex items-center gap-2">
-                        <ClientAvatar name={lead.assigned_to.name} size={20} src={lead.assigned_to.avatar_url} />
-                        <span className="text-sm">{firstName(lead.assigned_to.name)}</span>
-                      </div>
-                    ) : (
-                      <span className="text-xs text-ink-tertiary">Unassigned</span>
-                    )}
-                  </td>
-                  <td className="py-3">
-                    <LastActivityCell row={lead} />
-                  </td>
-                  <td className="py-3 text-right font-mono text-sm tabular-nums text-ink-primary">
-                    {lead.deal_value != null ? formatCurrencyUsd(lead.deal_value) : "—"}
-                  </td>
-                  <td className="py-3 text-sm text-ink-secondary">{formatTimeAgo(lead.created_at)}</td>
+                  </th>
+                  <SortableHeader field="name" label="Name" />
+                  <SortableHeader field="client" label="Client" />
+                  <th className="header-cell py-3 text-[11px] font-mono uppercase tracking-wide text-ink-tertiary">Source</th>
+                  <th className="header-cell py-3 text-[11px] font-mono uppercase tracking-wide text-ink-tertiary">Budget</th>
+                  <th className="header-cell py-3 text-[11px] font-mono uppercase tracking-wide text-ink-tertiary">Status</th>
+                  <th className="header-cell py-3 text-[11px] font-mono uppercase tracking-wide text-ink-tertiary">Assigned</th>
+                  <SortableHeader field="last_activity" label="Last activity" />
+                  <SortableHeader field="deal_value" label="Deal value" align="right" />
+                  <SortableHeader field="created_at" label="Created" />
                 </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+              </thead>
+              <tbody>
+                {initialRows.map((lead) => (
+                  <tr
+                    key={lead.id}
+                    className="cursor-pointer border-b border-border hover:bg-surface-card-alt"
+                    onClick={() => openLead(lead.id)}
+                  >
+                    <td className="py-3 pl-2" onClick={(e) => e.stopPropagation()}>
+                      <input
+                        type="checkbox"
+                        className="h-4 w-4 rounded border-border"
+                        checked={selectedIds.has(lead.id)}
+                        onChange={() => toggleOne(lead.id)}
+                        aria-label={`Select ${lead.name ?? "lead"}`}
+                      />
+                    </td>
+                    <td className="py-3">
+                      <div className="text-sm font-medium text-ink-primary">{lead.name || "—"}</div>
+                      <div className="font-mono text-xs text-ink-tertiary">{lead.phone || "—"}</div>
+                    </td>
+                    <td className="py-3">
+                      <div className="flex items-center gap-2">
+                        <ClientAvatar name={lead.clients?.name ?? "—"} size={20} src={lead.clients?.logo_url} />
+                        <span className="text-sm">{lead.clients?.name ?? "—"}</span>
+                      </div>
+                    </td>
+                    <td className="py-3 font-mono text-xs uppercase text-ink-secondary">{sourceLabel(lead.source)}</td>
+                    <td className="py-3 font-mono text-sm text-ink-primary">{lead.budget || "—"}</td>
+                    <td className="py-3">
+                      <StatusPill status={lead.status} />
+                    </td>
+                    <td className="py-3">
+                      {lead.assigned_to ? (
+                        <div className="flex items-center gap-2">
+                          <ClientAvatar name={lead.assigned_to.name} size={20} src={lead.assigned_to.avatar_url} />
+                          <span className="text-sm">{firstName(lead.assigned_to.name)}</span>
+                        </div>
+                      ) : (
+                        <span className="text-xs text-ink-tertiary">Unassigned</span>
+                      )}
+                    </td>
+                    <td className="py-3">
+                      <LastActivityCell row={lead} />
+                    </td>
+                    <td className="py-3 text-right font-mono text-sm tabular-nums text-ink-primary">
+                      {lead.deal_value != null ? formatCurrencyUsd(lead.deal_value) : "—"}
+                    </td>
+                    <td className="py-3 text-sm text-ink-secondary">{formatTimeAgo(lead.created_at)}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </>
       ) : null}
 
       {!emptyFiltered && !emptyAll ? (
@@ -748,7 +1008,7 @@ export function AllLeadsView({
       ) : null}
 
       {selectedIds.size > 0 ? (
-        <div className="fixed bottom-6 left-1/2 z-40 flex -translate-x-1/2 items-center gap-4 rounded-full border border-border bg-surface-sidebar px-5 py-3 text-[var(--text-on-dark)] shadow-lg">
+        <div className="safe-bottom fixed bottom-4 left-1/2 z-40 flex max-w-[calc(100vw-2rem)] -translate-x-1/2 flex-wrap items-center justify-center gap-3 rounded-full border border-border bg-surface-sidebar px-4 py-3 text-[var(--text-on-dark)] shadow-lg md:bottom-6 md:max-w-none md:gap-4 md:px-5">
           <span className="text-sm">{selectedIds.size} selected</span>
           <button type="button" className="text-sm hover:text-accent" onClick={() => setReassignOpen(true)}>
             Reassign
@@ -763,11 +1023,12 @@ export function AllLeadsView({
       ) : null}
 
       {reassignOpen ? (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-surface-overlay px-4">
-          <div className="w-full max-w-md rounded-lg border border-border bg-surface-card p-6 shadow-md">
+        <div className="fixed inset-0 z-50 flex flex-col bg-surface-overlay md:items-center md:justify-center md:px-4 md:py-8">
+          <div className="flex h-full w-full flex-col border-border bg-surface-card md:h-auto md:max-h-[min(90vh,640px)] md:max-w-md md:rounded-lg md:border md:shadow-md">
+            <div className="border-b border-border p-5 md:p-6">
             <h2 className="font-display text-lg text-ink-primary">Reassign {selectedIds.size} leads</h2>
             <p className="mt-2 text-sm text-ink-secondary">Choose an active salesperson. Each lead must belong to the same client as that salesperson.</p>
-            <select className="input-base mt-4 h-10 w-full" value={reassignTo} onChange={(e) => setReassignTo(e.target.value)}>
+            <select className="input-base mt-4 h-11 w-full text-base md:h-10 md:text-sm" value={reassignTo} onChange={(e) => setReassignTo(e.target.value)}>
               <option value="">Select…</option>
               {salespeople.map((u) => (
                 <option key={u.id} value={u.id}>
@@ -776,13 +1037,14 @@ export function AllLeadsView({
                 </option>
               ))}
             </select>
-            <div className="mt-6 flex justify-end gap-2">
-              <button type="button" className="btn-ghost text-sm" onClick={() => setReassignOpen(false)}>
+            </div>
+            <div className="safe-bottom mt-auto flex justify-end gap-2 border-t border-border p-4 md:mt-6 md:border-t-0 md:p-6 md:pt-0">
+              <button type="button" className="btn-ghost h-11 flex-1 text-sm md:h-9 md:flex-none" onClick={() => setReassignOpen(false)}>
                 Cancel
               </button>
               <button
                 type="button"
-                className="btn-primary text-sm"
+                className="btn-primary h-11 flex-1 text-sm md:h-9 md:flex-none"
                 disabled={!reassignTo || reassignBusy}
                 onClick={() => void handleBulkReassign()}
               >

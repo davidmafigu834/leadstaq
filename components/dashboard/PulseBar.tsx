@@ -35,14 +35,14 @@ function normalizeMetric(m: PulseBarMetric | LegacyPulseMetric): PulseBarMetric 
 export function PulseBar({ metrics }: { metrics: (PulseBarMetric | LegacyPulseMetric)[] }) {
   const list = metrics.map(normalizeMetric);
   return (
-    <div className="mb-8 flex min-h-[88px] overflow-hidden rounded-[10px] border border-border">
+    <div className="mb-8 grid min-h-[88px] grid-cols-1 divide-y divide-border overflow-hidden rounded-[10px] border border-border sm:grid-cols-2 sm:divide-x sm:divide-y-0 layout:grid-cols-4">
       {list.map((m, i) => (
         <motion.div
           key={`${m.eyebrow}-${i}`}
           initial={{ opacity: 0, y: 12 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.18, delay: i * 0.05, ease }}
-          className={`relative flex min-h-[88px] flex-1 flex-col justify-center border-r border-border px-5 py-5 last:border-r-0 ${
+          className={`relative flex min-h-[88px] flex-col justify-center px-4 py-4 sm:px-5 sm:py-5 ${
             m.variant === "dark"
               ? "bg-surface-sidebar text-[var(--text-on-dark)]"
               : "bg-surface-card"

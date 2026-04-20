@@ -11,9 +11,27 @@ import type { LeadWithClientResponseLimit } from "@/lib/leadStatus";
 import type { LeadRow, LeadSource, LeadStatus } from "@/types";
 import { StatusPill } from "@/components/StatusPill";
 import { openLeadPanel } from "@/store/uiStore";
+import { useMediaQuery } from "@/lib/hooks/useMediaQuery";
+import { ResponsiveTable, type ResponsiveTableColumn } from "@/components/ui/ResponsiveTable";
 import { LeadDetailPanel } from "./LeadDetailPanel";
 
-const COLS: LeadStatus[] = ["NEW", "CONTACTED", "NEGOTIATING", "PROPOSAL_SENT"];
+const COLS = ["NEW", "CONTACTED", "NEGOTIATING", "PROPOSAL_SENT"] as const satisfies readonly LeadStatus[];
+
+type BoardColumn = (typeof COLS)[number];
+
+const COL_LABEL: Record<BoardColumn, string> = {
+  NEW: "New",
+  CONTACTED: "Contacted",
+  NEGOTIATING: "Negotiating",
+  PROPOSAL_SENT: "Proposal sent",
+};
+
+const COL_DOT: Record<BoardColumn, string> = {
+  NEW: "var(--info)",
+  CONTACTED: "var(--success)",
+  NEGOTIATING: "var(--warning)",
+  PROPOSAL_SENT: "#8b5cf6",
+};
 
 const COL_ACCENT: Record<string, string> = {
   NEW: "border-t-[var(--info)]",
@@ -60,6 +78,9 @@ export function SalesBoard({
   const [tab, setTab] = useState<"active" | "closed">(initialTab);
   const [searchQuery, setSearchQuery] = useState("");
   const [debouncedQuery, setDebouncedQuery] = useState("");
+  const isMobileKanban = useMediaQuery("(max-width: 767px)");
+  const [activeColumn, setActiveColumn] = useState<BoardColumn>("NEW");
+  const [touchStartX, setTouchStartX] = useState<number | null>(null);
 
   useEffect(() => {
     setLeads(initialLeads);
@@ -70,8 +91,12 @@ export function SalesBoard({
     return () => window.clearTimeout(t);
   }, [searchQuery]);
 
+  useEffect(() => {
+    if (tab === "active") setActiveColumn("NEW");
+  }, [tab]);
+
   const activeInPipeline = useMemo(
-    () => leads.filter((l) => COLS.includes(l.status as LeadStatus)),
+    () => leads.filter((l) => (COLS as readonly string[]).includes(l.status)),
     [leads]
   );
 
@@ -86,7 +111,7 @@ export function SalesBoard({
     const g: Record<string, LeadWithClientResponseLimit[]> = {};
     for (const c of COLS) g[c] = [];
     for (const l of sortedForKanban) {
-      if (COLS.includes(l.status)) {
+      if ((COLS as readonly string[]).includes(l.status)) {
         g[l.status].push(l);
       }
     }
@@ -134,11 +159,32 @@ export function SalesBoard({
     );
   }, []);
 
+  function handleTouchStart(e: React.TouchEvent) {
+    setTouchStartX(e.touches[0].clientX);
+  }
+
+  function handleTouchEnd(e: React.TouchEvent) {
+    if (touchStartX === null) return;
+    const deltaX = e.changedTouches[0].clientX - touchStartX;
+    const threshold = 60;
+    if (Math.abs(deltaX) < threshold) {
+      setTouchStartX(null);
+      return;
+    }
+    const currentIdx = (COLS as readonly BoardColumn[]).indexOf(activeColumn);
+    if (deltaX < 0 && currentIdx < COLS.length - 1) {
+      setActiveColumn(COLS[currentIdx + 1]);
+    } else if (deltaX > 0 && currentIdx > 0) {
+      setActiveColumn(COLS[currentIdx - 1]);
+    }
+    setTouchStartX(null);
+  }
+
   async function onDragEnd(result: DropResult) {
     const { destination, draggableId } = result;
     if (!destination) return;
-    const nextStatus = destination.droppableId as LeadStatus;
-    if (!COLS.includes(nextStatus)) return;
+    const nextStatus = destination.droppableId as BoardColumn;
+    if (!(COLS as readonly string[]).includes(nextStatus)) return;
     setLeads((prev) => prev.map((l) => (l.id === draggableId ? { ...l, status: nextStatus } : l)));
     await fetch(`/api/leads/${draggableId}`, {
       method: "PATCH",
@@ -163,25 +209,32 @@ export function SalesBoard({
             <span className="absolute bottom-0 left-0 right-0 h-0.5 bg-[var(--accent)]" />
           </button>
         </div>
-        <div className="border border-border bg-surface-card">
-          <table className="w-full text-left text-sm">
-            <thead className="border-b border-border bg-surface-card-alt font-mono text-[11px] uppercase text-ink-tertiary">
-              <tr>
-                <th className="px-4 py-3">Name</th>
-                <th className="px-4 py-3">Status</th>
-              </tr>
-            </thead>
-            <tbody>
-              {closed.map((l) => (
-                <tr key={l.id} className="border-t border-border hover:bg-surface-card-alt">
-                  <td className="px-4 py-3 font-medium">{l.name}</td>
-                  <td className="px-4 py-3">
-                    <StatusPill status={l.status} />
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+        <div className="overflow-x-auto rounded-lg border border-border bg-surface-card p-2 md:p-0">
+          <ResponsiveTable<LeadWithClientResponseLimit>
+            columns={
+              [
+                {
+                  key: "name",
+                  label: "Name",
+                  mobilePrimary: true,
+                  render: (l) => (
+                    <div>
+                      <div className="font-medium text-ink-primary">{l.name}</div>
+                      <div className="font-mono text-xs text-ink-tertiary">{l.phone ?? "—"}</div>
+                    </div>
+                  ),
+                },
+                {
+                  key: "status",
+                  label: "Status",
+                  render: (l) => <StatusPill status={l.status} />,
+                },
+              ] as ResponsiveTableColumn<LeadWithClientResponseLimit>[]
+            }
+            rows={closed}
+            rowKey={(l) => l.id}
+            onRowClick={(l) => openLeadPanel(l.id)}
+          />
         </div>
         <LeadDetailPanel leads={leads} onLeadUpdated={handleLeadUpdated} onClose={handleUrlAfterPanelClose} />
       </div>
@@ -266,6 +319,82 @@ export function SalesBoard({
           <button type="button" className="btn-ghost mt-3 text-sm" onClick={() => setSearchQuery("")}>
             Clear search
           </button>
+        </div>
+      ) : isMobileKanban ? (
+        <div className="flex h-[min(640px,calc(100svh-220px))] flex-col">
+          <div className="-mx-4 flex gap-1 overflow-x-auto border-b border-border px-4 pb-3 scrollbar-hide">
+            {COLS.map((col) => {
+              const count = grouped[col].length;
+              const isActive = activeColumn === col;
+              return (
+                <button
+                  key={col}
+                  type="button"
+                  onClick={() => setActiveColumn(col)}
+                  className={[
+                    "flex h-8 shrink-0 items-center gap-2 whitespace-nowrap rounded-md px-3 text-xs",
+                    isActive
+                      ? "bg-surface-sidebar font-medium text-[var(--text-on-dark)]"
+                      : "bg-surface-card-alt text-ink-secondary",
+                  ].join(" ")}
+                >
+                  <span className="h-1.5 w-1.5 shrink-0 rounded-full" style={{ background: COL_DOT[col] }} />
+                  <span className="uppercase tracking-wide">{COL_LABEL[col]}</span>
+                  <span className="font-mono tabular-nums opacity-70">{count}</span>
+                </button>
+              );
+            })}
+          </div>
+          <div
+            className="min-h-0 flex-1 overflow-y-auto pb-24 pt-4"
+            onTouchStart={handleTouchStart}
+            onTouchEnd={handleTouchEnd}
+          >
+            {grouped[activeColumn].length === 0 ? (
+              <p className="rounded-md border border-dashed border-border bg-surface-card-alt px-4 py-8 text-center text-sm text-ink-tertiary">
+                No leads in {COL_LABEL[activeColumn]}.
+              </p>
+            ) : (
+              <div className="space-y-3">
+                {grouped[activeColumn].map((l) => (
+                  <button
+                    key={l.id}
+                    type="button"
+                    onClick={() => openLeadPanel(l.id)}
+                    className={`w-full border border-border bg-surface-card p-3.5 text-left active:scale-[0.98] ${
+                      kanbanLeadIsSlow(l) ? "border-l-[3px] border-l-[var(--danger)]" : ""
+                    }`}
+                  >
+                    <div className="flex items-start justify-between gap-2">
+                      <SourceDot source={l.source} />
+                      <span className="text-ink-tertiary">⋯</span>
+                    </div>
+                    <div className="mt-2 text-sm font-medium leading-snug text-ink-primary">{l.name}</div>
+                    <div className="mt-1 font-mono text-xs text-ink-tertiary">{l.phone}</div>
+                    <div className="my-3 h-px bg-border" />
+                    <div className="text-sm text-ink-secondary">
+                      {l.budget ?? "—"} · {l.project_type ?? "Project"}
+                    </div>
+                    <div className="mt-3 flex flex-wrap gap-2">
+                      <span
+                        className={`rounded-sm px-2 py-0.5 font-mono text-[10px] ${
+                          kanbanLeadIsSlow(l)
+                            ? "bg-[var(--danger)] text-white"
+                            : "bg-surface-card-alt text-ink-tertiary"
+                        }`}
+                      >
+                        {formatDistanceToNow(new Date(l.created_at), { addSuffix: true })}
+                      </span>
+                      <FollowUpKanbanPill followUpDate={l.follow_up_date} />
+                      <span className="rounded-sm bg-surface-card-alt px-2 py-0.5 font-mono text-[10px] text-ink-secondary">
+                        {l.source === "FACEBOOK" ? "FB" : l.source === "LANDING_PAGE" ? "LP" : "—"}
+                      </span>
+                    </div>
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
         </div>
       ) : (
         <DragDropContext onDragEnd={onDragEnd}>

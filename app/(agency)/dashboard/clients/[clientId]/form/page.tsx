@@ -1,5 +1,6 @@
 import { notFound } from "next/navigation";
 import { AgencyLayout } from "@/components/layouts/AgencyLayout";
+import { DesktopOnlyGate } from "@/components/ui/DesktopOnlyGate";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { loadClientHeroContext } from "@/lib/client-hero";
 import { FormBuilder } from "./FormBuilder";
@@ -30,7 +31,12 @@ export default async function FormBuilderPage({ params }: { params: { clientId: 
         publicLandingUrl={getPublicLandingPageUrl(client.slug as string)}
         hero={hero}
       >
-        <FormBuilder clientId={params.clientId} initial={initial} />
+        <DesktopOnlyGate
+          title="The form builder needs a laptop"
+          description="Designing forms and field logic works best on a wide screen. Open this on a laptop or desktop."
+        >
+          <FormBuilder clientId={params.clientId} initial={initial} />
+        </DesktopOnlyGate>
       </ClientDetailView>
     </AgencyLayout>
   );

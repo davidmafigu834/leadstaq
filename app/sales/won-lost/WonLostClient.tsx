@@ -8,6 +8,7 @@ import type { LeadRow } from "@/types";
 import { StatusPill } from "@/components/StatusPill";
 import { openLeadPanel } from "@/store/uiStore";
 import { LeadDetailPanel } from "../leads/LeadDetailPanel";
+import { ResponsiveTable, type ResponsiveTableColumn } from "@/components/ui/ResponsiveTable";
 
 type TabFilter = "all" | "won" | "lost";
 
@@ -45,6 +46,64 @@ export function WonLostClient({ initialLeads }: { initialLeads: LeadWithClientRe
     return closedLeads;
   }, [closedLeads, tab]);
 
+  const columns: ResponsiveTableColumn<LeadWithClientResponseLimit>[] = [
+    {
+      key: "name",
+      label: "Name",
+      mobilePrimary: true,
+      render: (l) => (
+        <div>
+          <div className="font-medium text-ink-primary">{l.name}</div>
+          <div className="font-mono text-xs text-ink-tertiary">{l.phone ?? "—"}</div>
+        </div>
+      ),
+    },
+    {
+      key: "project",
+      label: "Project type",
+      render: (l) => <span className="text-sm text-ink-primary">{l.project_type ?? "—"}</span>,
+    },
+    {
+      key: "value",
+      label: "Deal value",
+      align: "right",
+      render: (l) => (
+        <span className="font-mono text-sm tabular-nums text-ink-primary">
+          {l.status === "WON" ? formatDealValue(l.deal_value) : "—"}
+        </span>
+      ),
+    },
+    {
+      key: "status",
+      label: "Outcome",
+      render: (l) => <StatusPill status={l.status} />,
+    },
+    {
+      key: "closed",
+      label: "Closed",
+      render: (l) => <span className="text-sm text-ink-secondary">{closedWhenLabel(l.updated_at)}</span>,
+    },
+    {
+      key: "reason",
+      label: "Reason",
+      mobileHidden: true,
+      render: (l) => {
+        const lostReason = (l.lost_reason as string | null)?.trim() ?? "";
+        const reasonDisplay =
+          l.status === "LOST" && lostReason
+            ? lostReason.length > 40
+              ? `${lostReason.slice(0, 40)}…`
+              : lostReason
+            : "—";
+        return (
+          <span className="max-w-[200px] truncate text-xs text-ink-tertiary" title={lostReason}>
+            {reasonDisplay}
+          </span>
+        );
+      },
+    },
+  ];
+
   return (
     <div>
       <div className="mb-6 flex flex-wrap items-center gap-4 border-b border-border">
@@ -67,61 +126,20 @@ export function WonLostClient({ initialLeads }: { initialLeads: LeadWithClientRe
         <div className="flex flex-col items-center justify-center rounded-lg border border-dashed border-border py-16 text-center">
           <Archive className="mb-4 h-10 w-10 text-ink-tertiary" strokeWidth={1.5} />
           <h2 className="font-display text-2xl text-ink-primary">No closed deals yet</h2>
-          <p className="mt-2 max-w-sm text-sm text-ink-secondary">
-            Leads you win or lose will appear here.
-          </p>
+          <p className="mt-2 max-w-sm text-sm text-ink-secondary">Leads you win or lose will appear here.</p>
         </div>
       ) : filtered.length === 0 ? (
         <p className="rounded-lg border border-border bg-surface-card py-10 text-center text-sm text-ink-tertiary">
           No leads in this tab.
         </p>
       ) : (
-        <div className="overflow-x-auto rounded-lg border border-border bg-surface-card">
-          <table className="w-full min-w-[720px] text-left text-sm">
-            <thead className="border-b border-border bg-surface-card-alt font-mono text-[10px] uppercase tracking-wide text-ink-tertiary">
-              <tr>
-                <th className="px-4 py-3">Name</th>
-                <th className="px-4 py-3">Phone</th>
-                <th className="px-4 py-3">Project type</th>
-                <th className="px-4 py-3">Deal value</th>
-                <th className="px-4 py-3">Outcome</th>
-                <th className="px-4 py-3">Closed</th>
-                <th className="px-4 py-3">Reason</th>
-              </tr>
-            </thead>
-            <tbody>
-              {filtered.map((l) => {
-                const lostReason = (l.lost_reason as string | null)?.trim() ?? "";
-                const reasonDisplay =
-                  l.status === "LOST" && lostReason
-                    ? lostReason.length > 40
-                      ? `${lostReason.slice(0, 40)}…`
-                      : lostReason
-                    : "—";
-                return (
-                  <tr
-                    key={l.id}
-                    className="cursor-pointer border-t border-border hover:bg-surface-card-alt"
-                    onClick={() => openLeadPanel(l.id)}
-                  >
-                    <td className="px-4 py-3 text-sm font-medium text-ink-primary">{l.name}</td>
-                    <td className="px-4 py-3 font-mono text-xs text-ink-tertiary">{l.phone ?? "—"}</td>
-                    <td className="px-4 py-3 text-[13px] text-ink-primary">{l.project_type ?? "—"}</td>
-                    <td className="px-4 py-3 font-mono text-xs tabular-nums text-ink-primary">
-                      {l.status === "WON" ? formatDealValue(l.deal_value) : "—"}
-                    </td>
-                    <td className="px-4 py-3">
-                      <StatusPill status={l.status} />
-                    </td>
-                    <td className="px-4 py-3 font-mono text-xs text-ink-secondary">{closedWhenLabel(l.updated_at)}</td>
-                    <td className="max-w-[200px] truncate px-4 py-3 text-xs text-ink-secondary" title={lostReason}>
-                      {reasonDisplay}
-                    </td>
-                  </tr>
-                );
-              })}
-            </tbody>
-          </table>
+        <div className="overflow-x-auto rounded-lg border border-border bg-surface-card p-2 md:p-0">
+          <ResponsiveTable
+            columns={columns}
+            rows={filtered}
+            rowKey={(l) => l.id}
+            onRowClick={(l) => openLeadPanel(l.id)}
+          />
         </div>
       )}
 

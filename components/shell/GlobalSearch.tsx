@@ -33,7 +33,10 @@ export function GlobalSearch({ role }: { role: UserRole }) {
         setTimeout(() => inputRef.current?.focus(), 50);
       }
       if (e.key === "Escape" && open) {
+        e.preventDefault();
         setOpen(false);
+        setQuery("");
+        setResults([]);
       }
     }
     window.addEventListener("keydown", onKey);
@@ -97,15 +100,17 @@ export function GlobalSearch({ role }: { role: UserRole }) {
 
   const grouped = groupResults(results);
 
+  function openSearch() {
+    setOpen(true);
+    setTimeout(() => inputRef.current?.focus(), 50);
+  }
+
   return (
     <>
       <button
         type="button"
-        onClick={() => {
-          setOpen(true);
-          setTimeout(() => inputRef.current?.focus(), 50);
-        }}
-        className="flex h-9 w-full max-w-[320px] items-center gap-3 rounded-md border border-border bg-surface-card px-3 text-left text-sm text-ink-tertiary hover:border-[var(--border-strong)]"
+        onClick={openSearch}
+        className="hidden h-9 w-full max-w-[320px] items-center gap-3 rounded-md border border-border bg-surface-card px-3 text-left text-sm text-ink-tertiary hover:border-[var(--border-strong)] lg:flex"
       >
         <Search className="h-4 w-4 shrink-0" strokeWidth={1.5} />
         <span className="min-w-0 flex-1 truncate">Search…</span>
@@ -113,14 +118,22 @@ export function GlobalSearch({ role }: { role: UserRole }) {
           ⌘K
         </kbd>
       </button>
+      <button
+        type="button"
+        onClick={openSearch}
+        className="flex h-9 w-9 shrink-0 items-center justify-center rounded-md border border-border bg-surface-card text-ink-secondary transition-colors hover:bg-surface-card-alt lg:hidden"
+        aria-label="Search"
+      >
+        <Search className="h-4 w-4" strokeWidth={1.5} />
+      </button>
 
       {open ? (
         <div
-          className="fixed inset-0 z-[70] flex items-start justify-center bg-black/40 pt-20 md:pt-24"
+          className="fixed inset-0 z-[70] flex flex-col bg-black/40 md:flex-row md:items-start md:justify-center md:pt-24"
           ref={containerRef}
         >
-          <div className="mx-4 w-full max-w-[640px] overflow-hidden rounded-xl border border-border bg-surface-card shadow-2xl">
-            <div className="flex items-center gap-3 border-b border-border px-5 py-4">
+          <div className="flex h-full w-full max-w-none flex-col overflow-hidden border-border bg-surface-card shadow-2xl md:mx-4 md:h-auto md:max-h-[min(90vh,720px)] md:max-w-[90vw] md:w-[640px] md:rounded-xl md:border">
+            <div className="flex shrink-0 items-center gap-3 border-b border-border px-5 py-4">
               <Search className="h-4 w-4 shrink-0 text-ink-tertiary" strokeWidth={1.5} />
               <input
                 ref={inputRef}
@@ -155,7 +168,7 @@ export function GlobalSearch({ role }: { role: UserRole }) {
               </kbd>
             </div>
 
-            <div className="max-h-[min(420px,70vh)] overflow-y-auto">
+            <div className="min-h-0 flex-1 overflow-y-auto">
               {!query ? (
                 <div className="p-6 text-center text-sm text-ink-tertiary">
                   {role === "SALESPERSON"

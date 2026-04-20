@@ -1,5 +1,6 @@
 import { notFound } from "next/navigation";
 import { createAdminClient } from "@/lib/supabase/admin";
+import { DesktopOnlyGate } from "@/components/ui/DesktopOnlyGate";
 import { LandingPageBuilder } from "./LandingPageBuilder";
 
 export default async function LandingBuilderPage({ params }: { params: { clientId: string } }) {
@@ -24,14 +25,19 @@ export default async function LandingBuilderPage({ params }: { params: { clientI
   const builderKey = String(landingRow?.updated_at ?? `new-${params.clientId}`);
 
   return (
-    <LandingPageBuilder
-      clientId={params.clientId}
-      slug={client.slug as string}
-      clientName={client.name as string}
-      initial={landing ?? {}}
-      templateCount={templateCount}
-      builderKey={builderKey}
-      lockedTemplate={lockedTemplate}
-    />
+    <DesktopOnlyGate
+      title="The landing page builder needs a laptop"
+      description="Editing landing pages requires the three-panel workspace. Open this on a laptop or desktop."
+    >
+      <LandingPageBuilder
+        clientId={params.clientId}
+        slug={client.slug as string}
+        clientName={client.name as string}
+        initial={landing ?? {}}
+        templateCount={templateCount}
+        builderKey={builderKey}
+        lockedTemplate={lockedTemplate}
+      />
+    </DesktopOnlyGate>
   );
 }

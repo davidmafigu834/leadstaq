@@ -1,6 +1,6 @@
 "use client";
 
-import { Bell } from "lucide-react";
+import { Bell, ChevronLeft } from "lucide-react";
 import { useState, useEffect, useRef } from "react";
 import { formatTimeAgo } from "@/lib/format";
 import Link from "next/link";
@@ -99,21 +99,29 @@ export function NotificationBell({ initialUnread = 0, role }: { initialUnread?: 
       </button>
 
       {open ? (
-        <div className="absolute right-0 top-11 z-50 w-[360px] overflow-hidden rounded-lg border border-border bg-surface-card shadow-lg">
-          <div className="flex items-center justify-between border-b border-border px-4 py-3">
-            <h3 className="font-serif text-lg text-ink-primary">Notifications</h3>
+        <div className="fixed inset-0 z-50 flex flex-col overflow-hidden bg-surface-card md:absolute md:inset-auto md:right-0 md:top-11 md:h-auto md:max-h-[min(90vh,520px)] md:w-[360px] md:rounded-lg md:border md:border-border md:shadow-lg">
+          <div className="flex shrink-0 items-center gap-3 border-b border-border px-4 py-3 md:px-4">
+            <button
+              type="button"
+              className="flex h-9 w-9 shrink-0 items-center justify-center text-ink-secondary hover:bg-surface-card-alt md:hidden"
+              onClick={() => setOpen(false)}
+              aria-label="Back"
+            >
+              <ChevronLeft className="h-5 w-5" strokeWidth={1.5} />
+            </button>
+            <h3 className="min-w-0 flex-1 font-display text-lg text-ink-primary">Notifications</h3>
             {unreadCount > 0 ? (
               <button
                 type="button"
                 onClick={markAllRead}
-                className="text-xs text-ink-secondary hover:text-ink-primary"
+                className="shrink-0 text-xs text-ink-secondary hover:text-ink-primary"
               >
                 Mark all read
               </button>
             ) : null}
           </div>
 
-          <div className="max-h-[480px] overflow-y-auto">
+          <div className="min-h-0 flex-1 overflow-y-auto md:max-h-[480px]">
             {loading ? (
               <div className="py-8 text-center text-sm text-ink-tertiary">Loading…</div>
             ) : null}

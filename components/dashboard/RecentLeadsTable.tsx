@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useMemo, useState } from "react";
 import { Inbox } from "lucide-react";
 import { ClientAvatar } from "@/components/ClientAvatar";
@@ -8,6 +9,7 @@ import { StatusPill } from "@/components/StatusPill";
 import type { RecentLeadRow } from "@/lib/dashboard-data";
 import type { LeadSource } from "@/types";
 import { formatTimeAgo } from "@/lib/format";
+import { ResponsiveTable, type ResponsiveTableColumn } from "@/components/ui/ResponsiveTable";
 
 type Filter = "all" | "facebook" | "landing";
 
@@ -42,6 +44,7 @@ export function RecentLeadsTable({
   title = "Recent leads",
   showSourceFilters = true,
   agencyFooter = false,
+  leadListPath = "/dashboard/leads",
 }: {
   rows: RecentLeadRow[];
   eyebrow?: string;
@@ -49,7 +52,10 @@ export function RecentLeadsTable({
   showSourceFilters?: boolean;
   /** Agency dashboard: show “latest 10” + link to all leads instead of a fake pager. */
   agencyFooter?: boolean;
+  /** Base path for opening a lead (query `lead` is appended). */
+  leadListPath?: string;
 }) {
+  const router = useRouter();
   const [filter, setFilter] = useState<Filter>("all");
 
   const filtered = useMemo(() => {
@@ -64,6 +70,71 @@ export function RecentLeadsTable({
     { id: "landing", label: "Landing page" },
   ];
 
+  const columns = useMemo<ResponsiveTableColumn<RecentLeadRow>[]>(
+    () => [
+      {
+        key: "name",
+        label: "Name",
+        mobilePrimary: true,
+        render: (r) => (
+          <div>
+            <div className="text-[13px] font-medium text-ink-primary">{r.name ?? "—"}</div>
+            <div className="font-mono text-[11px] text-ink-tertiary">{r.phone ?? "—"}</div>
+          </div>
+        ),
+      },
+      {
+        key: "client",
+        label: "Client",
+        render: (r) => (
+          <div className="flex min-w-0 items-center gap-1.5">
+            <ClientAvatar name={r.clientName} size={20} />
+            <span className="text-[12px] text-ink-primary">{r.clientName}</span>
+          </div>
+        ),
+      },
+      {
+        key: "budget",
+        label: "Budget",
+        render: (r) => (
+          <span className="font-mono text-[13px] tabular-nums text-ink-primary">
+            {r.budget != null && r.budget !== "" ? r.budget : <span className="text-ink-tertiary">—</span>}
+          </span>
+        ),
+      },
+      {
+        key: "source",
+        label: "Source",
+        render: (r) => <SourceCell source={r.source} />,
+      },
+      {
+        key: "status",
+        label: "Status",
+        render: (r) => <StatusPill status={r.status} />,
+      },
+      {
+        key: "assigned",
+        label: "Assigned",
+        render: (r) => (
+          <div className="flex min-w-0 items-center gap-2">
+            {r.assigneeFullName ? <ClientAvatar name={r.assigneeFullName} size={24} /> : null}
+            <span className="text-[12px] text-ink-primary">{r.assigneeFullName ?? "—"}</span>
+          </div>
+        ),
+      },
+      {
+        key: "time",
+        label: "Time",
+        render: (r) => <span className="font-mono text-[11px] text-ink-tertiary">{formatTimeAgo(r.createdAt)}</span>,
+      },
+    ],
+    []
+  );
+
+  function openLead(r: RecentLeadRow) {
+    router.push(`${leadListPath}?lead=${r.id}`, { scroll: false });
+  }
+
   return (
     <div>
       <div className="mb-5 flex flex-col gap-4 min-[640px]:flex-row min-[640px]:items-end min-[640px]:justify-between">
@@ -72,7 +143,7 @@ export function RecentLeadsTable({
           <h2 className="mt-1 font-display text-2xl tracking-display text-ink-primary">{title}</h2>
         </div>
         {showSourceFilters ? (
-          <div className="flex flex-wrap items-center gap-2">
+          <div className="-mx-1 flex gap-2 overflow-x-auto px-1 pb-1 scrollbar-hide sm:flex-wrap">
             {filters.map((f) => {
               const active = filter === f.id;
               return (
@@ -80,7 +151,7 @@ export function RecentLeadsTable({
                   key={f.id}
                   type="button"
                   onClick={() => setFilter(f.id)}
-                  className={`h-8 rounded-sm px-3 text-[12px] font-medium transition-colors ${
+                  className={`h-9 shrink-0 rounded-sm px-3 text-[12px] font-medium transition-colors sm:h-8 ${
                     active
                       ? "bg-ink-primary text-white"
                       : "border border-border bg-transparent text-ink-secondary hover:bg-surface-card-alt"
@@ -101,86 +172,13 @@ export function RecentLeadsTable({
           <p className="text-[14px] text-ink-secondary">New submissions will show up here.</p>
         </div>
       ) : (
-        <div className="w-full overflow-x-auto">
-          <table className="w-full min-w-[720px] text-left">
-            <thead>
-              <tr className="border-b border-border-strong">
-                <th className="pb-2.5 font-mono text-[11px] font-normal uppercase tracking-[0.08em] text-ink-tertiary">
-                  Name
-                </th>
-                <th className="pb-2.5 font-mono text-[11px] font-normal uppercase tracking-[0.08em] text-ink-tertiary">
-                  Client
-                </th>
-                <th className="pb-2.5 font-mono text-[11px] font-normal uppercase tracking-[0.08em] text-ink-tertiary">
-                  Budget
-                </th>
-                <th className="pb-2.5 font-mono text-[11px] font-normal uppercase tracking-[0.08em] text-ink-tertiary">
-                  Source
-                </th>
-                <th className="pb-2.5 font-mono text-[11px] font-normal uppercase tracking-[0.08em] text-ink-tertiary">
-                  Status
-                </th>
-                <th className="pb-2.5 font-mono text-[11px] font-normal uppercase tracking-[0.08em] text-ink-tertiary">
-                  Assigned
-                </th>
-                <th className="pb-2.5 font-mono text-[11px] font-normal uppercase tracking-[0.08em] text-ink-tertiary">
-                  Time
-                </th>
-              </tr>
-            </thead>
-            <tbody>
-              {filtered.map((r) => (
-                <tr key={r.id} className="border-b border-border transition-colors hover:bg-surface-card-alt">
-                  <td className="h-14 align-middle">
-                    <Link href={`/dashboard/leads?lead=${r.id}`} className="block min-w-0 py-2" scroll={false}>
-                      <div className="text-[13px] font-medium text-ink-primary">{r.name ?? "—"}</div>
-                      <div className="font-mono text-[11px] text-ink-tertiary">{r.phone ?? "—"}</div>
-                    </Link>
-                  </td>
-                  <td className="h-14 align-middle">
-                    <Link href={`/dashboard/leads?lead=${r.id}`} className="flex min-w-0 items-center gap-1.5 py-2" scroll={false}>
-                      <ClientAvatar name={r.clientName} size={20} />
-                      <span className="text-[12px] text-ink-primary">{r.clientName}</span>
-                    </Link>
-                  </td>
-                  <td className="h-14 align-middle">
-                    <Link
-                      href={`/dashboard/leads?lead=${r.id}`}
-                      className="block py-2 font-mono text-[13px] tabular-nums text-ink-primary"
-                      scroll={false}
-                    >
-                      {r.budget != null && r.budget !== "" ? (
-                        r.budget
-                      ) : (
-                        <span className="text-ink-tertiary">—</span>
-                      )}
-                    </Link>
-                  </td>
-                  <td className="h-14 align-middle">
-                    <Link href={`/dashboard/leads?lead=${r.id}`} className="block py-2" scroll={false}>
-                      <SourceCell source={r.source} />
-                    </Link>
-                  </td>
-                  <td className="h-14 align-middle">
-                    <Link href={`/dashboard/leads?lead=${r.id}`} className="block py-2" scroll={false}>
-                      <StatusPill status={r.status} />
-                    </Link>
-                  </td>
-                  <td className="h-14 align-middle">
-                    <Link href={`/dashboard/leads?lead=${r.id}`} className="flex min-w-0 items-center gap-2 py-2" scroll={false}>
-                      {r.assigneeFullName ? <ClientAvatar name={r.assigneeFullName} size={24} /> : null}
-                      <span className="text-[12px] text-ink-primary">{r.assigneeFullName ?? "—"}</span>
-                    </Link>
-                  </td>
-                  <td className="h-14 align-middle">
-                    <Link href={`/dashboard/leads?lead=${r.id}`} className="block py-2 font-mono text-[11px] text-ink-tertiary" scroll={false}>
-                      {formatTimeAgo(r.createdAt)}
-                    </Link>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+        <div className="w-full">
+          <ResponsiveTable
+            columns={columns}
+            rows={filtered}
+            rowKey={(r) => r.id}
+            onRowClick={openLead}
+          />
         </div>
       )}
 

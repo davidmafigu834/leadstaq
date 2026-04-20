@@ -3,9 +3,9 @@
 import { useCallback, useEffect, useState } from "react";
 import { useSession } from "next-auth/react";
 import { format } from "date-fns";
-import { X } from "lucide-react";
+import { ChevronLeft, X } from "lucide-react";
 import { useLeadPanel, closeLeadPanel } from "@/store/uiStore";
-import type { LeadRow } from "@/types";
+import type { LeadRow, LeadStatus } from "@/types";
 import { MagicLinkButton } from "@/components/MagicLinkButton";
 import { FormAnswersSection } from "@/components/leads/FormAnswersSection";
 import { LogCallForm } from "@/components/leads/LogCallForm";
@@ -20,6 +20,17 @@ type CallLogApiRow = {
 };
 
 const TERMINAL: ReadonlySet<string> = new Set(["WON", "LOST", "NOT_QUALIFIED"]);
+
+const MOVE_COLS = ["NEW", "CONTACTED", "NEGOTIATING", "PROPOSAL_SENT"] as const satisfies readonly LeadStatus[];
+
+type MoveColumn = (typeof MOVE_COLS)[number];
+
+const COL_LABEL: Record<MoveColumn, string> = {
+  NEW: "New",
+  CONTACTED: "Contacted",
+  NEGOTIATING: "Negotiating",
+  PROPOSAL_SENT: "Proposal sent",
+};
 
 export function LeadDetailPanel({
   leads,
@@ -43,33 +54,60 @@ export function LeadDetailPanel({
 
   if (!open || !lead) return null;
 
-  const first = lead.name?.split(/\s+/)[0] ?? "Lead";
-  const isClosed = TERMINAL.has(lead.status);
-  const phone = lead.phone?.trim() ?? "";
+  const activeLead = lead;
+  const first = activeLead.name?.split(/\s+/)[0] ?? "Lead";
+  const isClosed = TERMINAL.has(activeLead.status);
+  const phone = activeLead.phone?.trim() ?? "";
 
   function handleClose() {
     closeLeadPanel();
     onClose?.();
   }
 
+  async function handleMoveStage(next: MoveColumn) {
+    if (!onLeadUpdated) return;
+    const res = await fetch(`/api/leads/${activeLead.id}`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ status: next }),
+    });
+    const json = (await res.json().catch(() => ({}))) as { lead?: LeadRow; error?: string };
+    if (res.ok && json.lead) onLeadUpdated(json.lead);
+  }
+
   return (
-    <div className="fixed inset-0 z-50 flex justify-end bg-surface-overlay">
+    <div className="fixed inset-0 z-50 md:flex md:justify-end">
+      <button
+        type="button"
+        className="absolute inset-0 hidden bg-black/30 md:block"
+        aria-label="Close lead"
+        onClick={handleClose}
+      />
       <div
-        className="h-full w-full max-w-[520px] overflow-y-auto border-l border-border bg-surface-card"
+        className="relative flex h-full w-full max-w-none flex-col border-l border-border bg-surface-card md:max-w-[520px]"
         role="dialog"
         aria-modal
       >
-        <div className="flex h-12 items-center justify-between bg-surface-sidebar px-5">
-          <div className="font-display text-xl text-[var(--text-on-dark)]">{lead.name}</div>
+        <div className="flex h-12 shrink-0 items-center gap-3 bg-surface-sidebar px-4 text-[var(--text-on-dark)] md:px-5">
           <button
             type="button"
-            className="text-[var(--text-on-dark-dim)] hover:text-[var(--text-on-dark)]"
+            className="-ml-1 flex h-9 w-9 items-center justify-center text-[var(--text-on-dark)] md:hidden"
             onClick={handleClose}
+            aria-label="Back"
           >
-            <X className="h-5 w-5" strokeWidth={1.5} />
+            <ChevronLeft className="h-5 w-5" strokeWidth={1.5} />
+          </button>
+          <div className="min-w-0 flex-1 truncate font-display text-lg md:text-xl">{activeLead.name}</div>
+          <button
+            type="button"
+            className="hidden h-8 w-8 items-center justify-center text-[var(--text-on-dark-dim)] hover:text-[var(--text-on-dark)] md:flex"
+            onClick={handleClose}
+            aria-label="Close"
+          >
+            <X className="h-4 w-4" strokeWidth={1.5} />
           </button>
         </div>
-        <div className="divide-y divide-border text-sm">
+        <div className="min-h-0 flex-1 divide-y divide-border overflow-y-auto text-sm">
           <div className="space-y-3 p-5">
             {isReadOnly ? (
               <div className="text-[13px] text-ink-secondary">
@@ -86,30 +124,52 @@ export function LeadDetailPanel({
               </div>
             ) : (
               <a className="font-mono text-lg text-[var(--info)] underline" href={`tel:${phone}`}>
-                {lead.phone}
+                {activeLead.phone}
               </a>
             )}
-            <div className="text-ink-secondary">{lead.email}</div>
+            <div className="text-ink-secondary">{activeLead.email}</div>
             <div className="font-mono text-[11px] uppercase text-ink-tertiary">
-              Source · {lead.source} · {format(new Date(lead.created_at), "MMM d, yyyy")}
+              Source · {activeLead.source} · {format(new Date(activeLead.created_at), "MMM d, yyyy")}
             </div>
-            <MagicLinkButton token={lead.magic_token} />
+            <MagicLinkButton token={activeLead.magic_token} />
             {!isReadOnly ? (
-              <a className="btn-primary flex w-full justify-center" href={`tel:${phone}`}>
+              <a className="btn-primary flex w-full justify-center py-3.5 md:py-2" href={`tel:${phone}`}>
                 Call {first}
               </a>
             ) : null}
           </div>
-          <FormAnswersSection formData={lead.form_data ?? {}} lead={lead} />
+          {role === "SALESPERSON" &&
+          !isReadOnly &&
+          !isClosed &&
+          (MOVE_COLS as readonly string[]).includes(activeLead.status) ? (
+            <div className="border-b border-border p-5 md:hidden">
+              <label className="mb-2 block font-mono text-xs uppercase tracking-wide text-ink-tertiary">
+                Move to
+              </label>
+              <div className="grid grid-cols-2 gap-2">
+                {MOVE_COLS.filter((c) => c !== activeLead.status).map((col) => (
+                  <button
+                    key={col}
+                    type="button"
+                    onClick={() => void handleMoveStage(col)}
+                    className="h-9 rounded-md border border-border text-xs text-ink-primary hover:bg-surface-card-alt"
+                  >
+                    → {COL_LABEL[col]}
+                  </button>
+                ))}
+              </div>
+            </div>
+          ) : null}
+          <FormAnswersSection formData={activeLead.form_data ?? {}} lead={activeLead} />
           {(role === "SALESPERSON" || role === "AGENCY_ADMIN") && !isReadOnly ? (
             <>
               <div className="p-5">
-                <CallHistory leadId={lead.id} refreshKey={logRefresh} />
+                <CallHistory leadId={activeLead.id} refreshKey={logRefresh} />
               </div>
               {!isClosed ? (
                 <div className="p-5">
                   <LogCallForm
-                    leadId={lead.id}
+                    leadId={activeLead.id}
                     onLogged={() => setLogRefresh((k) => k + 1)}
                     onLeadUpdated={onLeadUpdated}
                   />
@@ -120,11 +180,11 @@ export function LeadDetailPanel({
             </>
           ) : null}
           {role === "AGENCY_ADMIN" && !isReadOnly ? (
-            <AgencyLeadAdminSection lead={lead} onLeadUpdated={onLeadUpdated} onAfterArchive={handleClose} />
+            <AgencyLeadAdminSection lead={activeLead} onLeadUpdated={onLeadUpdated} onAfterArchive={handleClose} />
           ) : null}
           {isReadOnly ? (
             <div className="p-5">
-              <CallHistory leadId={lead.id} refreshKey={logRefresh} />
+              <CallHistory leadId={activeLead.id} refreshKey={logRefresh} />
             </div>
           ) : null}
         </div>

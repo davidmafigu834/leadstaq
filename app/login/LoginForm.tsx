@@ -37,13 +37,16 @@ function LoginFormInner() {
   }
 
   return (
-    <div className="w-full max-w-md border border-border bg-surface-card p-10 shadow-sm">
+    <div className="w-full max-w-[420px] rounded-xl border border-border bg-surface-card p-6 shadow-sm sm:p-10">
       <div className="text-center">
-        <div className="flex items-center justify-center gap-2">
-          <span className="h-1.5 w-1.5 bg-[var(--accent)]" aria-hidden />
-          <span className="font-display text-2xl tracking-display text-ink-primary">Leadstaq</span>
+        <div className="flex items-center justify-center gap-2.5">
+          <span className="h-1.5 w-1.5 rounded-sm bg-[var(--accent)]" aria-hidden />
+          <span className="font-display text-xl tracking-display text-ink-primary sm:text-2xl">Leadstaq</span>
         </div>
-        <p className="mt-3 text-sm text-ink-secondary">Sign in to your workspace</p>
+        <h1 className="mt-6 font-display text-[26px] leading-tight tracking-tight text-ink-primary sm:text-[32px]">
+          Welcome back
+        </h1>
+        <p className="mt-2 text-sm text-ink-secondary">Sign in to your account.</p>
       </div>
       <form className="mt-8 space-y-5" onSubmit={onSubmit}>
         <div>
@@ -53,9 +56,11 @@ function LoginFormInner() {
           <input
             id="email"
             type="email"
+            inputMode="email"
+            autoCapitalize="off"
             autoComplete="email"
             required
-            className="input-base mt-2"
+            className="input-base mt-2 text-base"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
           />
@@ -69,13 +74,13 @@ function LoginFormInner() {
             type="password"
             autoComplete="current-password"
             required
-            className="input-base mt-2"
+            className="input-base mt-2 text-base"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
           />
         </div>
         {error ? <div className="text-sm text-[var(--danger)]">{error}</div> : null}
-        <button type="submit" disabled={loading} className="btn-primary w-full">
+        <button type="submit" disabled={loading} className="btn-primary h-11 w-full sm:h-9">
           {loading ? "Signing in…" : "Sign in"}
         </button>
       </form>
@@ -88,7 +93,7 @@ export function LoginForm() {
   return (
     <Suspense
       fallback={
-        <div className="w-full max-w-md border border-border bg-surface-card p-8 text-center text-ink-tertiary">
+        <div className="w-full max-w-[420px] rounded-xl border border-border bg-surface-card p-8 text-center text-ink-tertiary">
           Loading…
         </div>
       }
