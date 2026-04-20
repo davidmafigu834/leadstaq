@@ -238,7 +238,7 @@ export function AgencySettingsClient() {
   }
 
   return (
-    <div className="flex gap-10 pb-24">
+    <div className="flex flex-col gap-6 pb-24 md:flex-row md:gap-10">
       <VerticalSettingsNav tabs={TABS} active={tab} onChange={setTab} />
 
       <div className="min-w-0 flex-1">
@@ -261,7 +261,7 @@ export function AgencySettingsClient() {
                   Shown in the top-left of the platform and on client-facing emails.
                 </p>
                 <input
-                  className="mt-2 w-full rounded-md border border-border bg-surface-card px-3 py-2 text-sm"
+                  className="mt-2 w-full rounded-md border border-border bg-surface-card px-3 py-2 text-base md:text-sm"
                   value={form.agency_name}
                   onChange={(e) => setForm((f) => ({ ...f, agency_name: e.target.value }))}
                 />
@@ -270,7 +270,7 @@ export function AgencySettingsClient() {
                 <span className="font-mono text-[10px] uppercase tracking-wide text-ink-tertiary">Logo URL</span>
                 <p className="mt-1 text-[12px] leading-snug text-[var(--text-tertiary)]">Used in emails and branded surfaces when set.</p>
                 <input
-                  className="mt-2 w-full rounded-md border border-border bg-surface-card px-3 py-2 text-sm"
+                  className="mt-2 w-full rounded-md border border-border bg-surface-card px-3 py-2 text-base md:text-sm"
                   value={form.logo_url}
                   onChange={(e) => setForm((f) => ({ ...f, logo_url: e.target.value }))}
                   placeholder="https://…"
@@ -287,7 +287,7 @@ export function AgencySettingsClient() {
                   type="number"
                   min={1}
                   max={168}
-                  className="mt-2 w-full rounded-md border border-border bg-surface-card px-3 py-2 text-sm"
+                  className="mt-2 w-full rounded-md border border-border bg-surface-card px-3 py-2 text-base md:text-sm"
                   value={form.default_response_time_limit_hours}
                   onChange={(e) =>
                     setForm((f) => ({ ...f, default_response_time_limit_hours: Number(e.target.value) || 2 }))
@@ -300,7 +300,7 @@ export function AgencySettingsClient() {
                   Used to format deal values across reports.
                 </p>
                 <input
-                  className="mt-2 w-full rounded-md border border-border bg-surface-card px-3 py-2 text-sm"
+                  className="mt-2 w-full rounded-md border border-border bg-surface-card px-3 py-2 text-base md:text-sm"
                   value={form.default_currency}
                   onChange={(e) => setForm((f) => ({ ...f, default_currency: e.target.value }))}
                 />
@@ -311,16 +311,16 @@ export function AgencySettingsClient() {
                   Controls when daily cron jobs fire and how dates display.
                 </p>
                 <input
-                  className="mt-2 w-full rounded-md border border-border bg-surface-card px-3 py-2 text-sm"
+                  className="mt-2 w-full rounded-md border border-border bg-surface-card px-3 py-2 text-base md:text-sm"
                   value={form.default_timezone}
                   onChange={(e) => setForm((f) => ({ ...f, default_timezone: e.target.value }))}
                   placeholder="America/New_York"
                 />
               </label>
             </div>
-            <div className="sticky bottom-0 border-t border-border bg-[var(--surface-page)] pt-4">
+            <div className="safe-bottom sticky bottom-0 border-t border-border bg-[var(--surface-page)] pt-4">
               <div className="flex flex-wrap items-center gap-3">
-                <button type="button" className="btn-primary" disabled={saving} onClick={() => void saveGeneral()}>
+                <button type="button" className="btn-primary h-11 md:h-9" disabled={saving} onClick={() => void saveGeneral()}>
                   {saving ? "Saving…" : "Save"}
                 </button>
                 {savedGeneral ? (
@@ -377,7 +377,7 @@ export function AgencySettingsClient() {
                 </p>
               </div>
             </div>
-            <button type="button" className="btn-primary" disabled={saving} onClick={() => void testNotification()}>
+            <button type="button" className="btn-primary h-11 md:h-9" disabled={saving} onClick={() => void testNotification()}>
               Test notification
             </button>
 
@@ -488,23 +488,25 @@ export function AgencySettingsClient() {
             </div>
 
             {inviteOpen ? (
-              <div className="fixed inset-0 z-50 flex items-center justify-center bg-[var(--surface-overlay)] p-4">
-                <div className="w-full max-w-md rounded-lg border border-border bg-surface-card p-6 shadow-lg">
+              <div className="fixed inset-0 z-50 flex flex-col bg-[var(--surface-overlay)] p-0 md:items-center md:justify-center md:p-4">
+                <div className="flex h-full w-full flex-col border border-border bg-surface-card p-5 shadow-lg md:h-auto md:max-w-md md:rounded-lg md:p-6">
                   <h3 className="font-display text-xl">Invite agency admin</h3>
                   <label className="mt-4 block">
                     <span className="font-mono text-[10px] uppercase text-ink-tertiary">Email</span>
                     <input
-                      className="mt-1 w-full rounded-md border border-border px-3 py-2 text-sm"
+                      className="mt-1 w-full rounded-md border border-border px-3 py-2 text-base md:text-sm"
                       value={inviteEmail}
                       onChange={(e) => setInviteEmail(e.target.value)}
                       type="email"
+                      inputMode="email"
+                      autoCapitalize="off"
                     />
                   </label>
-                  <div className="mt-4 flex justify-end gap-2">
-                    <button type="button" className="btn-ghost" onClick={() => setInviteOpen(false)}>
+                  <div className="safe-bottom mt-auto flex justify-end gap-2 border-t border-border pt-4 md:mt-4 md:border-t-0 md:pt-0">
+                    <button type="button" className="btn-ghost h-11 flex-1 md:h-9 md:flex-none" onClick={() => setInviteOpen(false)}>
                       Cancel
                     </button>
-                    <button type="button" className="btn-primary" disabled={saving} onClick={() => void sendInvite()}>
+                    <button type="button" className="btn-primary h-11 flex-1 md:h-9 md:flex-none" disabled={saving} onClick={() => void sendInvite()}>
                       Send invite
                     </button>
                   </div>
@@ -543,8 +545,8 @@ export function AgencySettingsClient() {
                 />
               </label>
             </div>
-            <div className="sticky bottom-0 border-t border-border bg-[var(--surface-page)] pt-4">
-              <button type="button" className="btn-primary" disabled={saving} onClick={() => void saveLegal()}>
+            <div className="safe-bottom sticky bottom-0 border-t border-border bg-[var(--surface-page)] pt-4">
+              <button type="button" className="btn-primary h-11 md:h-9" disabled={saving} onClick={() => void saveLegal()}>
                 {saving ? "Saving…" : "Save"}
               </button>
             </div>

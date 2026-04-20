@@ -154,7 +154,7 @@ export function ReportsControls({ clients }: { clients: ClientOption[] }) {
 
   return (
     <div className="flex flex-col gap-4">
-      <div className="flex flex-wrap items-center justify-end gap-2">
+      <div className="-mx-1 flex items-center justify-start gap-2 overflow-x-auto px-1 pb-1 scrollbar-hide md:mx-0 md:flex-wrap md:justify-end md:overflow-visible md:px-0">
         {PRESETS.map((p) => {
           const active =
             p.id === "custom"
@@ -165,7 +165,7 @@ export function ReportsControls({ clients }: { clients: ClientOption[] }) {
               key={p.id}
               type="button"
               onClick={() => onPreset(p.id)}
-              className={`rounded-md px-3 py-1.5 text-sm font-medium transition-colors ${
+              className={`shrink-0 rounded-md px-3 py-2.5 text-sm font-medium transition-colors md:py-1.5 ${
                 active
                   ? "bg-[var(--accent)] text-accent-ink"
                   : "border border-border bg-surface-card text-ink-secondary hover:border-border-strong"
@@ -182,7 +182,7 @@ export function ReportsControls({ clients }: { clients: ClientOption[] }) {
             From
             <input
               type="date"
-              className="input-base mt-1 block"
+              className="input-base mt-1 block h-11 text-base md:h-9 md:text-sm"
               value={customFrom}
               onChange={(e) => setCustomFrom(e.target.value)}
             />
@@ -191,7 +191,7 @@ export function ReportsControls({ clients }: { clients: ClientOption[] }) {
             To
             <input
               type="date"
-              className="input-base mt-1 block"
+              className="input-base mt-1 block h-11 text-base md:h-9 md:text-sm"
               value={customTo}
               onChange={(e) => setCustomTo(e.target.value)}
             />
@@ -199,7 +199,7 @@ export function ReportsControls({ clients }: { clients: ClientOption[] }) {
           <button
             type="button"
             onClick={() => void applyCustom()}
-            className="rounded-md bg-[var(--accent)] px-4 py-2 text-sm font-medium text-accent-ink"
+            className="h-11 rounded-md bg-[var(--accent)] px-4 py-2 text-sm font-medium text-accent-ink md:h-9"
           >
             Apply
           </button>
@@ -211,7 +211,7 @@ export function ReportsControls({ clients }: { clients: ClientOption[] }) {
         <button
           type="button"
           onClick={() => clearClients()}
-          className={`rounded-full border px-3 py-1 text-xs ${
+          className={`shrink-0 rounded-full border px-3 py-1.5 text-xs ${
             selectedClients.length === 0
               ? "border-border-strong bg-surface-card-alt text-ink-primary"
               : "border-border text-ink-secondary hover:border-border-strong"
@@ -219,6 +219,7 @@ export function ReportsControls({ clients }: { clients: ClientOption[] }) {
         >
           All clients
         </button>
+        <div className="-mx-1 flex min-w-full gap-2 overflow-x-auto px-1 pb-1 scrollbar-hide md:contents">
         {clients.map((c) => {
           const on = selectedClients.includes(c.id);
           return (
@@ -226,7 +227,7 @@ export function ReportsControls({ clients }: { clients: ClientOption[] }) {
               key={c.id}
               type="button"
               onClick={() => toggleClient(c.id)}
-              className={`rounded-full border px-3 py-1 text-xs ${
+              className={`shrink-0 rounded-full border px-3 py-1.5 text-xs ${
                 on
                   ? "border-border-strong bg-surface-card-alt text-ink-primary"
                   : "border-border text-ink-secondary hover:border-border-strong"
@@ -236,10 +237,11 @@ export function ReportsControls({ clients }: { clients: ClientOption[] }) {
             </button>
           );
         })}
+        </div>
       </div>
 
       <div className="flex flex-wrap items-center justify-between gap-4">
-        <div className="flex flex-wrap items-center gap-2">
+        <div className="-mx-1 flex min-w-full items-center gap-2 overflow-x-auto px-1 pb-1 scrollbar-hide md:mx-0 md:min-w-0 md:flex-wrap md:overflow-visible md:px-0">
           <span className="font-mono text-[11px] uppercase text-ink-tertiary">Source</span>
           {(["ALL", "FACEBOOK", "LANDING_PAGE", "MANUAL"] as const).map((s) => {
             const label =
@@ -250,7 +252,7 @@ export function ReportsControls({ clients }: { clients: ClientOption[] }) {
                 key={s}
                 type="button"
                 onClick={() => setSource(s === "ALL" ? "ALL" : s)}
-                className={`rounded-full border px-3 py-1 text-xs ${
+                className={`shrink-0 rounded-full border px-3 py-1.5 text-xs ${
                   active
                     ? "border-border-strong bg-surface-card-alt text-ink-primary"
                     : "border-border text-ink-secondary hover:border-border-strong"

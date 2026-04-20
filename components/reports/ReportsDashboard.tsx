@@ -12,6 +12,7 @@ import type { AgencyReport } from "@/lib/agency-report";
 import { formatCurrencyUsd, formatDuration } from "@/lib/format";
 import { ClientAvatar } from "@/components/ClientAvatar";
 import type { LeadSource } from "@/types";
+import { ResponsiveTable, type ResponsiveTableColumn } from "@/components/ui/ResponsiveTable";
 
 const SOURCE_LABEL: Record<LeadSource, string> = {
   FACEBOOK: "Facebook",
@@ -37,163 +38,132 @@ async function fetcher(url: string): Promise<AgencyReport> {
 function SourceTable({ report }: { report: AgencyReport }) {
   const sources: LeadSource[] = ["FACEBOOK", "LANDING_PAGE", "MANUAL"];
   const rows = sources.map((s) => ({ s, ...report.bySource[s] }));
-  const maxLeads = Math.max(...rows.map((r) => r.leads), 0);
-  const maxContacted = Math.max(...rows.map((r) => r.contacted), 0);
-  const maxWon = Math.max(...rows.map((r) => r.won), 0);
-  const maxWonValue = Math.max(...rows.map((r) => r.wonValue), 0);
-  const maxCr = Math.max(...rows.map((r) => r.contactRate), 0);
-  const maxWr = Math.max(...rows.map((r) => r.winRate), 0);
+  const columns: ResponsiveTableColumn<(typeof rows)[number]>[] = [
+    {
+      key: "source",
+      label: "Source",
+      mobilePrimary: true,
+      render: (r) => (
+        <span className="inline-flex items-center gap-2">
+          <span className={`h-2 w-2 rounded-full ${SOURCE_DOT[r.s]}`} />
+          {SOURCE_LABEL[r.s]}
+        </span>
+      ),
+    },
+    { key: "leads", label: "Leads", align: "right", render: (r) => <span className="tabular-nums">{r.leads}</span> },
+    {
+      key: "contacted",
+      label: "Contacted",
+      align: "right",
+      render: (r) => <span className="tabular-nums">{r.contacted}</span>,
+    },
+    { key: "won", label: "Won", align: "right", render: (r) => <span className="tabular-nums">{r.won}</span> },
+    {
+      key: "wonValue",
+      label: "Won value",
+      align: "right",
+      render: (r) => <span className="tabular-nums">{formatCurrencyUsd(r.wonValue)}</span>,
+    },
+    {
+      key: "contactRate",
+      label: "Contact rate",
+      align: "right",
+      render: (r) => <span className="tabular-nums">{r.contactRate}%</span>,
+    },
+    {
+      key: "winRate",
+      label: "Win rate",
+      align: "right",
+      render: (r) => <span className="tabular-nums">{r.winRate}%</span>,
+    },
+  ];
 
-  return (
-    <div className="overflow-x-auto">
-      <table className="w-full min-w-[640px] text-sm">
-        <thead>
-          <tr className="border-b border-border font-mono text-[11px] uppercase text-ink-tertiary">
-            <th className="pb-2 text-left">Source</th>
-            <th className="pb-2 text-right">Leads</th>
-            <th className="pb-2 text-right">Contacted</th>
-            <th className="pb-2 text-right">Won</th>
-            <th className="pb-2 text-right">Won value</th>
-            <th className="pb-2 text-right">Contact rate</th>
-            <th className="pb-2 text-right">Win rate</th>
-          </tr>
-        </thead>
-        <tbody>
-          {rows.map((r) => {
-            const dead = r.leads === 0;
-            const bold = (v: number, max: number) => (v === max && max > 0 ? "font-semibold text-ink-primary" : "");
-            return (
-              <tr key={r.s} className={dead ? "text-ink-tertiary opacity-60" : ""}>
-                <td className="py-2">
-                  <span className="inline-flex items-center gap-2">
-                    <span className={`h-2 w-2 rounded-full ${SOURCE_DOT[r.s]}`} />
-                    {SOURCE_LABEL[r.s]}
-                  </span>
-                </td>
-                <td className={`py-2 text-right ${bold(r.leads, maxLeads)}`}>{r.leads}</td>
-                <td className={`py-2 text-right ${bold(r.contacted, maxContacted)}`}>{r.contacted}</td>
-                <td className={`py-2 text-right ${bold(r.won, maxWon)}`}>{r.won}</td>
-                <td className={`py-2 text-right ${bold(r.wonValue, maxWonValue)}`}>
-                  {formatCurrencyUsd(r.wonValue)}
-                </td>
-                <td className={`py-2 text-right ${bold(r.contactRate, maxCr)}`}>{r.contactRate}%</td>
-                <td className={`py-2 text-right ${bold(r.winRate, maxWr)}`}>{r.winRate}%</td>
-              </tr>
-            );
-          })}
-        </tbody>
-      </table>
-    </div>
-  );
+  return <ResponsiveTable columns={columns} rows={rows} rowKey={(r) => r.s} rowClassName={(r) => (r.leads === 0 ? "opacity-60" : undefined)} />;
 }
 
 function ClientLeaderboard({ rows }: { rows: AgencyReport["byClient"] }) {
-  return (
-    <div className="overflow-x-auto">
-      <table className="w-full min-w-[720px] text-sm">
-        <thead>
-          <tr className="border-b border-border font-mono text-[11px] uppercase text-ink-tertiary">
-            <th className="w-12 pb-2 text-left">#</th>
-            <th className="pb-2 text-left">Client</th>
-            <th className="pb-2 text-right">Leads</th>
-            <th className="pb-2 text-right">Contact rate</th>
-            <th className="pb-2 text-right">Won</th>
-            <th className="pb-2 text-right">Won value</th>
-            <th className="pb-2 text-right">Avg response</th>
-          </tr>
-        </thead>
-        <tbody>
-          {rows.map((r) => (
-            <tr key={r.clientId} className="border-b border-border/80">
-              <td className="py-3 align-middle font-display text-2xl text-ink-tertiary">
-                {String(r.rank).padStart(2, "0")}
-              </td>
-              <td className="py-3">
-                <Link
-                  href={`/dashboard/clients/${r.clientId}`}
-                  className="group flex items-center gap-3 hover:opacity-90"
-                >
-                  <ClientAvatar name={r.clientName} size="sm" />
-                  <div>
-                    <div className="font-medium text-ink-primary group-hover:underline">{r.clientName}</div>
-                    <div className="font-mono text-[11px] text-ink-tertiary">{r.industry}</div>
-                  </div>
-                </Link>
-              </td>
-              <td className="py-3 text-right tabular-nums">{r.leads}</td>
-              <td className="py-3 text-right">
-                <div className="flex items-center justify-end gap-2">
-                  <div className="h-1.5 w-16 overflow-hidden rounded-full bg-surface-card-alt">
-                    <div
-                      className="h-full rounded-full bg-[var(--accent)]"
-                      style={{ width: `${Math.min(100, r.contactRate)}%` }}
-                    />
-                  </div>
-                  <span className="tabular-nums">{r.contactRate}%</span>
-                </div>
-              </td>
-              <td className="py-3 text-right tabular-nums">{r.won}</td>
-              <td className="py-3 text-right tabular-nums">{formatCurrencyUsd(r.wonValue)}</td>
-              <td className="py-3 text-right text-ink-secondary">{formatDuration(r.avgResponseMinutes)}</td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
-    </div>
-  );
+  const columns: ResponsiveTableColumn<AgencyReport["byClient"][number]>[] = [
+    {
+      key: "client",
+      label: "Client",
+      mobilePrimary: true,
+      render: (r) => (
+        <Link href={`/dashboard/clients/${r.clientId}`} className="group flex items-center gap-3 hover:opacity-90">
+          <ClientAvatar name={r.clientName} size="sm" />
+          <div>
+            <div className="font-medium text-ink-primary group-hover:underline">{r.clientName}</div>
+            <div className="font-mono text-[11px] text-ink-tertiary">#{String(r.rank).padStart(2, "0")} · {r.industry}</div>
+          </div>
+        </Link>
+      ),
+    },
+    { key: "leads", label: "Leads", align: "right", render: (r) => <span className="tabular-nums">{r.leads}</span> },
+    {
+      key: "contactRate",
+      label: "Contact rate",
+      align: "right",
+      render: (r) => <span className="tabular-nums">{r.contactRate}%</span>,
+    },
+    { key: "won", label: "Won", align: "right", render: (r) => <span className="tabular-nums">{r.won}</span> },
+    {
+      key: "wonValue",
+      label: "Won value",
+      align: "right",
+      render: (r) => <span className="tabular-nums">{formatCurrencyUsd(r.wonValue)}</span>,
+    },
+    {
+      key: "avg",
+      label: "Avg response",
+      align: "right",
+      render: (r) => <span className="text-ink-secondary">{formatDuration(r.avgResponseMinutes)}</span>,
+    },
+  ];
+
+  return <ResponsiveTable columns={columns} rows={rows} rowKey={(r) => r.clientId} />;
 }
 
 function SalesLeaderboard({ rows }: { rows: AgencyReport["bySalesperson"] }) {
-  return (
-    <div className="overflow-x-auto">
-      <table className="w-full min-w-[800px] text-sm">
-        <thead>
-          <tr className="border-b border-border font-mono text-[11px] uppercase text-ink-tertiary">
-            <th className="pb-2 text-left">Salesperson</th>
-            <th className="pb-2 text-right">Leads</th>
-            <th className="pb-2 text-right">Contacted</th>
-            <th className="pb-2 text-right">Won</th>
-            <th className="pb-2 text-right">Won value</th>
-            <th className="pb-2 text-right">Win rate</th>
-            <th className="pb-2 text-right">Avg response</th>
-          </tr>
-        </thead>
-        <tbody>
-          {rows.map((r) => (
-            <tr key={r.userId} className="border-b border-border/80">
-              <td className="py-3">
-                <div className="flex items-center gap-3">
-                  <ClientAvatar name={r.name} size="sm" />
-                  <div>
-                    <div className="font-medium text-ink-primary">{r.name}</div>
-                    <span className="inline-block rounded-sm bg-surface-card-alt px-2 py-0.5 font-mono text-[10px] text-ink-tertiary">
-                      {r.clientName}
-                    </span>
-                  </div>
-                </div>
-              </td>
-              <td className="py-3 text-right tabular-nums">{r.leads}</td>
-              <td className="py-3 text-right tabular-nums">{r.contacted}</td>
-              <td className="py-3 text-right tabular-nums">{r.won}</td>
-              <td className="py-3 text-right tabular-nums">{formatCurrencyUsd(r.wonValue)}</td>
-              <td className="py-3 text-right">
-                <div className="flex items-center justify-end gap-2">
-                  <div className="h-1.5 w-16 overflow-hidden rounded-full bg-surface-card-alt">
-                    <div
-                      className="h-full rounded-full bg-surface-sidebar"
-                      style={{ width: `${Math.min(100, r.winRate)}%` }}
-                    />
-                  </div>
-                  <span className="tabular-nums">{r.winRate}%</span>
-                </div>
-              </td>
-              <td className="py-3 text-right text-ink-secondary">{formatDuration(r.avgResponseMinutes)}</td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
-    </div>
-  );
+  const columns: ResponsiveTableColumn<AgencyReport["bySalesperson"][number]>[] = [
+    {
+      key: "salesperson",
+      label: "Salesperson",
+      mobilePrimary: true,
+      render: (r) => (
+        <div className="flex items-center gap-3">
+          <ClientAvatar name={r.name} size="sm" />
+          <div>
+            <div className="font-medium text-ink-primary">{r.name}</div>
+            <span className="inline-block rounded-sm bg-surface-card-alt px-2 py-0.5 font-mono text-[10px] text-ink-tertiary">
+              {r.clientName}
+            </span>
+          </div>
+        </div>
+      ),
+    },
+    { key: "leads", label: "Leads", align: "right", render: (r) => <span className="tabular-nums">{r.leads}</span> },
+    {
+      key: "contacted",
+      label: "Contacted",
+      align: "right",
+      render: (r) => <span className="tabular-nums">{r.contacted}</span>,
+    },
+    { key: "won", label: "Won", align: "right", render: (r) => <span className="tabular-nums">{r.won}</span> },
+    {
+      key: "wonValue",
+      label: "Won value",
+      align: "right",
+      render: (r) => <span className="tabular-nums">{formatCurrencyUsd(r.wonValue)}</span>,
+    },
+    { key: "winRate", label: "Win rate", align: "right", render: (r) => <span className="tabular-nums">{r.winRate}%</span> },
+    {
+      key: "avg",
+      label: "Avg response",
+      align: "right",
+      render: (r) => <span className="text-ink-secondary">{formatDuration(r.avgResponseMinutes)}</span>,
+    },
+  ];
+
+  return <ResponsiveTable columns={columns} rows={rows} rowKey={(r) => r.userId} />;
 }
 
 export function ReportsDashboard() {
@@ -237,11 +207,7 @@ export function ReportsDashboard() {
 
   return (
     <div className="space-y-10">
-      <div className="overflow-x-auto pb-1">
-        <div className="flex min-w-[900px]">
-          <PulseBar metrics={pulse} />
-        </div>
-      </div>
+      <PulseBar metrics={pulse} />
 
       <section className="border border-border bg-surface-card p-6">
         <div className="mb-4 flex flex-col gap-2 layout:flex-row layout:items-start layout:justify-between">

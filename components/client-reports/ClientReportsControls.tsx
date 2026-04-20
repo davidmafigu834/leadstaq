@@ -105,8 +105,8 @@ export function ClientReportsControls() {
   };
 
   return (
-    <div className="flex flex-col items-end gap-3">
-      <div className="flex flex-wrap justify-end gap-2">
+    <div className="flex flex-col items-start gap-3 md:items-end">
+      <div className="-mx-1 flex gap-2 overflow-x-auto px-1 pb-1 scrollbar-hide md:mx-0 md:flex-wrap md:justify-end md:overflow-visible md:px-0">
         {PRESETS.map((p) => {
           const active =
             p.id === "custom" ? customOpen || urlLabel === "Custom" : urlLabel === p.label;
@@ -115,7 +115,7 @@ export function ClientReportsControls() {
               key={p.id}
               type="button"
               onClick={() => onPreset(p.id)}
-              className={`rounded-md px-3 py-1.5 text-sm font-medium transition-colors ${
+              className={`shrink-0 rounded-md px-3 py-2.5 text-sm font-medium transition-colors md:py-1.5 ${
                 active
                   ? "bg-[var(--accent)] text-accent-ink"
                   : "border border-border bg-surface-card text-ink-secondary hover:border-border-strong"
@@ -127,12 +127,12 @@ export function ClientReportsControls() {
         })}
       </div>
       {customOpen && (
-        <div className="flex flex-wrap items-end justify-end gap-3 rounded-md border border-border bg-surface-card-alt p-4">
+        <div className="flex flex-wrap items-end gap-3 rounded-md border border-border bg-surface-card-alt p-4 md:justify-end">
           <label className="font-mono text-[11px] text-ink-secondary">
             From
             <input
               type="date"
-              className="input-base mt-1 block"
+              className="input-base mt-1 block h-11 text-base md:h-9 md:text-sm"
               value={customFrom}
               onChange={(e) => setCustomFrom(e.target.value)}
             />
@@ -141,7 +141,7 @@ export function ClientReportsControls() {
             To
             <input
               type="date"
-              className="input-base mt-1 block"
+              className="input-base mt-1 block h-11 text-base md:h-9 md:text-sm"
               value={customTo}
               onChange={(e) => setCustomTo(e.target.value)}
             />
@@ -149,7 +149,7 @@ export function ClientReportsControls() {
           <button
             type="button"
             onClick={() => void applyCustom()}
-            className="rounded-md bg-[var(--accent)] px-4 py-2 text-sm font-medium text-accent-ink"
+            className="h-11 rounded-md bg-[var(--accent)] px-4 py-2 text-sm font-medium text-accent-ink md:h-9"
           >
             Apply
           </button>

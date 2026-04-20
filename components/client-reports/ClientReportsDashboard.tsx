@@ -19,6 +19,7 @@ import {
 import { ClientAvatar } from "@/components/ClientAvatar";
 import type { ClientReportPayload } from "@/lib/client-report";
 import { formatCurrencyUsd } from "@/lib/format";
+import { ResponsiveTable, type ResponsiveTableColumn } from "@/components/ui/ResponsiveTable";
 
 async function fetcher(url: string): Promise<ClientReportPayload> {
   const r = await fetch(url);
@@ -196,7 +197,7 @@ export function ClientReportsDashboard() {
       </section>
 
       {/* Row 3 — Source + Response */}
-      <section className="grid gap-8 lg:grid-cols-2">
+      <section className="grid gap-8 md:grid-cols-2">
         <div className="rounded-lg border border-border bg-surface-card p-6">
           <p className="font-mono text-[11px] uppercase text-ink-tertiary">Leads by source</p>
           {donutTotal === 0 ? (
@@ -292,60 +293,78 @@ export function ClientReportsDashboard() {
         {data.team.length === 0 ? (
           <p className="mt-4 text-sm text-ink-secondary">No active salespeople for this client.</p>
         ) : (
-          <div className="mt-6 overflow-x-auto">
-            <table className="w-full min-w-[900px] text-sm">
-              <thead>
-                <tr className="border-b border-border font-mono text-[11px] uppercase text-ink-tertiary">
-                  <th className="pb-3 text-left">Salesperson</th>
-                  <th className="pb-3 text-right">Leads</th>
-                  <th className="pb-3 text-right">Contacted</th>
-                  <th className="pb-3 text-right">Won</th>
-                  <th className="pb-3 text-right">Won value</th>
-                  <th className="pb-3 text-right">Avg response</th>
-                  <th className="pb-3 text-right">14d volume</th>
-                </tr>
-              </thead>
-              <tbody>
-                {data.team.map((row, idx) => {
-                  const spark = row.last14DaysLeads.map((y, i) => ({ i: String(i), y }));
-                  const top = idx === 0;
-                  return (
-                    <tr
-                      key={row.userId}
-                      className={top ? "border-b border-border/80 bg-[rgba(212,255,79,0.08)]" : "border-b border-border/80"}
-                    >
-                      <td className="py-3">
-                        <div className="flex items-center gap-3">
-                          <ClientAvatar name={row.name} size="sm" />
-                          <span className="font-medium text-ink-primary">{row.name}</span>
-                        </div>
-                      </td>
-                      <td className="py-3 text-right tabular-nums">{row.leads}</td>
-                      <td className="py-3 text-right tabular-nums">{row.contacted}</td>
-                      <td className="py-3 text-right tabular-nums">{row.won}</td>
-                      <td className="py-3 text-right tabular-nums">{formatCurrencyUsd(row.wonValue)}</td>
-                      <td className="py-3 text-right text-ink-secondary">
-                        {row.avgResponseMinutes != null ? `${Math.round(row.avgResponseMinutes)}m` : "—"}
-                      </td>
-                      <td className="py-3 text-right">
-                        <div className="inline-flex justify-end">
-                          <LineChart width={88} height={36} data={spark} margin={{ top: 4, right: 0, bottom: 0, left: 0 }}>
-                            <Line
-                              type="monotone"
-                              dataKey="y"
-                              stroke="var(--accent)"
-                              strokeWidth={2}
-                              dot={false}
-                              isAnimationActive={false}
-                            />
-                          </LineChart>
-                        </div>
-                      </td>
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
+          <div className="mt-6 overflow-x-auto rounded-lg border border-border bg-surface-card p-2 md:border-0 md:bg-transparent md:p-0">
+            <ResponsiveTable
+              columns={[
+                {
+                  key: "salesperson",
+                  label: "Salesperson",
+                  mobilePrimary: true,
+                  render: (row: ClientReportPayload["team"][number]) => (
+                    <div className="flex items-center gap-3">
+                      <ClientAvatar name={row.name} size="sm" />
+                      <span className="font-medium text-ink-primary">{row.name}</span>
+                    </div>
+                  ),
+                },
+                {
+                  key: "leads",
+                  label: "Leads",
+                  align: "right",
+                  render: (row: ClientReportPayload["team"][number]) => <span className="tabular-nums">{row.leads}</span>,
+                },
+                {
+                  key: "contacted",
+                  label: "Contacted",
+                  align: "right",
+                  render: (row: ClientReportPayload["team"][number]) => (
+                    <span className="tabular-nums">{row.contacted}</span>
+                  ),
+                },
+                {
+                  key: "won",
+                  label: "Won",
+                  align: "right",
+                  render: (row: ClientReportPayload["team"][number]) => <span className="tabular-nums">{row.won}</span>,
+                },
+                {
+                  key: "wonValue",
+                  label: "Won value",
+                  align: "right",
+                  render: (row: ClientReportPayload["team"][number]) => (
+                    <span className="tabular-nums">{formatCurrencyUsd(row.wonValue)}</span>
+                  ),
+                },
+                {
+                  key: "avg",
+                  label: "Avg response",
+                  align: "right",
+                  render: (row: ClientReportPayload["team"][number]) => (
+                    <span className="text-ink-secondary">
+                      {row.avgResponseMinutes != null ? `${Math.round(row.avgResponseMinutes)}m` : "—"}
+                    </span>
+                  ),
+                },
+                {
+                  key: "spark",
+                  label: "14d volume",
+                  align: "right",
+                  render: (row: ClientReportPayload["team"][number]) => {
+                    const spark = row.last14DaysLeads.map((y, i) => ({ i: String(i), y }));
+                    return (
+                      <div className="inline-flex justify-end">
+                        <LineChart width={88} height={36} data={spark} margin={{ top: 4, right: 0, bottom: 0, left: 0 }}>
+                          <Line type="monotone" dataKey="y" stroke="var(--accent)" strokeWidth={2} dot={false} isAnimationActive={false} />
+                        </LineChart>
+                      </div>
+                    );
+                  },
+                },
+              ] as ResponsiveTableColumn<ClientReportPayload["team"][number]>[]}
+              rows={data.team}
+              rowKey={(row) => row.userId}
+              rowClassName={(row) => (data.team[0]?.userId === row.userId ? "bg-[rgba(212,255,79,0.08)]" : undefined)}
+            />
           </div>
         )}
       </section>

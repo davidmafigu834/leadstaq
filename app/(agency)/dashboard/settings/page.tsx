@@ -6,7 +6,7 @@ export default function SettingsPage() {
     <AgencyLayout hideShellHeader breadcrumb="AGENCY / SETTINGS" pageTitle="Settings">
       <div className="mb-10">
         <p className="font-mono text-[11px] uppercase tracking-wide text-ink-tertiary">AGENCY / SETTINGS</p>
-        <h1 className="font-display text-[40px] leading-none tracking-display text-ink-primary">Agency settings</h1>
+        <h1 className="font-display text-[28px] leading-none tracking-display text-ink-primary md:text-[40px]">Agency settings</h1>
         <p className="mt-2 text-[14px] text-[var(--text-secondary)]">Platform-wide configuration and integrations.</p>
       </div>
       <AgencySettingsClient />
