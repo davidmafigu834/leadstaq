@@ -154,7 +154,53 @@ export function AppShell({
       ) : null}
 
       <div className="flex min-h-0 flex-1 flex-col layout:ml-60 layout:min-h-0 layout:overflow-hidden">
-        {hideHeader ? null : (
+        {hideHeader ? (
+          <header className="safe-top sticky top-0 z-30 flex flex-col gap-2 border-b border-border bg-surface-canvas px-4 py-2.5 layout:hidden">
+            <div className="flex min-h-11 shrink-0 items-center gap-2">
+              <button
+                type="button"
+                className="flex h-9 w-9 shrink-0 items-center justify-center rounded-md text-ink-primary transition-colors hover:bg-surface-card-alt"
+                onClick={() => setMobileOpen(true)}
+                aria-label="Open menu"
+              >
+                <Menu className="h-5 w-5" strokeWidth={1.5} />
+              </button>
+              <div className="min-w-0 flex-1" />
+              <div className="flex shrink-0 flex-wrap items-center justify-end gap-2">
+                <NotificationBell initialUnread={unreadNotifications ?? 0} role={notificationRole} />
+                {!hideQuick ? (
+                  notificationRole === "AGENCY_ADMIN" ? (
+                    <>
+                      <button
+                        type="button"
+                        onClick={() => setNewLeadOpen(true)}
+                        className="btn-primary flex h-9 w-9 items-center justify-center"
+                        aria-label="New lead"
+                      >
+                        <Plus className="h-4 w-4" strokeWidth={1.5} />
+                      </button>
+                      <NewLeadModal open={newLeadOpen} onClose={() => setNewLeadOpen(false)} clients={clients ?? []} />
+                    </>
+                  ) : (
+                    <Link
+                      href={quickActionHref}
+                      className="btn-primary flex h-9 w-9 items-center justify-center"
+                      aria-label="New lead"
+                    >
+                      <Plus className="h-4 w-4" strokeWidth={1.5} />
+                    </Link>
+                  )
+                ) : null}
+                {actions ? <div className="flex flex-wrap items-center gap-2">{actions}</div> : null}
+              </div>
+            </div>
+            {!hideSearch ? (
+              <div className="min-w-0 w-full border-t border-border pt-2">
+                <GlobalSearch role={notificationRole} />
+              </div>
+            ) : null}
+          </header>
+        ) : (
           <header className="safe-top sticky top-0 z-30 flex min-h-14 shrink-0 flex-wrap items-center gap-3 border-b border-border bg-surface-canvas px-4 py-2.5 md:min-h-16 md:px-6 md:py-3 layout:px-10">
             <button
               type="button"

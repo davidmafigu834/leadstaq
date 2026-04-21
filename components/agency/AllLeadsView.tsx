@@ -372,17 +372,17 @@ export function AllLeadsView({
   const emptyAll = totalCount === 0 && !hasActiveFilters;
 
   return (
-    <div className="pb-24">
+    <div className="min-w-0 max-w-full pb-24">
       <header className="mb-6">
-        <div className="flex flex-wrap items-baseline justify-between gap-4">
-          <div>
+        <div className="flex flex-col gap-4 sm:flex-row sm:flex-wrap sm:items-baseline sm:justify-between">
+          <div className="min-w-0 flex-1">
             <div className="font-mono text-[11px] uppercase tracking-[0.1em] text-ink-tertiary">Agency / Leads</div>
-            <h1 className="font-display text-4xl tracking-display text-ink-primary">All leads</h1>
-            <p className="mt-2 text-sm text-ink-secondary">
+            <h1 className="font-display text-3xl tracking-display text-ink-primary sm:text-4xl">All leads</h1>
+            <p className="mt-2 break-words text-sm text-ink-secondary">
               {totalCount} {totalCount === 1 ? "lead" : "leads"} {filterDescription ? `· ${filterDescription}` : ""}
             </p>
           </div>
-          <div className="flex gap-2">
+          <div className="flex shrink-0 gap-2 self-start sm:self-auto">
             <button
               type="button"
               onClick={handleExportCsv}
@@ -403,7 +403,7 @@ export function AllLeadsView({
         </div>
       </header>
 
-      <div className="-mx-4 mb-3 flex gap-2 overflow-x-auto px-4 pb-1 scrollbar-hide md:mx-0 md:flex-wrap md:overflow-visible md:px-0">
+      <div className="mb-3 flex min-w-0 gap-2 overflow-x-auto pb-1 [-webkit-overflow-scrolling:touch] scrollbar-hide md:flex-wrap md:overflow-visible">
         <FilterPill active={filters.status === "all"} count={counts.total} onClick={() => setStatus("all")}>
           All
         </FilterPill>
@@ -742,51 +742,59 @@ export function AllLeadsView({
       </Sheet>
 
       {hasActiveFilters ? (
-        <div className="mb-4 flex flex-wrap items-center gap-2 border-b border-border pb-4">
-          <span className="text-xs text-ink-secondary">Active filters:</span>
-          {filters.clientIds.map((id) => (
-            <button
-              key={id}
-              type="button"
-              className="rounded-full border border-border bg-surface-card-alt px-2 py-0.5 text-xs"
-              onClick={() => replaceUrl({ ...filters, clientIds: filters.clientIds.filter((c) => c !== id), page: 1 })}
-            >
-              {clientNameById.get(id) ?? id} ×
-            </button>
-          ))}
-          {filters.sources.map((s) => (
-            <button
-              key={s}
-              type="button"
-              className="rounded-full border border-border bg-surface-card-alt px-2 py-0.5 text-xs"
-              onClick={() => replaceUrl({ ...filters, sources: filters.sources.filter((x) => x !== s), page: 1 })}
-            >
-              {sourceLabel(s)} ×
-            </button>
-          ))}
-          {filters.assigneeIds.map((id) => (
-            <button
-              key={id}
-              type="button"
-              className="rounded-full border border-border bg-surface-card-alt px-2 py-0.5 text-xs"
-              onClick={() => replaceUrl({ ...filters, assigneeIds: filters.assigneeIds.filter((x) => x !== id), page: 1 })}
-            >
-              {id === "__unassigned__" ? "Unassigned" : salespeople.find((u) => u.id === id)?.name ?? id} ×
-            </button>
-          ))}
-          {filters.search ? (
-            <button
-              type="button"
-              className="rounded-full border border-border bg-surface-card-alt px-2 py-0.5 text-xs"
-              onClick={() => {
-                setSearchInput("");
-                replaceUrl({ ...filters, search: undefined, page: 1 });
-              }}
-            >
-              Search “{filters.search}” ×
-            </button>
-          ) : null}
-          <button type="button" className="ml-auto text-xs text-ink-secondary hover:text-ink-primary" onClick={clearAllFilters}>
+        <div className="mb-4 flex flex-col gap-3 border-b border-border pb-4 sm:flex-row sm:items-start sm:justify-between sm:gap-4">
+          <div className="min-w-0 flex-1">
+            <span className="text-xs text-ink-secondary">Active filters:</span>
+            <div className="mt-2 flex flex-wrap gap-2">
+              {filters.clientIds.map((id) => (
+                <button
+                  key={id}
+                  type="button"
+                  className="max-w-full truncate rounded-full border border-border bg-surface-card-alt px-2 py-0.5 text-left text-xs"
+                  onClick={() => replaceUrl({ ...filters, clientIds: filters.clientIds.filter((c) => c !== id), page: 1 })}
+                >
+                  {clientNameById.get(id) ?? id} ×
+                </button>
+              ))}
+              {filters.sources.map((s) => (
+                <button
+                  key={s}
+                  type="button"
+                  className="rounded-full border border-border bg-surface-card-alt px-2 py-0.5 text-xs"
+                  onClick={() => replaceUrl({ ...filters, sources: filters.sources.filter((x) => x !== s), page: 1 })}
+                >
+                  {sourceLabel(s)} ×
+                </button>
+              ))}
+              {filters.assigneeIds.map((id) => (
+                <button
+                  key={id}
+                  type="button"
+                  className="max-w-full truncate rounded-full border border-border bg-surface-card-alt px-2 py-0.5 text-left text-xs"
+                  onClick={() => replaceUrl({ ...filters, assigneeIds: filters.assigneeIds.filter((x) => x !== id), page: 1 })}
+                >
+                  {id === "__unassigned__" ? "Unassigned" : salespeople.find((u) => u.id === id)?.name ?? id} ×
+                </button>
+              ))}
+              {filters.search ? (
+                <button
+                  type="button"
+                  className="max-w-full truncate rounded-full border border-border bg-surface-card-alt px-2 py-0.5 text-left text-xs"
+                  onClick={() => {
+                    setSearchInput("");
+                    replaceUrl({ ...filters, search: undefined, page: 1 });
+                  }}
+                >
+                  Search “{filters.search}” ×
+                </button>
+              ) : null}
+            </div>
+          </div>
+          <button
+            type="button"
+            className="shrink-0 self-start text-xs text-ink-secondary hover:text-ink-primary sm:pt-6 sm:text-right"
+            onClick={clearAllFilters}
+          >
             Clear all
           </button>
         </div>
@@ -819,7 +827,7 @@ export function AllLeadsView({
             {initialRows.map((lead) => (
               <div
                 key={lead.id}
-                className="relative rounded-lg border border-border bg-surface-card"
+                className="relative min-w-0 rounded-lg border border-border bg-surface-card"
               >
                 <div
                   className="absolute left-3 top-3 z-10 flex h-9 w-9 items-center justify-center"
@@ -839,13 +847,13 @@ export function AllLeadsView({
                   className="w-full pl-12 pr-4 py-3 text-left active:bg-surface-card-alt"
                   onClick={() => openLead(lead.id)}
                 >
-                  <div className="text-sm font-medium text-ink-primary">{lead.name || "—"}</div>
-                  <div className="font-mono text-xs text-ink-tertiary">{lead.phone || "—"}</div>
-                  <div className="mt-2 flex items-center gap-2">
+                  <div className="break-words text-sm font-medium text-ink-primary">{lead.name || "—"}</div>
+                  <div className="break-all font-mono text-xs text-ink-tertiary">{lead.phone || "—"}</div>
+                  <div className="mt-2 flex min-w-0 items-center gap-2">
                     <ClientAvatar name={lead.clients?.name ?? "—"} size={20} src={lead.clients?.logo_url} />
-                    <span className="text-sm text-ink-secondary">{lead.clients?.name ?? "—"}</span>
+                    <span className="min-w-0 truncate text-sm text-ink-secondary">{lead.clients?.name ?? "—"}</span>
                   </div>
-                  <div className="mt-3 grid grid-cols-2 gap-x-3 gap-y-2 border-t border-border pt-3">
+                  <div className="mt-3 grid grid-cols-1 gap-x-3 gap-y-2 border-t border-border pt-3 sm:grid-cols-2">
                     <div>
                       <div className="font-mono text-[10px] uppercase tracking-wide text-ink-tertiary">Source</div>
                       <div className="font-mono text-xs text-ink-primary">{sourceLabel(lead.source)}</div>
@@ -873,7 +881,7 @@ export function AllLeadsView({
                         )}
                       </div>
                     </div>
-                    <div className="col-span-2">
+                    <div className="col-span-full sm:col-span-2">
                       <div className="font-mono text-[10px] uppercase tracking-wide text-ink-tertiary">Last activity</div>
                       <div className="mt-0.5 text-sm text-ink-secondary">
                         <LastActivityCell row={lead} />
@@ -979,11 +987,11 @@ export function AllLeadsView({
       ) : null}
 
       {!emptyFiltered && !emptyAll ? (
-        <div className="mt-6 flex flex-wrap items-center justify-between gap-4 border-t border-border pt-4">
+        <div className="mt-6 flex flex-col gap-3 border-t border-border pt-4 sm:flex-row sm:flex-wrap sm:items-center sm:justify-between sm:gap-4">
           <span className="text-sm text-ink-secondary">
             Showing {startIndex}–{endIndex} of {totalCount}
           </span>
-          <div className="flex items-center gap-3">
+          <div className="flex flex-wrap items-center gap-3">
             <button
               type="button"
               disabled={filters.page <= 1}
@@ -1008,17 +1016,23 @@ export function AllLeadsView({
       ) : null}
 
       {selectedIds.size > 0 ? (
-        <div className="safe-bottom fixed bottom-4 left-1/2 z-40 flex max-w-[calc(100vw-2rem)] -translate-x-1/2 flex-wrap items-center justify-center gap-3 rounded-full border border-border bg-surface-sidebar px-4 py-3 text-[var(--text-on-dark)] shadow-lg md:bottom-6 md:max-w-none md:gap-4 md:px-5">
-          <span className="text-sm">{selectedIds.size} selected</span>
-          <button type="button" className="text-sm hover:text-accent" onClick={() => setReassignOpen(true)}>
-            Reassign
-          </button>
-          <button type="button" className="text-sm hover:text-accent" onClick={handleBulkExport}>
-            Export selected
-          </button>
-          <button type="button" className="text-xs text-[var(--text-on-dark-dim)]" onClick={() => setSelectedIds(new Set())}>
-            Clear
-          </button>
+        <div className="safe-bottom fixed bottom-4 left-1/2 z-40 flex w-[calc(100vw-2rem)] max-w-md -translate-x-1/2 flex-col items-stretch gap-2 rounded-2xl border border-border bg-surface-sidebar px-4 py-3 text-[var(--text-on-dark)] shadow-lg sm:bottom-6 sm:w-auto sm:max-w-none sm:flex-row sm:flex-wrap sm:items-center sm:justify-center sm:gap-3 sm:rounded-full sm:px-5">
+          <span className="text-center text-sm sm:text-left">{selectedIds.size} selected</span>
+          <div className="flex flex-wrap items-center justify-center gap-2 sm:gap-3">
+            <button type="button" className="min-h-11 flex-1 rounded-md px-3 text-sm hover:bg-white/10 sm:min-h-0 sm:flex-none" onClick={() => setReassignOpen(true)}>
+              Reassign
+            </button>
+            <button type="button" className="min-h-11 flex-1 rounded-md px-3 text-sm hover:bg-white/10 sm:min-h-0 sm:flex-none" onClick={handleBulkExport}>
+              Export selected
+            </button>
+            <button
+              type="button"
+              className="w-full text-xs text-[var(--text-on-dark-dim)] hover:text-[var(--text-on-dark)] sm:w-auto"
+              onClick={() => setSelectedIds(new Set())}
+            >
+              Clear
+            </button>
+          </div>
         </div>
       ) : null}
 
