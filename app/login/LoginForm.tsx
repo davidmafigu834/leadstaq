@@ -16,24 +16,29 @@ function LoginFormInner() {
     e.preventDefault();
     setLoading(true);
     setError(null);
-    const res = await signIn("credentials", {
-      redirect: false,
-      email,
-      password,
-    });
-    setLoading(false);
-    if (res?.error) {
-      setError("Invalid email or password.");
-      return;
-    }
-    const dest = searchParams.get("callbackUrl");
-    if (dest) {
-      router.push(dest);
+    try {
+      const res = await signIn("credentials", {
+        redirect: false,
+        email,
+        password,
+      });
+      if (res?.error || !res?.ok) {
+        setError("Invalid email or password.");
+        return;
+      }
+      const dest = searchParams.get("callbackUrl");
+      if (dest) {
+        router.push(dest);
+        router.refresh();
+        return;
+      }
+      router.push("/");
       router.refresh();
-      return;
+    } catch {
+      setError("Sign in failed. Please try again.");
+    } finally {
+      setLoading(false);
     }
-    router.push("/");
-    router.refresh();
   }
 
   return (

@@ -279,18 +279,14 @@ export function ClientSettingsClient({
       if (j.message) setToast(String(j.message));
       setInviteSalesOpen(false);
       setInviteForm({ name: "", email: "", phone: "" });
-      const newUserId = typeof newUser?.id === "string" ? newUser.id : null;
-      const newUserName = typeof newUser?.name === "string" ? newUser.name : null;
-      const newUserEmail = typeof newUser?.email === "string" ? newUser.email : null;
-      const newUserPhone = typeof newUser?.phone === "string" ? newUser.phone : null;
-      if (newUserId && newUserName && newUserEmail) {
+      if (newUser?.id && newUser?.name && newUser?.email) {
         setSales((prev) => [
           ...prev,
           {
-            id: newUserId,
-            name: newUserName,
-            email: newUserEmail,
-            phone: newUserPhone,
+            id: newUser.id,
+            name: newUser.name,
+            email: newUser.email,
+            phone: typeof newUser.phone === "string" ? newUser.phone : null,
             is_active: true,
             round_robin_order: prev.length,
           },

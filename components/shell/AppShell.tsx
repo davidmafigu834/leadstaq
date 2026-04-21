@@ -89,7 +89,7 @@ export function AppShell({
       ? "font-display text-[22px] leading-[1.05] tracking-tight text-ink-primary md:text-[28px] layout:text-[40px]"
       : "font-display text-[18px] leading-tight tracking-display text-ink-primary md:text-[22px] layout:text-[28px]";
 
-  const desktopSidebar = (
+  const sidebar = (
     <AgencySidebar
       homeHref={homeHref}
       roleLabel={roleLabel}
@@ -101,21 +101,6 @@ export function AppShell({
       coBrand={coBrand}
       sidebarBrand={sidebarBrand}
       navActive={navActive}
-    />
-  );
-  const mobileSidebar = (
-    <AgencySidebar
-      homeHref={homeHref}
-      roleLabel={roleLabel}
-      primaryNav={primaryNav}
-      secondaryNav={secondaryNav}
-      clients={clients}
-      userName={userName}
-      userRoleLabel={userRoleLabel}
-      coBrand={coBrand}
-      sidebarBrand={sidebarBrand}
-      navActive={navActive}
-      forceExpanded
     />
   );
 
@@ -125,7 +110,7 @@ export function AppShell({
         className="fixed inset-y-0 left-0 z-20 hidden w-60 flex-col border-r border-[var(--surface-sidebar-border)] bg-surface-sidebar layout:flex"
         aria-label="Workspace navigation"
       >
-        <div className="flex min-h-0 flex-1 flex-col overflow-hidden">{desktopSidebar}</div>
+        <div className="flex min-h-0 flex-1 flex-col overflow-hidden">{sidebar}</div>
       </aside>
 
       {mobileOpen ? (
@@ -148,7 +133,7 @@ export function AppShell({
                 <X className="h-4 w-4" strokeWidth={1.5} />
               </button>
             </div>
-            <div className="flex min-h-0 flex-1 flex-col overflow-hidden">{mobileSidebar}</div>
+            <div className="flex min-h-0 flex-1 flex-col overflow-hidden">{sidebar}</div>
           </aside>
         </>
       ) : null}
