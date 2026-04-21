@@ -53,7 +53,7 @@ export async function sendEmailWithLog(params: SendEmailWithLogParams): Promise<
 
   try {
     const resend = new Resend(key);
-    const response = await resend.emails.send({
+    const basePayload = {
       from: typeof params.mail.from === "string" ? params.mail.from : params.mail.from.email,
       to: Array.isArray(params.mail.to)
         ? params.mail.to.map((addr) => (typeof addr === "string" ? addr : addr.email))
@@ -61,9 +61,18 @@ export async function sendEmailWithLog(params: SendEmailWithLogParams): Promise<
           ? params.mail.to
           : params.mail.to.email,
       subject: params.mail.subject,
-      html: params.mail.html,
-      text: params.mail.text,
-    });
+    };
+    const response =
+      typeof params.mail.html === "string"
+        ? await resend.emails.send({
+            ...basePayload,
+            html: params.mail.html,
+            ...(typeof params.mail.text === "string" ? { text: params.mail.text } : {}),
+          })
+        : await resend.emails.send({
+            ...basePayload,
+            text: typeof params.mail.text === "string" ? params.mail.text : "",
+          });
     if (response.error) {
       const result: SendResult = {
         ok: false,
