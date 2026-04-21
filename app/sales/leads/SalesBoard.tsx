@@ -321,7 +321,7 @@ export function SalesBoard({
           </button>
         </div>
       ) : isMobileKanban ? (
-        <div className="flex h-[min(640px,calc(100svh-220px))] flex-col">
+        <div className="flex min-h-[60svh] max-h-[calc(100svh-220px)] flex-col">
           <div className="-mx-4 flex gap-1 overflow-x-auto border-b border-border px-4 pb-3 scrollbar-hide">
             {COLS.map((col) => {
               const count = grouped[col].length;
@@ -398,14 +398,14 @@ export function SalesBoard({
         </div>
       ) : (
         <DragDropContext onDragEnd={onDragEnd}>
-          <div className="flex gap-5 overflow-x-auto pb-4">
+          <div className="flex snap-x snap-mandatory gap-5 overflow-x-auto pb-4">
             {COLS.map((col) => (
               <Droppable droppableId={col} key={col}>
                 {(provided, snapshot) => (
                   <div
                     ref={provided.innerRef}
                     {...provided.droppableProps}
-                    className={`w-[320px] shrink-0 rounded-sm border border-border bg-transparent ${
+                    className={`w-[280px] shrink-0 snap-start rounded-sm border border-border bg-transparent sm:w-[320px] ${
                       snapshot.isDraggingOver ? "ring-2 ring-dashed ring-[var(--accent)]" : ""
                     }`}
                   >

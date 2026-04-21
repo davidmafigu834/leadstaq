@@ -53,7 +53,7 @@ export function CampaignsClientTab({ clientId, clientName }: { clientId: string;
             aria-label="Date range"
             value={datePreset}
             onChange={(e) => setDatePreset(e.target.value as FbCampaignsDatePreset)}
-            className="input-base h-9 w-[140px] text-sm"
+            className="input-base h-9 w-full text-sm sm:w-[140px]"
           >
             <option value="last_7d">Last 7 days</option>
             <option value="last_30d">Last 30 days</option>

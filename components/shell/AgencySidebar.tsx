@@ -29,12 +29,22 @@ function initialsFromName(name: string): string {
   return `${parts[0]![0] ?? ""}${parts[parts.length - 1]![0] ?? ""}`.toUpperCase();
 }
 
-function NavRow({ item, navActive }: { item: AppShellNavItem; navActive: (href: string) => boolean }) {
+function NavRow({
+  item,
+  navActive,
+  mobileExpanded = false,
+}: {
+  item: AppShellNavItem;
+  navActive: (href: string) => boolean;
+  mobileExpanded?: boolean;
+}) {
   const isActive = navActive(item.href);
   return (
     <Link
       href={item.href}
-      className={`relative flex h-9 items-center justify-center gap-3 rounded-sm px-2 py-2 text-[13px] font-medium transition-colors layout:justify-start layout:px-3 ${
+      className={`relative flex h-9 items-center gap-3 rounded-sm py-2 text-[13px] font-medium transition-colors ${
+        mobileExpanded ? "justify-start px-3" : "justify-center px-2 layout:justify-start layout:px-3"
+      } ${
         isActive
           ? "text-[var(--accent)]"
           : "text-[var(--text-on-dark-dim)] hover:bg-[var(--surface-sidebar-elevated)] hover:text-[var(--text-on-dark)]"
@@ -47,9 +57,13 @@ function NavRow({ item, navActive }: { item: AppShellNavItem; navActive: (href: 
         />
       ) : null}
       <ShellIcon name={item.icon} className="h-4 w-4 shrink-0" />
-      <span className="hidden min-w-0 flex-1 truncate layout:inline">{item.label}</span>
+      <span className={`min-w-0 flex-1 truncate ${mobileExpanded ? "inline" : "hidden layout:inline"}`}>{item.label}</span>
       {item.badge != null && item.badge > 0 ? (
-        <span className="hidden rounded-sm bg-[var(--accent)] px-1.5 py-0 font-mono text-[10px] font-medium text-[var(--accent-ink)] layout:inline">
+        <span
+          className={`rounded-sm bg-[var(--accent)] px-1.5 py-0 font-mono text-[10px] font-medium text-[var(--accent-ink)] ${
+            mobileExpanded ? "inline" : "hidden layout:inline"
+          }`}
+        >
           {item.badge > 99 ? "99+" : item.badge}
         </span>
       ) : null}
@@ -68,6 +82,7 @@ export function AgencySidebar({
   coBrand,
   sidebarBrand,
   navActive,
+  mobileExpanded = false,
 }: {
   homeHref: string;
   roleLabel: string;
@@ -79,13 +94,20 @@ export function AgencySidebar({
   coBrand?: string | null;
   sidebarBrand?: { name: string; logoUrl: string | null } | null;
   navActive: (href: string) => boolean;
+  mobileExpanded?: boolean;
 }) {
   return (
     <div className="flex h-full min-h-0 flex-1 flex-col">
       <div className="shrink-0 px-3 pb-4 pt-6 layout:px-5">
-        <Link href={homeHref} className="flex items-center justify-center gap-2 layout:justify-start">
-          <span className="mt-1 h-1.5 w-1.5 shrink-0 bg-[var(--accent)] layout:hidden" aria-hidden />
-          <div className="hidden text-left layout:block">
+        <Link
+          href={homeHref}
+          className={`flex items-center gap-2 ${mobileExpanded ? "justify-start" : "justify-center layout:justify-start"}`}
+        >
+          <span
+            className={`mt-1 h-1.5 w-1.5 shrink-0 bg-[var(--accent)] ${mobileExpanded ? "hidden" : "layout:hidden"}`}
+            aria-hidden
+          />
+          <div className={`${mobileExpanded ? "block" : "hidden layout:block"} text-left`}>
             {sidebarBrand ? (
               <div className="mb-2 flex items-center gap-2.5">
                 {sidebarBrand.logoUrl ? (
@@ -118,26 +140,30 @@ export function AgencySidebar({
             </div>
           </div>
         </Link>
-        <div className="mt-5 hidden h-px bg-[var(--surface-sidebar-border)] layout:block" />
+        <div className={`mt-5 h-px bg-[var(--surface-sidebar-border)] ${mobileExpanded ? "block" : "hidden layout:block"}`} />
       </div>
 
       <div className="min-h-0 flex-1 overflow-y-auto overflow-x-hidden overscroll-contain px-1 pb-2 [scrollbar-width:thin] [scrollbar-color:rgba(255,255,255,0.2)_transparent]">
         <nav className="flex flex-col gap-0.5 px-2 layout:px-3">
           {primaryNav.map((item) => (
-            <NavRow key={item.href} item={item} navActive={navActive} />
+            <NavRow key={item.href} item={item} navActive={navActive} mobileExpanded={mobileExpanded} />
           ))}
         </nav>
 
-        <div className="mx-2 my-2 hidden h-px bg-[var(--surface-sidebar-border)] layout:mx-3 layout:block" />
+        <div
+          className={`mx-2 my-2 h-px bg-[var(--surface-sidebar-border)] ${
+            mobileExpanded ? "block" : "hidden layout:mx-3 layout:block"
+          }`}
+        />
 
         <nav className="flex flex-col gap-0.5 px-2 pb-2 layout:px-3">
           {secondaryNav.map((item) => (
-            <NavRow key={item.href} item={item} navActive={navActive} />
+            <NavRow key={item.href} item={item} navActive={navActive} mobileExpanded={mobileExpanded} />
           ))}
         </nav>
 
         {clients && clients.length > 0 ? (
-          <div className="hidden px-3 pb-2 pt-2 layout:block">
+          <div className={`${mobileExpanded ? "block" : "hidden layout:block"} px-3 pb-2 pt-2`}>
             <div className="mt-4 mb-2 px-2 font-mono text-[11px] font-normal uppercase tracking-[0.08em] text-[var(--text-on-dark-dim)]">
               Clients
             </div>
@@ -170,13 +196,21 @@ export function AgencySidebar({
 
       <div className="shrink-0 border-t border-[var(--surface-sidebar-border)] pt-4">
         <details className="group relative px-2 pb-2 layout:px-3">
-          <summary className="flex cursor-pointer list-none items-center justify-center gap-2 rounded-sm px-1 py-2 marker:hidden hover:bg-[var(--surface-sidebar-elevated)] layout:justify-start layout:px-2 [&::-webkit-details-marker]:hidden">
+          <summary
+            className={`flex cursor-pointer list-none items-center gap-2 rounded-sm py-2 marker:hidden hover:bg-[var(--surface-sidebar-elevated)] [&::-webkit-details-marker]:hidden ${
+              mobileExpanded ? "justify-start px-2" : "justify-center px-1 layout:justify-start layout:px-2"
+            }`}
+          >
             <ClientAvatar name={userName} size="sm" />
-            <div className="hidden min-w-0 flex-1 text-left layout:block">
+            <div className={`${mobileExpanded ? "block" : "hidden layout:block"} min-w-0 flex-1 text-left`}>
               <div className="truncate text-[13px] font-medium text-[var(--text-on-dark)]">{userName}</div>
               <div className="truncate font-mono text-[11px] text-[var(--text-on-dark-dim)]">{userRoleLabel}</div>
             </div>
-            <ChevronRight className="hidden h-4 w-4 shrink-0 text-[var(--text-on-dark-dim)] transition group-open:rotate-90 layout:block" />
+            <ChevronRight
+              className={`h-4 w-4 shrink-0 text-[var(--text-on-dark-dim)] transition group-open:rotate-90 ${
+                mobileExpanded ? "block" : "hidden layout:block"
+              }`}
+            />
           </summary>
           <div className="absolute bottom-full left-0 right-0 z-50 mb-1 rounded-sm border border-[var(--surface-sidebar-border)] bg-[var(--surface-sidebar-elevated)] py-1 shadow-md">
             <button

@@ -75,7 +75,7 @@ export function ClientReadOnlyKanban({
   if (isMobile) {
     const active = grouped.find((g) => g.col === activeCol);
     return (
-      <div className="flex h-[min(640px,calc(100svh-220px))] flex-col">
+      <div className="flex min-h-[60svh] max-h-[calc(100svh-220px)] flex-col">
         <div className="-mx-4 flex gap-1 overflow-x-auto border-b border-border px-4 pb-3 scrollbar-hide">
           {grouped.map(({ col, items }) => {
             const on = activeCol === col;
@@ -115,7 +115,7 @@ export function ClientReadOnlyKanban({
                       {l.assigneeName ? (
                         <div className="flex shrink-0 items-center gap-1.5">
                           <ClientAvatar name={l.assigneeName} size="sm" />
-                          <span className="max-w-[100px] truncate text-[11px] text-ink-tertiary">{l.assigneeName}</span>
+                          <span className="max-w-[120px] truncate text-[11px] text-ink-tertiary sm:max-w-[100px]">{l.assigneeName}</span>
                         </div>
                       ) : (
                         <span className="text-[11px] text-ink-tertiary">—</span>
@@ -147,9 +147,9 @@ export function ClientReadOnlyKanban({
   }
 
   return (
-    <div className="flex gap-5 overflow-x-auto pb-4">
+    <div className="flex snap-x snap-mandatory gap-5 overflow-x-auto pb-4">
       {grouped.map(({ col, items }) => (
-        <div key={col} className="w-[320px] shrink-0 rounded-sm border border-border bg-transparent">
+        <div key={col} className="w-[280px] shrink-0 snap-start rounded-sm border border-border bg-transparent sm:w-[320px]">
           <div className={`border-t-2 ${COL_ACCENT[col] ?? "border-t-border"} px-1 pb-2 pt-3`}>
             <div className="flex items-center justify-between px-2">
               <span className="font-mono text-[11px] uppercase tracking-wide text-ink-tertiary">
@@ -177,7 +177,7 @@ export function ClientReadOnlyKanban({
                     {l.assigneeName ? (
                       <div className="flex shrink-0 items-center gap-1.5">
                         <ClientAvatar name={l.assigneeName} size="sm" />
-                        <span className="max-w-[100px] truncate text-[11px] text-ink-tertiary">{l.assigneeName}</span>
+                        <span className="max-w-[120px] truncate text-[11px] text-ink-tertiary sm:max-w-[100px]">{l.assigneeName}</span>
                       </div>
                     ) : (
                       <span className="text-[11px] text-ink-tertiary">—</span>

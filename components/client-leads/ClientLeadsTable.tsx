@@ -279,7 +279,7 @@ export function ClientLeadsTable({
         <label className="text-xs text-ink-secondary">
           Source
           <select
-            className="input-base mt-1 block min-w-[140px] text-sm"
+            className="input-base mt-1 block w-full min-w-0 text-sm sm:w-auto sm:min-w-[140px]"
             value={source}
             onChange={(e) => setSource(e.target.value as "all" | LeadSource)}
           >
@@ -292,7 +292,7 @@ export function ClientLeadsTable({
         <label className="text-xs text-ink-secondary">
           Date range
           <select
-            className="input-base mt-1 block min-w-[160px] text-sm"
+            className="input-base mt-1 block w-full min-w-0 text-sm sm:w-auto sm:min-w-[160px]"
             value={datePreset}
             onChange={(e) => setDatePreset(e.target.value as DatePreset)}
           >
@@ -328,7 +328,7 @@ export function ClientLeadsTable({
         <label className="text-xs text-ink-secondary">
           Assignee
           <select
-            className="input-base mt-1 block min-w-[160px] text-sm"
+            className="input-base mt-1 block w-full min-w-0 text-sm sm:w-auto sm:min-w-[160px]"
             value={assignee}
             onChange={(e) => setAssignee(e.target.value)}
           >
@@ -340,7 +340,7 @@ export function ClientLeadsTable({
             ))}
           </select>
         </label>
-        <div className="relative min-w-[200px] flex-1">
+        <div className="relative w-full min-w-0 flex-1 sm:min-w-[200px]">
           <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-ink-tertiary" />
           <input
             type="search"
@@ -386,7 +386,36 @@ export function ClientLeadsTable({
         </div>
       ) : (
         <>
-          <div className="overflow-x-auto">
+          <div className="space-y-3 md:hidden">
+            {pageRows.map((l) => {
+              const asg = unwrapAssignee(l.assigned_to);
+              return (
+                <button
+                  key={l.id}
+                  type="button"
+                  className="w-full border border-border bg-surface-card p-3 text-left"
+                  onClick={() => openLeadPanel(l.id)}
+                >
+                  <div className="flex items-center justify-between gap-2">
+                    <div className="font-medium text-ink-primary">{l.name ?? "—"}</div>
+                    <StatusPill status={l.status} />
+                  </div>
+                  <div className="mt-1 font-mono-data text-xs text-ink-tertiary">{l.phone ?? "—"}</div>
+                  <div className="mt-3 grid grid-cols-2 gap-2 text-xs text-ink-secondary">
+                    <div className="flex items-center gap-2">
+                      <SourceDot source={l.source} />
+                      <span>{sourceLabel(l.source)}</span>
+                    </div>
+                    <div className="text-right">{l.budget ?? "—"}</div>
+                    <div>{asg?.name?.split(/\s+/)[0] ?? "—"}</div>
+                    <div className="text-right">{format(new Date(l.created_at), "MMM d, yyyy")}</div>
+                  </div>
+                </button>
+              );
+            })}
+          </div>
+
+          <div className="hidden overflow-x-auto md:block">
             <table className="w-full min-w-[960px] border-collapse text-left text-sm">
               <thead>
                 <tr className="border-b border-border font-mono text-[11px] uppercase text-ink-tertiary">

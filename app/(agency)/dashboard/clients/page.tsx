@@ -7,7 +7,7 @@ export default async function ClientsPage() {
   const { data: clients } = await supabase
     .from("clients")
     .select("id, name, industry")
-    .eq("is_archived", false)
+    .or("is_archived.is.null,is_archived.eq.false")
     .order("name");
 
   const rows =

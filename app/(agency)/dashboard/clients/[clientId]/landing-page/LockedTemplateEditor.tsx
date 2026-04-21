@@ -6,6 +6,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { getByContentPath } from "@/lib/json-content-path";
+import { getPublicBaseUrl } from "@/lib/constants";
 import { applyLockedFieldUpdate } from "@/lib/templates/northfield/apply-field";
 import { NORTHFIELD_EDITABLE_FIELDS, NORTHFIELD_EDITOR_GROUPS } from "@/lib/templates/northfield/editableFields";
 import { northfieldContentSchema, northfieldThemeSchema } from "@/lib/templates/northfield/schema";
@@ -250,9 +251,7 @@ export function LockedTemplateEditor({
   );
 
   const displayUrl = useMemo(() => {
-    const envHost =
-      (typeof process !== "undefined" &&
-        process.env.NEXT_PUBLIC_APP_DOMAIN?.replace(/^https?:\/\//i, "").replace(/\/$/, "")) || "leadstaq.com";
+    const envHost = getPublicBaseUrl().replace(/^https?:\/\//i, "").replace(/\/$/, "");
     const cd = String(initialLanding.custom_domain ?? "").trim();
     if (cd) {
       const host = cd.replace(/^https?:\/\//i, "").split("/")[0]?.replace(/\/$/, "") ?? cd;

@@ -61,7 +61,7 @@ export function CampaignsDashboard({ allClients }: { allClients: AllClient[] }) 
       <div className="mb-8 flex flex-col gap-6 layout:flex-row layout:items-start layout:justify-between">
         <div>
           <p className="font-mono text-[11px] uppercase tracking-wide text-ink-tertiary">Agency / Campaigns</p>
-          <h1 className="font-display text-[40px] leading-none tracking-display text-ink-primary">Campaigns</h1>
+          <h1 className="font-display text-3xl leading-none tracking-display text-ink-primary sm:text-[40px]">Campaigns</h1>
           <p className="mt-2 text-[14px] text-ink-secondary">Live performance across all connected ad accounts</p>
         </div>
         <div className="flex flex-col items-stretch gap-3 layout:items-end">
@@ -74,7 +74,7 @@ export function CampaignsDashboard({ allClients }: { allClients: AllClient[] }) 
                 const opts = Array.from(e.target.selectedOptions).map((o) => o.value);
                 setSelected(new Set(opts));
               }}
-              className="input-base min-h-[40px] min-w-[200px] max-w-full py-1 text-sm"
+              className="input-base min-h-[40px] w-full min-w-0 max-w-full py-1 text-sm sm:min-w-[200px]"
             >
               {allClients.map((c) => (
                 <option key={c.id} value={c.id}>
@@ -86,7 +86,7 @@ export function CampaignsDashboard({ allClients }: { allClients: AllClient[] }) 
               aria-label="Date range"
               value={datePreset}
               onChange={(e) => setDatePreset(e.target.value as FbCampaignsDatePreset)}
-              className="input-base h-9 w-[140px] text-sm"
+              className="input-base h-9 w-full text-sm sm:w-[140px]"
             >
               <option value="last_7d">Last 7 days</option>
               <option value="last_30d">Last 30 days</option>

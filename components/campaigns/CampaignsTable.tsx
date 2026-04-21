@@ -111,7 +111,36 @@ export function CampaignsTable({
                 )}
               </span>
             </div>
-            <div className="overflow-x-auto rounded-lg border border-border">
+            <div className="mb-3 text-xs text-ink-tertiary md:hidden">Swipe for full table on larger screens.</div>
+            <div className="space-y-2 md:hidden">
+              {g.campaigns.map((c) => {
+                const ins = c.insights;
+                const label = effectiveStatusLabel(c.effective_status, c.status);
+                return (
+                  <a
+                    key={c.id}
+                    href={metaCampaignUrl(c.id)}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="block border border-border bg-surface-card p-3"
+                  >
+                    <div className="flex items-start justify-between gap-2">
+                      <div className="font-medium text-ink-primary">{c.name || "—"}</div>
+                      <span className={`inline-flex rounded-sm px-2 py-0.5 font-mono text-[10px] ${statusPillClass(label)}`}>
+                        {label}
+                      </span>
+                    </div>
+                    <div className="mt-3 grid grid-cols-2 gap-2 text-xs text-ink-secondary">
+                      <div>Spend: ${Math.round(ins.spend).toLocaleString()}</div>
+                      <div className="text-right">Leads: {ins.leads}</div>
+                      <div>Clicks: {ins.clicks.toLocaleString()}</div>
+                      <div className="text-right">CTR: {formatCtr(ins.ctr)}</div>
+                    </div>
+                  </a>
+                );
+              })}
+            </div>
+            <div className="hidden overflow-x-auto rounded-lg border border-border md:block">
               <table className="w-full min-w-[1100px] text-sm">
                 <thead>
                   <tr className="border-b border-border bg-surface-card-alt font-mono text-[11px] uppercase text-ink-tertiary">

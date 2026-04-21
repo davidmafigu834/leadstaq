@@ -7,7 +7,16 @@ import type { UserRole } from "@/types";
 export async function middleware(req: NextRequest) {
   const hostHeader = req.headers.get("host") || "";
   const host = hostHeader.split(":")[0];
-  const appDomain = (process.env.NEXT_PUBLIC_APP_DOMAIN || "localhost:3000").split(":")[0];
+  const appDomain = (
+    process.env.NEXT_PUBLIC_APP_DOMAIN ||
+    process.env.NEXT_PUBLIC_SITE_URL ||
+    process.env.NEXTAUTH_URL ||
+    hostHeader ||
+    "localhost:3000"
+  )
+    .replace(/^https?:\/\//i, "")
+    .split("/")[0]
+    .split(":")[0];
 
   if (host && host !== appDomain && host.endsWith("." + appDomain)) {
     const slug = host.slice(0, -(appDomain.length + 1));

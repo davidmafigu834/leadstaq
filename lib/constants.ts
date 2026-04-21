@@ -9,7 +9,10 @@ export function getPublicBaseUrl(): string {
 }
 
 export function getAppDomain(): string {
-  return process.env.NEXT_PUBLIC_APP_DOMAIN || "localhost:3000";
+  const explicit = process.env.NEXT_PUBLIC_APP_DOMAIN?.trim();
+  if (explicit) return explicit.replace(/^https?:\/\//i, "").replace(/\/$/, "");
+  const base = getPublicBaseUrl();
+  return base.replace(/^https?:\/\//i, "").replace(/\/$/, "");
 }
 
 export function magicLinkUrl(token: string): string {

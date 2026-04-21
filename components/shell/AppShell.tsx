@@ -103,6 +103,21 @@ export function AppShell({
       navActive={navActive}
     />
   );
+  const mobileSidebar = (
+    <AgencySidebar
+      homeHref={homeHref}
+      roleLabel={roleLabel}
+      primaryNav={primaryNav}
+      secondaryNav={secondaryNav}
+      clients={clients}
+      userName={userName}
+      userRoleLabel={userRoleLabel}
+      coBrand={coBrand}
+      sidebarBrand={sidebarBrand}
+      navActive={navActive}
+      mobileExpanded
+    />
+  );
 
   return (
     <div className="flex min-h-screen min-h-[100svh] bg-surface-canvas layout:h-[100dvh] layout:max-h-[100dvh] layout:min-h-0 layout:overflow-hidden">
@@ -121,7 +136,7 @@ export function AppShell({
             aria-label="Close menu"
             onClick={() => setMobileOpen(false)}
           />
-          <aside className="fixed inset-y-0 left-0 z-[51] flex w-[280px] flex-col overflow-y-auto border-r border-[var(--surface-sidebar-border)] bg-surface-sidebar layout:hidden">
+          <aside className="fixed inset-y-0 left-0 z-[51] flex w-[85vw] max-w-[320px] flex-col overflow-y-auto border-r border-[var(--surface-sidebar-border)] bg-surface-sidebar layout:hidden">
             <div className="flex shrink-0 items-center justify-between border-b border-[var(--surface-sidebar-border)] p-4">
               <span className="font-display text-lg text-[var(--text-on-dark)]">Menu</span>
               <button
@@ -133,7 +148,7 @@ export function AppShell({
                 <X className="h-4 w-4" strokeWidth={1.5} />
               </button>
             </div>
-            <div className="flex min-h-0 flex-1 flex-col overflow-hidden">{sidebar}</div>
+            <div className="flex min-h-0 flex-1 flex-col overflow-hidden">{mobileSidebar}</div>
           </aside>
         </>
       ) : null}
@@ -155,7 +170,7 @@ export function AppShell({
               </div>
               <h1 className={titleClass}>{pageTitle}</h1>
             </div>
-            <div className="ml-auto flex shrink-0 flex-wrap items-center justify-end gap-2">
+            <div className="ml-auto flex w-full shrink-0 flex-wrap items-center justify-end gap-2 sm:w-auto">
               <div className="hidden items-center lg:flex">
                 <AgencyHeaderClock />
               </div>

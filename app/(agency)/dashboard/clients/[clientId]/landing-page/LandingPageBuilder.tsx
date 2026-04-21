@@ -18,6 +18,7 @@ import type { EditorPanel } from "@/lib/landing-types";
 import { pathToEditorTarget } from "@/lib/editablePaths";
 import { isLandingMeaningfullyEmpty } from "@/lib/landing-empty";
 import { formStateToApiBody, rowToFormState } from "@/lib/landing-normalize";
+import { getPublicBaseUrl } from "@/lib/constants";
 import type { BuilderToPreviewMessage } from "@/types/previewProtocol";
 import { LandingBuilderProvider, useLandingBuilder, useLandingDirty } from "./LandingBuilderContext";
 import { PreviewBridgeProvider, type PreviewBridge } from "./PreviewBridgeContext";
@@ -45,10 +46,7 @@ const SECTION_LABEL: Record<EditorPanel, string> = {
 };
 
 function displayPublicLandingUrl(slug: string, customDomain: string): string {
-  const envHost =
-    (typeof process !== "undefined" &&
-      process.env.NEXT_PUBLIC_APP_DOMAIN?.replace(/^https?:\/\//i, "").replace(/\/$/, "")) ||
-    "leadstaq.com";
+  const envHost = getPublicBaseUrl().replace(/^https?:\/\//i, "").replace(/\/$/, "");
   const trimmed = customDomain?.trim() ?? "";
   if (trimmed) {
     const host = trimmed.replace(/^https?:\/\//i, "").split("/")[0]?.replace(/\/$/, "") ?? trimmed;

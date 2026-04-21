@@ -279,7 +279,7 @@ export function ClientDashboardView({
           <div className="mb-2 font-mono text-[10px] uppercase tracking-[0.12em] opacity-70 md:mb-3 md:text-[11px]">
             Leads this month
           </div>
-          <div className="mb-2 font-display text-[52px] font-normal leading-[0.9] tracking-display md:mb-3 md:text-[80px]">
+          <div className="mb-2 font-display text-[44px] font-normal leading-[0.9] tracking-display sm:text-[52px] md:mb-3 md:text-[80px]">
             {report.headline.leads}
           </div>
           <DeltaPill value={leadsDelta} />
@@ -316,7 +316,7 @@ export function ClientDashboardView({
             return (
               <div key={stage.key} className="relative">
                 <div className="flex items-center gap-4">
-                  <div className="w-32 shrink-0 font-mono text-[11px] uppercase tracking-[0.08em] text-ink-secondary">
+                  <div className="w-24 shrink-0 font-mono text-[10px] uppercase tracking-[0.08em] text-ink-secondary sm:w-32 sm:text-[11px]">
                     {stage.label}
                   </div>
                   <div className="relative min-w-0 flex-1">

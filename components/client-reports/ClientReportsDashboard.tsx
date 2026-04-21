@@ -144,19 +144,21 @@ export function ClientReportsDashboard() {
           <p className="font-mono text-[11px] font-normal uppercase tracking-wide opacity-90">
             Leads · {periodEyebrow}
           </p>
-          <p className="font-display text-[80px] font-normal leading-none tracking-display text-balance">
+          <p className="font-display text-[52px] font-normal leading-none tracking-display text-balance sm:text-[64px] md:text-[80px]">
             {data.headline.leads}
           </p>
           <HeroPill value={data.deltas.leadsPct} />
         </div>
         <div className="flex flex-col justify-center border-b border-black px-6 py-6 md:border-b-0 md:border-r md:py-8">
           <p className="font-mono text-[11px] font-normal uppercase tracking-wide opacity-90">Deals won</p>
-          <p className="font-display text-[48px] font-normal leading-none tracking-display">{data.headline.wonCount}</p>
+          <p className="font-display text-[38px] font-normal leading-none tracking-display sm:text-[44px] md:text-[48px]">
+            {data.headline.wonCount}
+          </p>
           <HeroPill value={data.deltas.wonCountPct} />
         </div>
         <div className="flex flex-col justify-center px-6 py-6 md:py-8">
           <p className="font-mono text-[11px] font-normal uppercase tracking-wide opacity-90">Revenue won</p>
-          <p className="font-display text-[48px] font-normal leading-none tracking-display">
+          <p className="font-display text-[38px] font-normal leading-none tracking-display sm:text-[44px] md:text-[48px]">
             {formatCurrencyUsd(data.headline.wonValue)}
           </p>
           <HeroPill value={data.deltas.wonValuePct} />
@@ -173,7 +175,7 @@ export function ClientReportsDashboard() {
             const w = Math.max(4, (count / funnelMax) * 100);
             return (
               <div key={f.key} className="flex items-stretch gap-3">
-                <div className="flex w-[140px] shrink-0 items-center font-mono text-[11px] uppercase text-ink-secondary">
+                <div className="flex w-24 shrink-0 items-center font-mono text-[10px] uppercase text-ink-secondary sm:w-[140px] sm:text-[11px]">
                   {f.label}
                 </div>
                 <div className="min-w-0 flex-1">
