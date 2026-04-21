@@ -317,11 +317,16 @@ export function FacebookConnectPanel({
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ clientId, pageId: selectedPageId }),
       });
-      const data = (await res.json()) as { ok?: boolean; error?: string };
+      const data = (await res.json()) as { ok?: boolean; pageName?: string; error?: string };
       if (!res.ok) {
         setApiError(data.error ?? "Could not save page");
         return;
       }
+      setSnap((s) => ({
+        ...s,
+        fb_page_id: selectedPageId,
+        fb_page_name: data.pageName ?? s.fb_page_name,
+      }));
       router.replace(`/dashboard/clients/${clientId}/facebook?step=form`);
       router.refresh();
     } finally {
@@ -349,6 +354,11 @@ export function FacebookConnectPanel({
         setApiError(data.error ?? "Could not save form");
         return;
       }
+      setSnap((s) => ({
+        ...s,
+        fb_form_id: selectedFormId,
+        fb_form_name: f?.name ?? null,
+      }));
       router.replace(`/dashboard/clients/${clientId}/facebook`);
       router.refresh();
     } finally {

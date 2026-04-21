@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { format, parseISO } from "date-fns";
 import { VerticalSettingsNav } from "@/components/settings/VerticalSettingsNav";
 import { ClientAvatar } from "@/components/ClientAvatar";
@@ -36,6 +36,41 @@ type MessageLogRow = {
   template_key: string | null;
 };
 
+/** Shown on Agency team until dismissed or 30 days pass (stored in localStorage only). */
+type PendingAdminPassword = {
+  userId: string;
+  email: string;
+  password: string;
+  expiresAt: number;
+};
+
+const AGENCY_TEAM_TEMP_PASS_STORAGE_KEY = "agency-settings-team-temp-passes";
+const AGENCY_TEAM_TEMP_PASS_TTL_MS = 30 * 24 * 60 * 60 * 1000;
+
+function parsePendingAdminPasswords(raw: string | null): PendingAdminPassword[] {
+  if (!raw) return [];
+  try {
+    const arr = JSON.parse(raw) as unknown;
+    if (!Array.isArray(arr)) return [];
+    const out: PendingAdminPassword[] = [];
+    const now = Date.now();
+    for (const x of arr) {
+      if (!x || typeof x !== "object") continue;
+      const o = x as Record<string, unknown>;
+      const userId = typeof o.userId === "string" ? o.userId : null;
+      const email = typeof o.email === "string" ? o.email : "";
+      const password = typeof o.password === "string" ? o.password : null;
+      const expiresAt = typeof o.expiresAt === "number" ? o.expiresAt : null;
+      if (!userId || !password || !expiresAt) continue;
+      if (now >= expiresAt) continue;
+      out.push({ userId, email, password, expiresAt });
+    }
+    return out;
+  } catch {
+    return [];
+  }
+}
+
 const TABS = [
   { id: "general", label: "General" },
   { id: "notifications", label: "Notifications" },
@@ -67,7 +102,8 @@ export function AgencySettingsClient() {
 
   const [inviteOpen, setInviteOpen] = useState(false);
   const [inviteEmail, setInviteEmail] = useState("");
-  const [tempPassword, setTempPassword] = useState<string | null>(null);
+  const [pendingAdminPasswords, setPendingAdminPasswords] = useState<PendingAdminPassword[]>([]);
+  const skipNextPersistRef = useRef(true);
   const [messageLogs, setMessageLogs] = useState<MessageLogRow[]>([]);
   const [logsLoading, setLogsLoading] = useState(false);
 
@@ -100,6 +136,34 @@ export function AgencySettingsClient() {
   useEffect(() => {
     void load();
   }, []);
+
+  useEffect(() => {
+    try {
+      const saved = window.localStorage.getItem(AGENCY_TEAM_TEMP_PASS_STORAGE_KEY);
+      setPendingAdminPasswords(parsePendingAdminPasswords(saved));
+    } catch {
+      // Ignore parse/storage errors in restricted environments.
+    }
+  }, []);
+
+  useEffect(() => {
+    if (skipNextPersistRef.current) {
+      skipNextPersistRef.current = false;
+      return;
+    }
+    try {
+      if (pendingAdminPasswords.length === 0) {
+        window.localStorage.removeItem(AGENCY_TEAM_TEMP_PASS_STORAGE_KEY);
+        return;
+      }
+      window.localStorage.setItem(
+        AGENCY_TEAM_TEMP_PASS_STORAGE_KEY,
+        JSON.stringify(pendingAdminPasswords)
+      );
+    } catch {
+      // Ignore storage errors in restricted environments.
+    }
+  }, [pendingAdminPasswords]);
 
   useEffect(() => {
     if (tab !== "notifications") return;
@@ -204,9 +268,26 @@ export function AgencySettingsClient() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email: inviteEmail.trim() }),
       });
-      const j = await res.json();
+      const j = (await res.json()) as {
+        error?: string;
+        user?: { id?: string; email?: string };
+        temporaryPassword?: string;
+      };
       if (!res.ok) throw new Error(j.error ?? "Invite failed");
-      setTempPassword(j.temporaryPassword as string);
+      const user = j.user;
+      const temporaryPassword = j.temporaryPassword;
+      if (user?.id && temporaryPassword) {
+        const email = typeof user.email === "string" ? user.email : inviteEmail.trim();
+        setPendingAdminPasswords((prev) => [
+          ...prev.filter((p) => p.userId !== user.id),
+          {
+            userId: user.id,
+            email,
+            password: temporaryPassword,
+            expiresAt: Date.now() + AGENCY_TEAM_TEMP_PASS_TTL_MS,
+          },
+        ]);
+      }
       setInviteOpen(false);
       setInviteEmail("");
       setToast("Admin user created.");
@@ -216,6 +297,19 @@ export function AgencySettingsClient() {
     } finally {
       setSaving(false);
     }
+  }
+
+  async function copyPendingPassword(password: string) {
+    try {
+      await navigator.clipboard.writeText(password);
+      setToast("Temporary password copied.");
+    } catch {
+      setToast("Could not copy automatically. Please copy manually.");
+    }
+  }
+
+  function dismissPendingInvitePassword(userId: string) {
+    setPendingAdminPasswords((prev) => prev.filter((p) => p.userId !== userId));
   }
 
   async function deactivateAdmin(id: string) {
@@ -435,12 +529,39 @@ export function AgencySettingsClient() {
                 Invite admin
               </button>
             </div>
-            {tempPassword ? (
-              <div className="rounded-md border border-amber-500/40 bg-amber-500/10 px-3 py-2 text-sm">
-                Temporary password (copy now): <code className="font-mono">{tempPassword}</code>
-                <button type="button" className="ml-2 underline" onClick={() => setTempPassword(null)}>
-                  Dismiss
-                </button>
+            {pendingAdminPasswords.length > 0 ? (
+              <div className="space-y-3">
+                {pendingAdminPasswords.map((p) => (
+                  <div
+                    key={p.userId}
+                    className="rounded-md border border-amber-500/40 bg-amber-500/10 px-3 py-2 text-sm text-ink-primary"
+                  >
+                    <div className="flex flex-wrap items-baseline gap-x-2 gap-y-1">
+                      <span className="text-ink-secondary">Temporary password for</span>
+                      <span className="font-medium">{p.email}</span>
+                    </div>
+                    <div className="mt-2 font-mono text-sm">
+                      <code className="break-all">{p.password}</code>
+                    </div>
+                    <div className="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-ink-tertiary">
+                      <span>Expires {format(new Date(p.expiresAt), "MMM d, yyyy")}</span>
+                      <button
+                        type="button"
+                        className="text-ink-primary underline underline-offset-2 hover:text-ink-secondary"
+                        onClick={() => void copyPendingPassword(p.password)}
+                      >
+                        Copy
+                      </button>
+                      <button
+                        type="button"
+                        className="text-ink-primary underline underline-offset-2 hover:text-ink-secondary"
+                        onClick={() => dismissPendingInvitePassword(p.userId)}
+                      >
+                        Dismiss
+                      </button>
+                    </div>
+                  </div>
+                ))}
               </div>
             ) : null}
             <div className="overflow-x-auto rounded-lg border border-border">

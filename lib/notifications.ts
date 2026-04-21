@@ -116,12 +116,39 @@ export async function notifyNewLead(
         }
       );
       console.log("[notifyNewLead] Email to salesperson: skipped (no email)");
+    } else if (!process.env.RESEND_API_KEY) {
+      await logMessage(
+        { ok: false, error: "Resend API key not configured", errorCode: "NO_RESEND" },
+        {
+          userId: salesperson.id,
+          leadId: lead.id,
+          clientId: lead.client_id,
+          channel: "email",
+          notificationType: "NEW_LEAD",
+          recipient: to,
+          payloadPreview: fallbackSales,
+        }
+      );
+      console.info("[notifyNewLead] Email to salesperson: skipped (Resend API key not configured)");
+    } else if (!process.env.RESEND_FROM_EMAIL?.trim()) {
+      await logMessage(
+        { ok: false, error: "RESEND_FROM_EMAIL not set", errorCode: "NO_FROM_EMAIL" },
+        {
+          userId: salesperson.id,
+          leadId: lead.id,
+          clientId: lead.client_id,
+          channel: "email",
+          notificationType: "NEW_LEAD",
+          recipient: to,
+          payloadPreview: fallbackSales,
+        }
+      );
+      console.error("[notifyNewLead] RESEND_FROM_EMAIL not set — salesperson email not sent");
     } else {
-      const from = process.env.RESEND_FROM_EMAIL || "noreply@example.com";
       const r = await sendEmailWithLog({
         mail: {
           to,
-          from,
+          from: process.env.RESEND_FROM_EMAIL,
           subject: `New lead: ${lead.name ?? "Lead"} — ${clientName}`,
           html: `
           <p>New lead assigned to you.</p>
@@ -589,7 +616,7 @@ export async function notifyAdminsNoSalesperson(params: {
     const r = await sendEmailWithLog({
       mail: {
         to: a.email as string,
-        from,
+        from: from,
         subject: "Lead with no assignee",
         text,
       },

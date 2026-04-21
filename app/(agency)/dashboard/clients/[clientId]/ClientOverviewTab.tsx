@@ -14,6 +14,7 @@ export function ClientOverviewTab({
   landingPublished,
   landingPublicUrl,
   fbPageName,
+  fbPageId,
   notificationsConfigured,
   onboarding,
 }: {
@@ -24,6 +25,7 @@ export function ClientOverviewTab({
   landingPublished: boolean;
   landingPublicUrl: string;
   fbPageName: string | null;
+  fbPageId: string | null;
   notificationsConfigured: boolean;
   onboarding: {
     formFieldCount: number;
@@ -32,6 +34,8 @@ export function ClientOverviewTab({
     fbConnected: boolean;
   };
 }) {
+  const fbIntegrationActive = Boolean(fbPageName?.trim() || fbPageId);
+
   return (
     <div className="space-y-12">
       <OnboardingChecklist
@@ -117,16 +121,16 @@ export function ClientOverviewTab({
           />
           <IntegrationCard
             label="Facebook"
-            statusDotClass={fbPageName ? "bg-[var(--success)]" : "bg-ink-tertiary"}
+            statusDotClass={fbIntegrationActive ? "bg-[var(--success)]" : "bg-ink-tertiary"}
             statusText={
-              fbPageName ? (
-                <span className="truncate">{fbPageName}</span>
+              fbIntegrationActive ? (
+                <span className="truncate">{fbPageName?.trim() || "Page linked"}</span>
               ) : (
                 <span className="text-ink-secondary">Not connected</span>
               )
             }
             href={`/dashboard/clients/${clientId}/facebook`}
-            linkLabel={fbPageName ? "View →" : "Configure →"}
+            linkLabel={fbIntegrationActive ? "View →" : "Configure →"}
           />
           <IntegrationCard
             label="Notifications"

@@ -24,7 +24,9 @@ export async function GET() {
   const twilioSid = process.env.TWILIO_ACCOUNT_SID ?? "";
   const twilioFrom = process.env.TWILIO_WHATSAPP_FROM ?? "";
   const resendKey = Boolean(process.env.RESEND_API_KEY);
-  const resendFrom = process.env.RESEND_FROM_EMAIL ?? "";
+  const resendFrom = process.env.RESEND_FROM_EMAIL?.trim() ?? "";
+  /** Resend sends fail without a verified-domain From; API key alone is not enough. */
+  const resendReady = Boolean(resendKey && resendFrom);
 
   return NextResponse.json({
     settings,
@@ -35,7 +37,7 @@ export async function GET() {
         whatsappFrom: twilioFrom || null,
       },
       resend: {
-        configured: resendKey,
+        configured: resendReady,
         fromEmail: resendFrom || null,
       },
     },

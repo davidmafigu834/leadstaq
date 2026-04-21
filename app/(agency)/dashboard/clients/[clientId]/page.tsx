@@ -44,13 +44,15 @@ export default async function ClientDetailPage({ params }: { params: { clientId:
   const landingPublicUrl = getPublicLandingPageUrl(client.slug as string);
   const landingPublished = Boolean(landing?.published);
   const fbPageName = (client.fb_page_name as string | null) ?? null;
+  const fbPageId = (client.fb_page_id as string | null) ?? null;
   const notificationsConfigured =
     Boolean(process.env.TWILIO_ACCOUNT_SID && process.env.TWILIO_AUTH_TOKEN) &&
-    Boolean(process.env.RESEND_API_KEY);
+    Boolean(process.env.RESEND_API_KEY && process.env.RESEND_FROM_EMAIL?.trim());
 
   const hero = buildClientDetailHero(
     {
       fb_form_id: client.fb_form_id as string | null,
+      fb_page_id: client.fb_page_id as string | null,
       fb_page_name: client.fb_page_name as string | null,
       fb_token_expired_at: client.fb_token_expired_at as string | null,
       twilio_whatsapp_override: client.twilio_whatsapp_override as string | null,
@@ -96,6 +98,7 @@ export default async function ClientDetailPage({ params }: { params: { clientId:
           landingPublished={landingPublished}
           landingPublicUrl={landingPublicUrl}
           fbPageName={fbPageName}
+          fbPageId={fbPageId}
           notificationsConfigured={notificationsConfigured}
           onboarding={{ formFieldCount, salespeopleCount, hasManager, fbConnected }}
         />

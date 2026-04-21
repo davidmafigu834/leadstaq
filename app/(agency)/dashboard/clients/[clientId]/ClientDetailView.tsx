@@ -67,6 +67,10 @@ export function ClientDetailView({
     activeTabRef.current?.scrollIntoView({ behavior: "smooth", block: "nearest", inline: "center" });
   }, [pathname]);
 
+  const facebookLinked = Boolean(hero.fbFormId || hero.fbPageId);
+  const facebookLiveLabel =
+    hero.fbPageName?.trim() ? hero.fbPageName : facebookLinked ? "Connected" : "Not connected";
+
   const notifStatus: "active" | "not_configured" =
     hero.notificationsEnvConfigured || Boolean(hero.twilioWhatsappOverride?.trim()) ? "active" : "not_configured";
   const notifLive =
@@ -99,8 +103,8 @@ export function ClientDetailView({
           />
           <StatusIndicator
             label="Facebook"
-            status={hero.fbFormId ? "connected" : "disconnected"}
-            liveLabel={hero.fbPageName || "Connected"}
+            status={facebookLinked ? "connected" : "disconnected"}
+            liveLabel={facebookLiveLabel}
             draftLabel="Not connected"
             tokenExpired={Boolean(hero.fbTokenExpiredAt)}
           />

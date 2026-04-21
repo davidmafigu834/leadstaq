@@ -4,6 +4,7 @@ import { createAdminClient } from "@/lib/supabase/admin";
 export type ClientDetailHeroProps = {
   landingPublished: boolean;
   fbFormId: string | null;
+  fbPageId: string | null;
   fbPageName: string | null;
   fbTokenExpiredAt: string | null;
   twilioWhatsappOverride: string | null;
@@ -12,13 +13,17 @@ export type ClientDetailHeroProps = {
 
 export function agencyNotificationsEnvConfigured(): boolean {
   return Boolean(
-    process.env.TWILIO_ACCOUNT_SID && process.env.TWILIO_AUTH_TOKEN && process.env.RESEND_API_KEY
+    process.env.TWILIO_ACCOUNT_SID &&
+      process.env.TWILIO_AUTH_TOKEN &&
+      process.env.RESEND_API_KEY &&
+      process.env.RESEND_FROM_EMAIL?.trim()
   );
 }
 
 export function buildClientDetailHero(
   client: {
     fb_form_id?: string | null;
+    fb_page_id?: string | null;
     fb_page_name?: string | null;
     fb_token_expired_at?: string | null;
     twilio_whatsapp_override?: string | null;
@@ -28,6 +33,7 @@ export function buildClientDetailHero(
   return {
     landingPublished,
     fbFormId: client.fb_form_id ?? null,
+    fbPageId: client.fb_page_id ?? null,
     fbPageName: client.fb_page_name ?? null,
     fbTokenExpiredAt: client.fb_token_expired_at ?? null,
     twilioWhatsappOverride: client.twilio_whatsapp_override ?? null,
