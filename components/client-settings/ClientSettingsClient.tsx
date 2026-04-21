@@ -47,6 +47,7 @@ type UserRow = {
   is_active: boolean;
   round_robin_order: number;
 };
+type ManagerRow = { id: string; name: string; email: string; phone: string | null };
 
 export function ClientSettingsClient({
   clientId,
@@ -65,6 +66,8 @@ export function ClientSettingsClient({
   agencyDefaultHours: number;
   initialTab?: string;
 }) {
+  const TEMP_PASS_TTL_MS = 30 * 24 * 60 * 60 * 1000;
+  const tempPassStorageKey = `client-settings-temp-pass:${clientId}`;
   const [tab, setTab] = useState(() => normalizeSettingsTab(initialTab));
   const notificationsSectionRef = useRef<HTMLDivElement>(null);
   const [toast, setToast] = useState<string | null>(null);
@@ -72,7 +75,7 @@ export function ClientSettingsClient({
 
   const [client, setClient] = useState(initialClient);
   const [sales, setSales] = useState(initialSalespeople);
-  const manager = initialManager;
+  const [manager, setManager] = useState<ManagerRow | null>(initialManager);
 
   const [profileForm, setProfileForm] = useState({
     name: String(initialClient.name ?? ""),
@@ -97,7 +100,9 @@ export function ClientSettingsClient({
   const [inviteSalesOpen, setInviteSalesOpen] = useState(false);
   const [inviteMgrOpen, setInviteMgrOpen] = useState(false);
   const [inviteForm, setInviteForm] = useState({ name: "", email: "", phone: "" });
+  const [inviteError, setInviteError] = useState<string | null>(null);
   const [tempPass, setTempPass] = useState<string | null>(null);
+  const [tempPassExpiresAt, setTempPassExpiresAt] = useState<number | null>(null);
 
   const rrList = useMemo(
     () => [...sales].filter((s) => s.is_active).sort((a, b) => a.round_robin_order - b.round_robin_order),
@@ -111,6 +116,43 @@ export function ClientSettingsClient({
     const t = window.setTimeout(() => setToast(null), 4000);
     return () => window.clearTimeout(t);
   }, [toast]);
+
+  useEffect(() => {
+    try {
+      const saved = window.localStorage.getItem(tempPassStorageKey);
+      if (!saved) return;
+      const parsed = JSON.parse(saved) as { value?: unknown; expiresAt?: unknown };
+      const value = typeof parsed.value === "string" ? parsed.value : null;
+      const expiresAt = typeof parsed.expiresAt === "number" ? parsed.expiresAt : null;
+      if (!value || !expiresAt) {
+        window.localStorage.removeItem(tempPassStorageKey);
+        return;
+      }
+      if (Date.now() >= expiresAt) {
+        window.localStorage.removeItem(tempPassStorageKey);
+        return;
+      }
+      setTempPass(value);
+      setTempPassExpiresAt(expiresAt);
+    } catch {
+      // Ignore parse/storage errors in restricted environments.
+    }
+  }, [tempPassStorageKey]);
+
+  useEffect(() => {
+    try {
+      if (tempPass) {
+        const expiresAt = tempPassExpiresAt ?? Date.now() + TEMP_PASS_TTL_MS;
+        window.localStorage.setItem(tempPassStorageKey, JSON.stringify({ value: tempPass, expiresAt }));
+        if (tempPassExpiresAt == null) setTempPassExpiresAt(expiresAt);
+      } else {
+        window.localStorage.removeItem(tempPassStorageKey);
+        if (tempPassExpiresAt != null) setTempPassExpiresAt(null);
+      }
+    } catch {
+      // Ignore storage errors in restricted environments.
+    }
+  }, [tempPass, tempPassExpiresAt, tempPassStorageKey, TEMP_PASS_TTL_MS]);
 
   useEffect(() => {
     if (tab !== "notifications") return;
@@ -215,6 +257,7 @@ export function ClientSettingsClient({
 
   async function inviteSales() {
     setSaving(true);
+    setInviteError(null);
     try {
       const res = await fetch(`/api/clients/${clientId}/users`, {
         method: "POST",
@@ -228,12 +271,31 @@ export function ClientSettingsClient({
       });
       const j = await res.json();
       if (!res.ok) throw new Error(j.error ?? "Failed");
-      setTempPass(j.temporaryPassword as string);
+      const newUser = j.user as Partial<UserRow> | undefined;
+      if (j.temporaryPassword) {
+        setTempPass(j.temporaryPassword as string);
+        setTempPassExpiresAt(Date.now() + TEMP_PASS_TTL_MS);
+      }
+      if (j.message) setToast(String(j.message));
       setInviteSalesOpen(false);
       setInviteForm({ name: "", email: "", phone: "" });
-      window.location.reload();
+      if (newUser?.id && newUser?.name && newUser?.email) {
+        setSales((prev) => [
+          ...prev,
+          {
+            id: newUser.id,
+            name: newUser.name,
+            email: newUser.email,
+            phone: typeof newUser.phone === "string" ? newUser.phone : null,
+            is_active: true,
+            round_robin_order: prev.length,
+          },
+        ]);
+      }
     } catch (e) {
-      setToast(e instanceof Error ? e.message : "Error");
+      const msg = e instanceof Error ? e.message : "Error";
+      setInviteError(msg);
+      setToast(msg);
     } finally {
       setSaving(false);
     }
@@ -241,6 +303,7 @@ export function ClientSettingsClient({
 
   async function inviteManager() {
     setSaving(true);
+    setInviteError(null);
     try {
       const res = await fetch(`/api/clients/${clientId}/users`, {
         method: "POST",
@@ -254,12 +317,26 @@ export function ClientSettingsClient({
       });
       const j = await res.json();
       if (!res.ok) throw new Error(j.error ?? "Failed");
-      setTempPass(j.temporaryPassword as string);
+      const newMgr = j.user as Partial<ManagerRow> | undefined;
+      if (j.temporaryPassword) {
+        setTempPass(j.temporaryPassword as string);
+        setTempPassExpiresAt(Date.now() + TEMP_PASS_TTL_MS);
+      }
+      if (j.message) setToast(String(j.message));
       setInviteMgrOpen(false);
       setInviteForm({ name: "", email: "", phone: "" });
-      window.location.reload();
+      if (newMgr?.id && newMgr?.name && newMgr?.email) {
+        setManager({
+          id: newMgr.id,
+          name: newMgr.name,
+          email: newMgr.email,
+          phone: typeof newMgr.phone === "string" ? newMgr.phone : null,
+        });
+      }
     } catch (e) {
-      setToast(e instanceof Error ? e.message : "Error");
+      const msg = e instanceof Error ? e.message : "Error";
+      setInviteError(msg);
+      setToast(msg);
     } finally {
       setSaving(false);
     }
@@ -290,6 +367,16 @@ export function ClientSettingsClient({
     setSales((prev) => prev.filter((u) => u.id !== id));
   }
 
+  async function copyTempPassword() {
+    if (!tempPass) return;
+    try {
+      await navigator.clipboard.writeText(tempPass);
+      setToast("Temporary password copied.");
+    } catch {
+      setToast("Could not copy automatically. Please copy manually.");
+    }
+  }
+
   return (
     <div className="flex gap-10 pb-24">
       <VerticalSettingsNav tabs={TABS} active={tab} onChange={setTab} />
@@ -301,6 +388,9 @@ export function ClientSettingsClient({
         {tempPass ? (
           <div className="mb-4 rounded-md border border-amber-500/40 bg-amber-500/10 px-3 py-2 text-sm">
             Temporary password: <code className="font-mono">{tempPass}</code>
+            <button type="button" className="ml-2 underline" onClick={() => void copyTempPassword()}>
+              Copy
+            </button>
             <button type="button" className="ml-2 underline" onClick={() => setTempPass(null)}>
               Dismiss
             </button>
@@ -407,12 +497,26 @@ export function ClientSettingsClient({
                     <div className="font-mono text-xs text-ink-secondary">{manager.email}</div>
                     <div className="text-xs text-ink-tertiary">{manager.phone ?? "—"}</div>
                   </div>
-                  <button type="button" className="btn-ghost ml-auto text-sm" onClick={() => setInviteMgrOpen(true)}>
+                  <button
+                    type="button"
+                    className="btn-ghost ml-auto text-sm"
+                    onClick={() => {
+                      setInviteError(null);
+                      setInviteMgrOpen(true);
+                    }}
+                  >
                     Replace / invite
                   </button>
                 </div>
               ) : (
-                <button type="button" className="btn-primary mt-2" onClick={() => setInviteMgrOpen(true)}>
+                <button
+                  type="button"
+                  className="btn-primary mt-2"
+                  onClick={() => {
+                    setInviteError(null);
+                    setInviteMgrOpen(true);
+                  }}
+                >
                   Invite manager
                 </button>
               )}
@@ -421,7 +525,14 @@ export function ClientSettingsClient({
             <section>
               <div className="flex flex-wrap items-center justify-between gap-3">
                 <h3 className="font-mono text-[10px] uppercase text-ink-tertiary">Salespeople</h3>
-                <button type="button" className="btn-ghost text-sm" onClick={() => setInviteSalesOpen(true)}>
+                <button
+                  type="button"
+                  className="btn-ghost text-sm"
+                  onClick={() => {
+                    setInviteError(null);
+                    setInviteSalesOpen(true);
+                  }}
+                >
                   Add salesperson
                 </button>
               </div>
@@ -505,39 +616,49 @@ export function ClientSettingsClient({
             </section>
 
             {(inviteSalesOpen || inviteMgrOpen) && (
-              <div className="fixed inset-0 z-50 flex items-center justify-center bg-[var(--surface-overlay)] p-4">
-                <div className="w-full max-w-md rounded-lg border border-border bg-surface-card p-6 shadow-lg">
+              <div className="fixed inset-0 z-50 flex flex-col bg-[var(--surface-overlay)] p-0 md:items-center md:justify-center md:p-4">
+                <div className="flex h-full w-full max-w-md flex-col border border-border bg-surface-card p-5 shadow-lg md:h-auto md:rounded-lg md:p-6">
                   <h3 className="font-display text-xl">{inviteSalesOpen ? "Invite salesperson" : "Invite manager"}</h3>
                   <label className="mt-3 block text-sm">
                     Name
                     <input
-                      className="mt-1 w-full rounded-md border border-border px-3 py-2"
+                      className="mt-1 w-full rounded-md border border-border px-3 py-2 text-base md:text-sm"
                       value={inviteForm.name}
                       onChange={(e) => setInviteForm((f) => ({ ...f, name: e.target.value }))}
+                      autoCapitalize="words"
                     />
                   </label>
                   <label className="mt-3 block text-sm">
                     Email
                     <input
-                      className="mt-1 w-full rounded-md border border-border px-3 py-2"
+                      className="mt-1 w-full rounded-md border border-border px-3 py-2 text-base md:text-sm"
                       value={inviteForm.email}
                       onChange={(e) => setInviteForm((f) => ({ ...f, email: e.target.value }))}
+                      inputMode="email"
+                      autoCapitalize="off"
                     />
                   </label>
                   <label className="mt-3 block text-sm">
-                    Phone (E.164)
+                    Phone (E.164{inviteMgrOpen ? ", optional for manager" : ""})
                     <input
-                      className="mt-1 w-full rounded-md border border-border px-3 py-2"
+                      className="mt-1 w-full rounded-md border border-border px-3 py-2 text-base md:text-sm"
                       value={inviteForm.phone}
                       onChange={(e) => setInviteForm((f) => ({ ...f, phone: e.target.value }))}
                       placeholder="+15551234567"
+                      inputMode="tel"
                     />
                   </label>
-                  <div className="mt-4 flex justify-end gap-2">
+                  {inviteError ? (
+                    <p className="mt-3 rounded-md border border-[var(--danger-border)] bg-[var(--danger-bg)] px-3 py-2 text-sm text-[var(--danger-fg)]">
+                      {inviteError}
+                    </p>
+                  ) : null}
+                  <div className="safe-bottom mt-auto flex justify-end gap-2 border-t border-border pt-4 md:mt-4 md:border-t-0 md:pt-0">
                     <button
                       type="button"
-                      className="btn-ghost"
+                      className="btn-ghost h-11 flex-1 md:h-9 md:flex-none"
                       onClick={() => {
+                        setInviteError(null);
                         setInviteSalesOpen(false);
                         setInviteMgrOpen(false);
                       }}
@@ -546,7 +667,7 @@ export function ClientSettingsClient({
                     </button>
                     <button
                       type="button"
-                      className="btn-primary"
+                      className="btn-primary h-11 flex-1 md:h-9 md:flex-none"
                       disabled={saving}
                       onClick={() => void (inviteSalesOpen ? inviteSales() : inviteManager())}
                     >

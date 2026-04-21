@@ -7,6 +7,8 @@ import { ClientDetailView } from "../ClientDetailView";
 import { getPublicLandingPageUrl } from "@/lib/public-url";
 import { ClientSettingsClient } from "@/components/client-settings/ClientSettingsClient";
 
+export const dynamic = "force-dynamic";
+
 export default async function ClientSettingsPage({
   params,
   searchParams,

@@ -18,7 +18,7 @@ type SettingsPayload = {
   };
   connections: {
     twilio: { configured: boolean; accountSidMasked: string | null; whatsappFrom: string | null };
-    sendgrid: { configured: boolean; fromEmail: string | null };
+    resend: { configured: boolean; fromEmail: string | null };
   };
 };
 
@@ -363,17 +363,17 @@ export function AgencySettingsClient() {
               <div className="rounded-lg border border-border bg-surface-card p-4">
                 <div className="flex items-center gap-2">
                   <span
-                    className={`h-2 w-2 shrink-0 rounded-full ${data?.connections.sendgrid.configured ? "bg-emerald-500" : "bg-red-500"}`}
+                    className={`h-2 w-2 shrink-0 rounded-full ${data?.connections.resend.configured ? "bg-emerald-500" : "bg-red-500"}`}
                   />
-                  <div className="font-mono text-[10px] uppercase text-ink-tertiary">SendGrid</div>
+                  <div className="font-mono text-[10px] uppercase text-ink-tertiary">Resend</div>
                 </div>
                 <p className="mt-2 text-sm">
-                  <span className={data?.connections.sendgrid.configured ? "text-emerald-600" : "text-red-600"}>
-                    {data?.connections.sendgrid.configured ? "Connected" : "Not configured"}
+                  <span className={data?.connections.resend.configured ? "text-emerald-600" : "text-red-600"}>
+                    {data?.connections.resend.configured ? "Connected" : "Not configured"}
                   </span>
                 </p>
                 <p className="mt-1 font-mono text-xs text-ink-secondary">
-                  From email: {data?.connections.sendgrid.fromEmail ?? "—"}
+                  From email: {data?.connections.resend.fromEmail ?? "—"}
                 </p>
               </div>
             </div>

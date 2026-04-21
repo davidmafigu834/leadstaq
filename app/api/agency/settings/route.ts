@@ -23,8 +23,8 @@ export async function GET() {
   const settings = await getAgencySettings();
   const twilioSid = process.env.TWILIO_ACCOUNT_SID ?? "";
   const twilioFrom = process.env.TWILIO_WHATSAPP_FROM ?? "";
-  const sendgridKey = Boolean(process.env.SENDGRID_API_KEY);
-  const sendgridFrom = process.env.SENDGRID_FROM_EMAIL ?? "";
+  const resendKey = Boolean(process.env.RESEND_API_KEY);
+  const resendFrom = process.env.RESEND_FROM_EMAIL ?? "";
 
   return NextResponse.json({
     settings,
@@ -34,9 +34,9 @@ export async function GET() {
         accountSidMasked: twilioSid ? `${twilioSid.slice(0, 4)}…${twilioSid.slice(-4)}` : null,
         whatsappFrom: twilioFrom || null,
       },
-      sendgrid: {
-        configured: sendgridKey,
-        fromEmail: sendgridFrom || null,
+      resend: {
+        configured: resendKey,
+        fromEmail: resendFrom || null,
       },
     },
   });

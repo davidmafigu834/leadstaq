@@ -43,14 +43,14 @@ export async function POST() {
   }
 
   const email = (user?.email as string | null)?.trim();
-  const sendFrom = process.env.SENDGRID_FROM_EMAIL;
+  const sendFrom = process.env.RESEND_FROM_EMAIL;
   if (email && sendFrom) {
     const mail = await sendEmailWithLog({
       mail: {
         to: email,
         from: sendFrom,
         subject: "Leadstaq test email",
-        text: "Test email — your SendGrid integration is working.",
+        text: "Test email — your Resend integration is working.",
       },
       context: {
         userId: g.session.userId,

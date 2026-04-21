@@ -108,8 +108,8 @@ export function TemplatePreviewModal({
   const w = WIDTH[device];
 
   return (
-    <div className="fixed inset-0 z-[70] flex items-center justify-center bg-[var(--surface-overlay)] p-4">
-      <div className="flex max-h-[90vh] w-full max-w-[1280px] flex-col overflow-hidden rounded-2xl bg-white shadow-lg">
+    <div className="fixed inset-0 z-[70] flex flex-col bg-[var(--surface-overlay)] md:items-center md:justify-center md:p-4">
+      <div className="flex h-full w-full max-w-[1280px] flex-col overflow-hidden bg-white shadow-lg md:max-h-[90vh] md:rounded-2xl">
         <header className="flex h-[60px] shrink-0 items-center gap-4 border-b border-[var(--border)] px-4 md:px-6">
           <button type="button" className="btn-ghost h-9 w-9 shrink-0 p-0" onClick={onClose} aria-label="Close">
             <X className="h-5 w-5" />
@@ -214,8 +214,8 @@ export function TemplatePreviewModal({
       </div>
 
       {applyOpen ? (
-        <div className="fixed inset-0 z-[80] flex items-center justify-center bg-black/50 p-4">
-          <div className="max-h-[90vh] w-full max-w-lg overflow-y-auto rounded-xl bg-white p-6 shadow-xl">
+        <div className="fixed inset-0 z-[80] flex flex-col bg-black/50 p-0 md:items-center md:justify-center md:p-4">
+          <div className="flex h-full w-full max-w-lg flex-col overflow-y-auto bg-white p-5 shadow-xl md:max-h-[90vh] md:rounded-xl md:p-6">
             <h3 className="font-display text-xl text-[var(--text-primary)]">Apply {t?.name ?? "template"} to a client</h3>
             <ul className="mt-4 max-h-64 space-y-1 overflow-y-auto border border-[var(--border)] rounded-lg p-1">
               {clients.map((c) => (
@@ -258,11 +258,11 @@ export function TemplatePreviewModal({
                 </span>
               </label>
             </div>
-            <div className="mt-6 flex justify-end gap-2">
-              <button type="button" className="btn-ghost h-9 px-3 text-sm" onClick={() => (setApplyOpen(false), onCloseApplyMode())}>
+            <div className="safe-bottom mt-auto flex justify-end gap-2 border-t border-[var(--border)] pt-4 md:mt-6 md:border-t-0 md:pt-0">
+              <button type="button" className="btn-ghost h-11 px-3 text-sm md:h-9" onClick={() => (setApplyOpen(false), onCloseApplyMode())}>
                 Cancel
               </button>
-              <button type="button" className="h-9 rounded-md bg-[var(--accent)] px-4 text-sm font-semibold text-[var(--accent-ink)] disabled:opacity-50" disabled={!clientId || applying} onClick={() => void apply()}>
+              <button type="button" className="h-11 rounded-md bg-[var(--accent)] px-4 text-sm font-semibold text-[var(--accent-ink)] disabled:opacity-50 md:h-9" disabled={!clientId || applying} onClick={() => void apply()}>
                 {applying ? "Applying…" : "Apply template"}
               </button>
             </div>

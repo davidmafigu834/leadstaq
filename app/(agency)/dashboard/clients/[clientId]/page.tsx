@@ -46,7 +46,7 @@ export default async function ClientDetailPage({ params }: { params: { clientId:
   const fbPageName = (client.fb_page_name as string | null) ?? null;
   const notificationsConfigured =
     Boolean(process.env.TWILIO_ACCOUNT_SID && process.env.TWILIO_AUTH_TOKEN) &&
-    Boolean(process.env.SENDGRID_API_KEY);
+    Boolean(process.env.RESEND_API_KEY);
 
   const hero = buildClientDetailHero(
     {

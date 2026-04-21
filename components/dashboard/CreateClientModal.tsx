@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { X } from "lucide-react";
+import { ChevronLeft, X } from "lucide-react";
 
 function suggestSlugFromName(name: string): string {
   const s = name
@@ -88,64 +88,73 @@ export function CreateClientModal({ open, onClose }: { open: boolean; onClose: (
   }
 
   return (
-    <div className="fixed inset-0 z-[60] flex items-center justify-center bg-surface-overlay px-4 py-8">
-      <div className="relative max-h-[90vh] w-full max-w-lg overflow-y-auto rounded-lg border border-border bg-surface-card p-6 shadow-lg">
-        <button
-          type="button"
-          className="absolute right-4 top-4 text-ink-tertiary hover:text-ink-primary"
-          onClick={onClose}
-          aria-label="Close"
-        >
-          <X className="h-5 w-5" strokeWidth={1.5} />
-        </button>
-        <h2 className="pr-10 font-display text-xl text-ink-primary">New client</h2>
-        <p className="mt-2 text-sm text-ink-secondary">
-          After you create the client, you will go to their overview to finish setup (landing page, form, team, and
-          optional Facebook).
-        </p>
-        <form onSubmit={(e) => void handleSubmit(e)} className="mt-6 space-y-4">
-          <div>
-            <label className="mb-1 block text-[12px] font-medium text-ink-secondary">Client name *</label>
-            <input
-              className="input-base h-10 w-full"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              required
-              autoFocus
-            />
+    <div className="fixed inset-0 z-[60] flex flex-col bg-surface-overlay md:items-center md:justify-center md:px-4 md:py-8">
+      <div className="flex h-full w-full flex-col border border-border bg-surface-card shadow-lg md:h-auto md:max-h-[90vh] md:max-w-lg md:rounded-lg">
+        <header className="flex h-14 items-center gap-3 border-b border-border px-4 md:h-auto md:border-b-0 md:px-6 md:pt-6">
+          <button type="button" className="flex h-9 w-9 items-center justify-center md:hidden" onClick={onClose} aria-label="Back">
+            <ChevronLeft className="h-5 w-5" strokeWidth={1.5} />
+          </button>
+          <h2 className="min-w-0 flex-1 truncate font-display text-xl text-ink-primary">New client</h2>
+          <button
+            type="button"
+            className="hidden text-ink-tertiary hover:text-ink-primary md:block"
+            onClick={onClose}
+            aria-label="Close"
+          >
+            <X className="h-5 w-5" strokeWidth={1.5} />
+          </button>
+        </header>
+        <form onSubmit={(e) => void handleSubmit(e)} className="flex min-h-0 flex-1 flex-col">
+          <div className="min-h-0 flex-1 overflow-y-auto px-4 pb-6 pt-4 md:px-6 md:pt-2">
+            <p className="mt-2 text-sm text-ink-secondary">
+              After you create the client, you will go to their overview to finish setup (landing page, form, team, and
+              optional Facebook).
+            </p>
+            <div className="mt-6 space-y-4">
+              <div>
+                <label className="mb-1 block text-[12px] font-medium text-ink-secondary">Client name *</label>
+                <input
+                  className="input-base h-11 w-full text-base md:h-10 md:text-sm"
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                  required
+                  autoFocus
+                />
+              </div>
+              <div>
+                <label className="mb-1 block text-[12px] font-medium text-ink-secondary">Industry *</label>
+                <input
+                  className="input-base h-11 w-full text-base md:h-10 md:text-sm"
+                  value={industry}
+                  onChange={(e) => setIndustry(e.target.value)}
+                  required
+                  placeholder="e.g. Solar, HVAC"
+                />
+              </div>
+              <div>
+                <label className="mb-1 block text-[12px] font-medium text-ink-secondary">URL slug *</label>
+                <input
+                  className="input-base h-11 w-full font-mono text-base md:h-10 md:text-sm"
+                  value={slug}
+                  onChange={(e) => {
+                    setSlugTouched(true);
+                    setSlug(e.target.value.toLowerCase());
+                  }}
+                  required
+                  pattern="[a-z0-9-]+"
+                  title="Lowercase letters, numbers, and hyphens only"
+                  placeholder="acme-roofing"
+                />
+                <p className="mt-1 text-xs text-ink-tertiary">Used in public URLs: /p/{slug || "your-slug"} …</p>
+              </div>
+              {error ? <p className="text-sm text-[var(--status-lost-fg)]">{error}</p> : null}
+            </div>
           </div>
-          <div>
-            <label className="mb-1 block text-[12px] font-medium text-ink-secondary">Industry *</label>
-            <input
-              className="input-base h-10 w-full"
-              value={industry}
-              onChange={(e) => setIndustry(e.target.value)}
-              required
-              placeholder="e.g. Solar, HVAC"
-            />
-          </div>
-          <div>
-            <label className="mb-1 block text-[12px] font-medium text-ink-secondary">URL slug *</label>
-            <input
-              className="input-base h-10 w-full font-mono text-sm"
-              value={slug}
-              onChange={(e) => {
-                setSlugTouched(true);
-                setSlug(e.target.value.toLowerCase());
-              }}
-              required
-              pattern="[a-z0-9-]+"
-              title="Lowercase letters, numbers, and hyphens only"
-              placeholder="acme-roofing"
-            />
-            <p className="mt-1 text-xs text-ink-tertiary">Used in public URLs: /p/{slug || "your-slug"} …</p>
-          </div>
-          {error ? <p className="text-sm text-[var(--status-lost-fg)]">{error}</p> : null}
-          <div className="flex justify-end gap-2 pt-2">
-            <button type="button" className="btn-ghost" onClick={onClose} disabled={submitting}>
+          <div className="safe-bottom mt-auto flex justify-end gap-2 border-t border-border p-4 md:px-6 md:pb-6">
+            <button type="button" className="btn-ghost h-11 flex-1 md:h-9 md:flex-none" onClick={onClose} disabled={submitting}>
               Cancel
             </button>
-            <button type="submit" className="btn-primary" disabled={submitting}>
+            <button type="submit" className="btn-primary h-11 flex-1 md:h-9 md:flex-none" disabled={submitting}>
               {submitting ? "Creating…" : "Create client"}
             </button>
           </div>

@@ -14,7 +14,7 @@
   },
   "dependencies": {
     "@hello-pangea/dnd": "^16.6.0",
-    "@sendgrid/mail": "^8.1.4",
+    "resend": "^4.6.0",
     "@supabase/supabase-js": "^2.49.1",
     "@vercel/functions": "^1.6.0",
     "bcryptjs": "^2.4.3",

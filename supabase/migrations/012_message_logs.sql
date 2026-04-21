@@ -1,4 +1,4 @@
--- Outbound delivery audit (Twilio / SendGrid), separate from in-app notifications table.
+-- Outbound delivery audit (Twilio / Resend), separate from in-app notifications table.
 
 create table if not exists public.message_logs (
   id uuid primary key default gen_random_uuid(),

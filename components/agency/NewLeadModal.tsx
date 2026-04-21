@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { X } from "lucide-react";
+import { ChevronLeft, X } from "lucide-react";
 import type { AppShellClientRow } from "@/components/shell/app-shell-types";
 
 export function NewLeadModal({
@@ -102,23 +102,29 @@ export function NewLeadModal({
     Boolean(clientId && name.trim() && phone.trim() && (assignMode === "round_robin" || assigneeId));
 
   return (
-    <div className="fixed inset-0 z-[60] flex items-center justify-center bg-surface-overlay px-4 py-8">
-      <div className="relative max-h-[90vh] w-full max-w-lg overflow-y-auto rounded-lg border border-border bg-surface-card p-6 shadow-lg">
-        <button
-          type="button"
-          className="absolute right-4 top-4 text-ink-tertiary hover:text-ink-primary"
-          onClick={onClose}
-          aria-label="Close"
-        >
-          <X className="h-5 w-5" strokeWidth={1.5} />
-        </button>
-        <h2 className="pr-10 font-display text-xl text-ink-primary">Create a lead manually</h2>
-        <form onSubmit={(e) => void handleSubmit(e)} className="mt-6 space-y-4">
+    <div className="fixed inset-0 z-[60] flex flex-col bg-surface-overlay md:items-center md:justify-center md:px-4 md:py-8">
+      <div className="flex h-full w-full flex-col border border-border bg-surface-card shadow-lg md:h-auto md:max-h-[90vh] md:max-w-lg md:rounded-lg">
+        <header className="flex h-14 items-center gap-3 border-b border-border px-4 md:h-auto md:border-b-0 md:px-6 md:pt-6">
+          <button type="button" className="flex h-9 w-9 items-center justify-center md:hidden" onClick={onClose} aria-label="Back">
+            <ChevronLeft className="h-5 w-5" strokeWidth={1.5} />
+          </button>
+          <h2 className="min-w-0 flex-1 truncate font-display text-xl text-ink-primary">Create a lead manually</h2>
+          <button
+            type="button"
+            className="hidden text-ink-tertiary hover:text-ink-primary md:block"
+            onClick={onClose}
+            aria-label="Close"
+          >
+            <X className="h-5 w-5" strokeWidth={1.5} />
+          </button>
+        </header>
+        <form onSubmit={(e) => void handleSubmit(e)} className="flex min-h-0 flex-1 flex-col">
+          <div className="min-h-0 flex-1 space-y-4 overflow-y-auto px-4 pb-6 pt-4 md:px-6 md:pt-2">
           <div>
             <label className="mb-1 block text-[12px] font-medium text-ink-secondary">Client *</label>
             <select
               required
-              className="input-base h-10 w-full"
+              className="input-base h-11 w-full text-base md:h-10 md:text-sm"
               value={clientId}
               onChange={(e) => setClientId(e.target.value)}
             >
@@ -133,15 +139,16 @@ export function NewLeadModal({
           <div className="grid gap-4 sm:grid-cols-2">
             <div>
               <label className="mb-1 block text-[12px] font-medium text-ink-secondary">Lead name *</label>
-              <input className="input-base h-10 w-full" value={name} onChange={(e) => setName(e.target.value)} required />
+              <input className="input-base h-11 w-full text-base md:h-10 md:text-sm" value={name} onChange={(e) => setName(e.target.value)} required />
             </div>
             <div>
               <label className="mb-1 block text-[12px] font-medium text-ink-secondary">Phone *</label>
               <input
-                className="input-base h-10 w-full font-mono text-sm"
+                className="input-base h-11 w-full font-mono text-base md:h-10 md:text-sm"
                 value={phone}
                 onChange={(e) => setPhone(e.target.value)}
                 placeholder="+263 77 123 4567"
+                inputMode="tel"
                 required
               />
               {phoneError ? <p className="mt-1 text-xs text-[var(--status-lost-fg)]">{phoneError}</p> : null}
@@ -150,26 +157,26 @@ export function NewLeadModal({
           <div className="grid gap-4 sm:grid-cols-2">
             <div>
               <label className="mb-1 block text-[12px] font-medium text-ink-secondary">Email</label>
-              <input type="email" className="input-base h-10 w-full" value={email} onChange={(e) => setEmail(e.target.value)} />
+              <input type="email" inputMode="email" autoCapitalize="off" className="input-base h-11 w-full text-base md:h-10 md:text-sm" value={email} onChange={(e) => setEmail(e.target.value)} />
             </div>
             <div>
               <label className="mb-1 block text-[12px] font-medium text-ink-secondary">Budget</label>
-              <input className="input-base h-10 w-full" value={budget} onChange={(e) => setBudget(e.target.value)} placeholder="$10K - $25K" />
+              <input className="input-base h-11 w-full text-base md:h-10 md:text-sm" value={budget} onChange={(e) => setBudget(e.target.value)} placeholder="$10K - $25K" />
             </div>
           </div>
           <div className="grid gap-4 sm:grid-cols-2">
             <div>
               <label className="mb-1 block text-[12px] font-medium text-ink-secondary">Project type</label>
-              <input className="input-base h-10 w-full" value={projectType} onChange={(e) => setProjectType(e.target.value)} />
+              <input className="input-base h-11 w-full text-base md:h-10 md:text-sm" value={projectType} onChange={(e) => setProjectType(e.target.value)} />
             </div>
             <div>
               <label className="mb-1 block text-[12px] font-medium text-ink-secondary">Timeline</label>
-              <input className="input-base h-10 w-full" value={timeline} onChange={(e) => setTimeline(e.target.value)} placeholder="Q3 2026" />
+              <input className="input-base h-11 w-full text-base md:h-10 md:text-sm" value={timeline} onChange={(e) => setTimeline(e.target.value)} placeholder="Q3 2026" />
             </div>
           </div>
           <div>
             <label className="mb-1 block text-[12px] font-medium text-ink-secondary">Notes</label>
-            <textarea className="input-base min-h-[88px] w-full py-2 text-sm" value={notes} onChange={(e) => setNotes(e.target.value)} rows={3} />
+            <textarea className="input-base min-h-[88px] w-full py-2 text-base md:text-sm" value={notes} onChange={(e) => setNotes(e.target.value)} rows={3} />
           </div>
           <div>
             <span className="mb-2 block text-[12px] font-medium text-ink-secondary">Assign to *</span>
@@ -185,7 +192,7 @@ export function NewLeadModal({
             </div>
             {assignMode === "specific" ? (
               <select
-                className="input-base mt-2 h-10 w-full"
+                className="input-base mt-2 h-11 w-full text-base md:h-10 md:text-sm"
                 value={assigneeId}
                 onChange={(e) => setAssigneeId(e.target.value)}
                 required={assignMode === "specific"}
@@ -208,11 +215,12 @@ export function NewLeadModal({
             />
             <span>Send WhatsApp + email notifications to the assigned salesperson</span>
           </label>
-          <div className="flex justify-end gap-2 pt-2">
-            <button type="button" className="btn-ghost text-sm" onClick={onClose}>
+          </div>
+          <div className="safe-bottom mt-auto flex justify-end gap-2 border-t border-border p-4 md:px-6 md:pb-6">
+            <button type="button" className="btn-ghost h-11 flex-1 text-sm md:h-9 md:flex-none" onClick={onClose}>
               Cancel
             </button>
-            <button type="submit" className="btn-primary text-sm" disabled={!canSubmit || submitting}>
+            <button type="submit" className="btn-primary h-11 flex-1 text-sm md:h-9 md:flex-none" disabled={!canSubmit || submitting}>
               {submitting ? "Creating…" : "Create lead"}
             </button>
           </div>

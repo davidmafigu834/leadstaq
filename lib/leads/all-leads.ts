@@ -196,6 +196,30 @@ type FetchResult = {
 };
 
 const MAX_SCAN = 8000;
+let shouldFilterArchivedLeads = true;
+
+function isMissingArchivedColumnError(error: unknown): boolean {
+  const msg =
+    error instanceof Error
+      ? error.message
+      : typeof error === "string"
+        ? error
+        : (error as { message?: unknown } | null)?.message;
+  if (typeof msg !== "string") return false;
+  return msg.includes("column leads.is_archived does not exist");
+}
+
+async function runWithArchivedFallback<T>(runner: () => Promise<T>): Promise<T> {
+  try {
+    return await runner();
+  } catch (error) {
+    if (shouldFilterArchivedLeads && isMissingArchivedColumnError(error)) {
+      shouldFilterArchivedLeads = false;
+      return runner();
+    }
+    throw error;
+  }
+}
 
 function applyCommonFilters(
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -205,7 +229,8 @@ function applyCommonFilters(
   to: Date | null
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
 ): any {
-  let out = q.eq("is_archived", false);
+  let out = q;
+  if (shouldFilterArchivedLeads) out = out.eq("is_archived", false);
   if (f.clientIds.length) out = out.in("client_id", f.clientIds);
   if (f.sources.length) out = out.in("source", f.sources);
   if (f.assigneeIds.length) {
@@ -316,140 +341,146 @@ function sortLeads(rows: LeadListRow[], f: LeadFilters, lastMap: Record<string, 
 }
 
 export async function fetchFilteredLeads(f: LeadFilters): Promise<FetchResult> {
-  const supabase = createAdminClient();
-  const { from, to } = dateBounds(f);
-  const select =
-    "id, name, phone, email, budget, project_type, source, status, deal_value, created_at, updated_at, follow_up_date, assigned_to_id, client_id, form_data, magic_token, clients ( id, name, slug, logo_url, response_time_limit_hours )";
+  return runWithArchivedFallback(async () => {
+    const supabase = createAdminClient();
+    const { from, to } = dateBounds(f);
+    const select =
+      "id, name, phone, email, budget, project_type, source, status, deal_value, created_at, updated_at, follow_up_date, assigned_to_id, client_id, form_data, magic_token, clients ( id, name, slug, logo_url, response_time_limit_hours )";
 
-  const needsMemorySort =
-    f.status === "uncontacted" ||
-    f.sortBy === "last_activity" ||
-    f.sortBy === "client" ||
-    (f.sortBy !== "created_at" && f.sortBy !== "name" && f.sortBy !== "deal_value" && f.sortBy !== "status");
+    const needsMemorySort =
+      f.status === "uncontacted" ||
+      f.sortBy === "last_activity" ||
+      f.sortBy === "client" ||
+      (f.sortBy !== "created_at" && f.sortBy !== "name" && f.sortBy !== "deal_value" && f.sortBy !== "status");
 
-  if (!needsMemorySort) {
-    let q = applyCommonFilters(supabase.from("leads").select(select, { count: "exact" }), f, from, to);
-    if (f.status !== "all" && f.status !== "uncontacted") {
-      q = q.eq("status", f.status);
+    if (!needsMemorySort) {
+      let q = applyCommonFilters(supabase.from("leads").select(select, { count: "exact" }), f, from, to);
+      if (f.status !== "all" && f.status !== "uncontacted") {
+        q = q.eq("status", f.status);
+      }
+      const ascending = f.sortDir === "asc";
+      const col =
+        f.sortBy === "name"
+          ? "name"
+          : f.sortBy === "deal_value"
+            ? "deal_value"
+            : f.sortBy === "status"
+              ? "status"
+              : "created_at";
+      const start = (f.page - 1) * f.pageSize;
+      const end = start + f.pageSize - 1;
+      const { data, error, count } = await q.order(col, { ascending, nullsFirst: false }).range(start, end);
+      if (error) throw new Error(error.message);
+      const rowsRaw = await attachAssignees((data ?? []) as unknown as LeadListRow[]);
+      const lastMap = await fetchLastCallTimes(rowsRaw.map((r) => r.id));
+      const rows = mergeLastCallAt(rowsRaw, lastMap);
+      return { rows, totalCount: count ?? rows.length };
     }
-    const ascending = f.sortDir === "asc";
-    const col =
-      f.sortBy === "name"
-        ? "name"
-        : f.sortBy === "deal_value"
-          ? "deal_value"
-          : f.sortBy === "status"
-            ? "status"
-            : "created_at";
-    const start = (f.page - 1) * f.pageSize;
-    const end = start + f.pageSize - 1;
-    const { data, error, count } = await q.order(col, { ascending, nullsFirst: false }).range(start, end);
-    if (error) throw new Error(error.message);
-    const rowsRaw = await attachAssignees((data ?? []) as unknown as LeadListRow[]);
-    const lastMap = await fetchLastCallTimes(rowsRaw.map((r) => r.id));
-    const rows = mergeLastCallAt(rowsRaw, lastMap);
-    return { rows, totalCount: count ?? rows.length };
-  }
 
-  const rows = await loadLeadsWithMemoryPipeline(f, MAX_SCAN);
-  const totalCount = rows.length;
-  const start = (f.page - 1) * f.pageSize;
-  const pageRows = rows.slice(start, start + f.pageSize);
-  return { rows: pageRows, totalCount };
+    const rows = await loadLeadsWithMemoryPipeline(f, MAX_SCAN);
+    const totalCount = rows.length;
+    const start = (f.page - 1) * f.pageSize;
+    const pageRows = rows.slice(start, start + f.pageSize);
+    return { rows: pageRows, totalCount };
+  });
 }
 
 /** Full filtered list for CSV (same ordering as table when possible), capped at `maxRows`. */
 export async function fetchLeadsForExport(f: LeadFilters, maxRows = 10_000): Promise<LeadListRow[]> {
-  const supabase = createAdminClient();
-  const { from, to } = dateBounds(f);
-  const select =
-    "id, name, phone, email, budget, source, status, deal_value, created_at, updated_at, follow_up_date, assigned_to_id, client_id, form_data, magic_token, project_type, clients ( id, name, slug, logo_url, response_time_limit_hours )";
+  return runWithArchivedFallback(async () => {
+    const supabase = createAdminClient();
+    const { from, to } = dateBounds(f);
+    const select =
+      "id, name, phone, email, budget, source, status, deal_value, created_at, updated_at, follow_up_date, assigned_to_id, client_id, form_data, magic_token, project_type, clients ( id, name, slug, logo_url, response_time_limit_hours )";
 
-  const needsMemorySort =
-    f.status === "uncontacted" ||
-    f.sortBy === "last_activity" ||
-    f.sortBy === "client" ||
-    (f.sortBy !== "created_at" && f.sortBy !== "name" && f.sortBy !== "deal_value" && f.sortBy !== "status");
+    const needsMemorySort =
+      f.status === "uncontacted" ||
+      f.sortBy === "last_activity" ||
+      f.sortBy === "client" ||
+      (f.sortBy !== "created_at" && f.sortBy !== "name" && f.sortBy !== "deal_value" && f.sortBy !== "status");
 
-  if (!needsMemorySort) {
-    let q = applyCommonFilters(supabase.from("leads").select(select), f, from, to);
-    if (f.status !== "all" && f.status !== "uncontacted") {
-      q = q.eq("status", f.status);
+    if (!needsMemorySort) {
+      let q = applyCommonFilters(supabase.from("leads").select(select), f, from, to);
+      if (f.status !== "all" && f.status !== "uncontacted") {
+        q = q.eq("status", f.status);
+      }
+      const ascending = f.sortDir === "asc";
+      const col =
+        f.sortBy === "name"
+          ? "name"
+          : f.sortBy === "deal_value"
+            ? "deal_value"
+            : f.sortBy === "status"
+              ? "status"
+              : "created_at";
+      const { data, error } = await q.order(col, { ascending, nullsFirst: false }).limit(maxRows);
+      if (error) throw new Error(error.message);
+      return attachAssignees((data ?? []) as unknown as LeadListRow[]);
     }
-    const ascending = f.sortDir === "asc";
-    const col =
-      f.sortBy === "name"
-        ? "name"
-        : f.sortBy === "deal_value"
-          ? "deal_value"
-          : f.sortBy === "status"
-            ? "status"
-            : "created_at";
-    const { data, error } = await q.order(col, { ascending, nullsFirst: false }).limit(maxRows);
-    if (error) throw new Error(error.message);
-    return attachAssignees((data ?? []) as unknown as LeadListRow[]);
-  }
 
-  const rows = await loadLeadsWithMemoryPipeline(f, maxRows);
-  return rows.slice(0, maxRows);
+    const rows = await loadLeadsWithMemoryPipeline(f, maxRows);
+    return rows.slice(0, maxRows);
+  });
 }
 
 export async function getStatusCounts(fBase: LeadFilters): Promise<StatusCounts> {
-  const supabase = createAdminClient();
-  const { from, to } = dateBounds(fBase);
-  const common = { ...fBase, status: "all" as const };
+  return runWithArchivedFallback(async () => {
+    const supabase = createAdminClient();
+    const { from, to } = dateBounds(fBase);
+    const common = { ...fBase, status: "all" as const };
 
-  const { count: total } = await applyCommonFilters(
-    supabase.from("leads").select("id", { count: "exact", head: true }),
-    common,
-    from,
-    to
-  );
-
-  const c: StatusCounts = {
-    total: total ?? 0,
-    NEW: 0,
-    CONTACTED: 0,
-    NEGOTIATING: 0,
-    PROPOSAL_SENT: 0,
-    WON: 0,
-    LOST: 0,
-    NOT_QUALIFIED: 0,
-    uncontacted: 0,
-  };
-
-  for (const st of STATUSES) {
-    const { count } = await applyCommonFilters(
+    const { count: total } = await applyCommonFilters(
       supabase.from("leads").select("id", { count: "exact", head: true }),
       common,
       from,
       to
-    ).eq("status", st);
-    (c as Record<string, number>)[st] = count ?? 0;
-  }
+    );
 
-  const { data: newRows } = await applyCommonFilters(
-    supabase.from("leads").select("id, created_at, clients ( response_time_limit_hours )"),
-    common,
-    from,
-    to
-  )
-    .eq("status", "NEW")
-    .limit(5000);
+    const c: StatusCounts = {
+      total: total ?? 0,
+      NEW: 0,
+      CONTACTED: 0,
+      NEGOTIATING: 0,
+      PROPOSAL_SENT: 0,
+      WON: 0,
+      LOST: 0,
+      NOT_QUALIFIED: 0,
+      uncontacted: 0,
+    };
 
-  for (const r of newRows ?? []) {
-    if (
-      isLeadSlow(
-        "NEW",
-        r.created_at as string,
-        (r as { clients?: { response_time_limit_hours?: number | null } | null }).clients?.response_time_limit_hours
-      )
-    ) {
-      c.uncontacted += 1;
+    for (const st of STATUSES) {
+      const { count } = await applyCommonFilters(
+        supabase.from("leads").select("id", { count: "exact", head: true }),
+        common,
+        from,
+        to
+      ).eq("status", st);
+      (c as Record<string, number>)[st] = count ?? 0;
     }
-  }
 
-  return c;
+    const { data: newRows } = await applyCommonFilters(
+      supabase.from("leads").select("id, created_at, clients ( response_time_limit_hours )"),
+      common,
+      from,
+      to
+    )
+      .eq("status", "NEW")
+      .limit(5000);
+
+    for (const r of newRows ?? []) {
+      if (
+        isLeadSlow(
+          "NEW",
+          r.created_at as string,
+          (r as { clients?: { response_time_limit_hours?: number | null } | null }).clients?.response_time_limit_hours
+        )
+      ) {
+        c.uncontacted += 1;
+      }
+    }
+
+    return c;
+  });
 }
 
 export function buildFilterDescription(f: LeadFilters, clientNames: Map<string, string>): string {

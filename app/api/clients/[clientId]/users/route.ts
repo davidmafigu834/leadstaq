@@ -31,7 +31,7 @@ const inviteSalesSchema = z.object({
   role: z.enum(["SALESPERSON", "CLIENT_MANAGER"]),
   name: z.string().min(1).max(120),
   email: z.string().email(),
-  phone: z.string().min(8).max(32),
+  phone: z.string().max(32).optional(),
 });
 
 export async function POST(req: Request, { params }: { params: { clientId: string } }) {
@@ -43,10 +43,17 @@ export async function POST(req: Request, { params }: { params: { clientId: strin
     return NextResponse.json({ error: "Invalid body", details: parsed.error.flatten() }, { status: 400 });
   }
 
-  const phoneNorm = normalizeToE164(parsed.data.phone);
-  if (!phoneNorm) {
+  const rawPhone = parsed.data.phone?.trim() ?? "";
+  const phoneNorm = rawPhone ? normalizeToE164(rawPhone) : null;
+  if (parsed.data.role === "SALESPERSON" && !phoneNorm) {
     return NextResponse.json(
-      { error: "Phone number looks invalid. Use international format like +263 77 123 4567." },
+      { error: "Salesperson phone is required. Use international format like +263 77 123 4567." },
+      { status: 400 }
+    );
+  }
+  if (parsed.data.role === "CLIENT_MANAGER" && rawPhone && !phoneNorm) {
+    return NextResponse.json(
+      { error: "Manager phone looks invalid. Use international format like +263 77 123 4567." },
       { status: 400 }
     );
   }
@@ -58,9 +65,39 @@ export async function POST(req: Request, { params }: { params: { clientId: strin
   }
 
   const email = parsed.data.email.toLowerCase().trim();
-  const { data: dupe } = await supabase.from("users").select("id").eq("email", email).maybeSingle();
+  const { data: dupe } = await supabase
+    .from("users")
+    .select("id, name, email, role, client_id, is_active, phone")
+    .eq("email", email)
+    .maybeSingle();
   if (dupe) {
-    return NextResponse.json({ error: "Email already registered" }, { status: 400 });
+    const sameClient = (dupe.client_id as string | null) === params.clientId;
+    const sameRole = (dupe.role as string | null) === parsed.data.role;
+    if (sameClient && sameRole) {
+      const tempPass = randomBytes(12).toString("base64url").slice(0, 16);
+      const hash = await hashPassword(tempPass);
+      const updates: Record<string, unknown> = {
+        name: parsed.data.name.trim(),
+        is_active: true,
+        password: hash,
+      };
+      if (phoneNorm) updates.phone = phoneNorm;
+      const { data: updated, error: updateErr } = await supabase
+        .from("users")
+        .update(updates)
+        .eq("id", dupe.id as string)
+        .select("id, name, email, phone, role")
+        .single();
+      if (updateErr) {
+        return NextResponse.json({ error: updateErr.message }, { status: 500 });
+      }
+      return NextResponse.json({
+        user: updated,
+        temporaryPassword: tempPass,
+        message: "Existing user reactivated with a new temporary password.",
+      });
+    }
+    return NextResponse.json({ error: "Email already registered to another account" }, { status: 400 });
   }
 
   let rr = 0;

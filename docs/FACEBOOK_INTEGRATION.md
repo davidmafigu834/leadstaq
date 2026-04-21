@@ -17,7 +17,7 @@ This guide describes how Leadstaq connects to Meta (Facebook) Lead Ads, what to 
    - `010_leads_facebook_lead_id.sql` — `leads.facebook_lead_id` + unique index per `(client_id, facebook_lead_id)` for deduplication.
    - `011_fb_token_expired_at.sql` — `clients.fb_token_expired_at` for Graph token expiry detection and UI.
 
-2. **SendGrid** (optional but recommended): `SENDGRID_API_KEY`, `SENDGRID_FROM_EMAIL` — used for “no salesperson” alerts and “Facebook token expired” emails to agency admins.
+2. **Resend** (optional but recommended): `RESEND_API_KEY`, `RESEND_FROM_EMAIL` — used for “no salesperson” alerts and “Facebook token expired” emails to agency admins.
 
 3. **Twilio WhatsApp** (optional): configured for new-lead notifications as elsewhere in the app.
 

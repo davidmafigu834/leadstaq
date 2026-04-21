@@ -615,8 +615,8 @@ export function FacebookConnectPanel({
         )}
 
         {backfillOpen ? (
-          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4" role="dialog">
-            <div className="w-full max-w-md rounded-lg border border-border bg-surface-card p-6 shadow-lg">
+          <div className="fixed inset-0 z-50 flex flex-col bg-black/40 p-0 md:items-center md:justify-center md:p-4" role="dialog">
+            <div className="flex h-full w-full max-w-md flex-col border border-border bg-surface-card p-5 shadow-lg md:h-auto md:rounded-lg md:p-6">
               <h4 className="font-display text-lg text-ink-primary">Backfill missed leads</h4>
               <p className="mt-2 text-sm text-ink-secondary">
                 Fetch and import any leads from this form created after this date that did not reach Leadstaq.
@@ -624,17 +624,17 @@ export function FacebookConnectPanel({
               <label className="mt-4 block text-xs font-mono uppercase text-ink-tertiary">Since</label>
               <input
                 type="datetime-local"
-                className="mt-1 w-full rounded-md border border-border bg-content px-3 py-2 text-sm"
+                className="mt-1 w-full rounded-md border border-border bg-content px-3 py-2 text-base md:text-sm"
                 value={backfillSince}
                 onChange={(e) => setBackfillSince(e.target.value)}
               />
               {backfillMessage && backfillOpen ? (
                 <p className="mt-3 text-sm text-[var(--danger-fg)]">{backfillMessage}</p>
               ) : null}
-              <div className="mt-6 flex justify-end gap-2">
+              <div className="safe-bottom mt-auto flex justify-end gap-2 border-t border-border pt-4 md:mt-6 md:border-t-0 md:pt-0">
                 <button
                   type="button"
-                  className="rounded-md border border-border px-4 py-2 text-sm text-ink-secondary"
+                  className="h-11 rounded-md border border-border px-4 py-2 text-sm text-ink-secondary md:h-9"
                   onClick={() => {
                     setBackfillOpen(false);
                     setBackfillMessage(null);
@@ -645,7 +645,7 @@ export function FacebookConnectPanel({
                 </button>
                 <button
                   type="button"
-                  className="rounded-md bg-[var(--accent)] px-4 py-2 text-sm font-medium text-accent-ink disabled:opacity-50"
+                  className="h-11 rounded-md bg-[var(--accent)] px-4 py-2 text-sm font-medium text-accent-ink disabled:opacity-50 md:h-9"
                   disabled={backfillLoading}
                   onClick={() => void onBackfillConfirm()}
                 >

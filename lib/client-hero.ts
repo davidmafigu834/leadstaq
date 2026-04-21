@@ -12,7 +12,7 @@ export type ClientDetailHeroProps = {
 
 export function agencyNotificationsEnvConfigured(): boolean {
   return Boolean(
-    process.env.TWILIO_ACCOUNT_SID && process.env.TWILIO_AUTH_TOKEN && process.env.SENDGRID_API_KEY
+    process.env.TWILIO_ACCOUNT_SID && process.env.TWILIO_AUTH_TOKEN && process.env.RESEND_API_KEY
   );
 }
 

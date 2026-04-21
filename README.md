@@ -57,15 +57,15 @@ Lead management for marketing agencies and their service-business clients. Built
 | `TWILIO_*` | WhatsApp (account, token, `TWILIO_WHATSAPP_FROM`) |
 | `TWILIO_CONTENT_SID_*` | Approved WhatsApp Content template SIDs (`HX…`) — see below |
 | `DEFAULT_COUNTRY_CODE` | ISO country for parsing local phones (e.g. `ZW`) |
-| `SENDGRID_API_KEY` | SendGrid API key (server-only) |
-| `SENDGRID_FROM_EMAIL` | Verified sender address (e.g. `notifications@yourdomain.com`) |
+| `RESEND_API_KEY` | Resend API key (server-only) |
+| `RESEND_FROM_EMAIL` | Verified sender address (e.g. `notifications@yourdomain.com`) |
 | `FACEBOOK_APP_ID` / `FACEBOOK_APP_SECRET` | Meta app (Login + Marketing API) |
 | `FACEBOOK_REDIRECT_URI` | Must match app settings exactly, e.g. `https://your-app.vercel.app/api/facebook/oauth/callback` |
 | `FACEBOOK_WEBHOOK_VERIFY_TOKEN` | Same value configured on the Meta webhook |
 | `FACEBOOK_API_VERSION` | Graph API version (default `v19.0`) |
 | `CRON_SECRET` | `Authorization: Bearer` for cron routes in production (set on Vercel; Vercel Cron sends it automatically) |
 
-For outbound email, verify the sending domain for `SENDGRID_FROM_EMAIL` in SendGrid (SPF and DKIM records) so messages authenticate correctly.
+For outbound email, verify the sending domain for `RESEND_FROM_EMAIL` in Resend (SPF and DKIM records) so messages authenticate correctly.
 
 ## Add a new client
 

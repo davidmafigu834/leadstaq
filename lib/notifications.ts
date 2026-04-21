@@ -117,7 +117,7 @@ export async function notifyNewLead(
       );
       console.log("[notifyNewLead] Email to salesperson: skipped (no email)");
     } else {
-      const from = process.env.SENDGRID_FROM_EMAIL || "noreply@example.com";
+      const from = process.env.RESEND_FROM_EMAIL || "noreply@example.com";
       const r = await sendEmailWithLog({
         mail: {
           to,
@@ -181,9 +181,9 @@ export async function notifyNewLead(
         console.info("[notifyNewLead] manager WhatsApp skipped (no phone)");
       }
       if (mp.newLead.email && hasEmail) {
-        if (!process.env.SENDGRID_API_KEY) {
+        if (!process.env.RESEND_API_KEY) {
           await logMessage(
-            { ok: false, error: "SendGrid API key not configured", errorCode: "NO_SENDGRID" },
+            { ok: false, error: "Resend API key not configured", errorCode: "NO_RESEND" },
             {
               userId: manager.id,
               leadId: lead.id,
@@ -193,10 +193,10 @@ export async function notifyNewLead(
               recipient: manager.email!,
             }
           );
-          console.info("[notifyNewLead] manager email skipped (SendGrid API key not configured)");
-        } else if (!process.env.SENDGRID_FROM_EMAIL) {
+          console.info("[notifyNewLead] manager email skipped (Resend API key not configured)");
+        } else if (!process.env.RESEND_FROM_EMAIL) {
           await logMessage(
-            { ok: false, error: "SENDGRID_FROM_EMAIL not set", errorCode: "NO_FROM_EMAIL" },
+            { ok: false, error: "RESEND_FROM_EMAIL not set", errorCode: "NO_FROM_EMAIL" },
             {
               userId: manager.id,
               leadId: lead.id,
@@ -206,12 +206,12 @@ export async function notifyNewLead(
               recipient: manager.email!,
             }
           );
-          console.error("[notifyNewLead] SENDGRID_FROM_EMAIL not set — manager email not sent");
+          console.error("[notifyNewLead] RESEND_FROM_EMAIL not set — manager email not sent");
         } else {
           const r = await sendEmailWithLog({
             mail: {
               to: manager.email!,
-              from: process.env.SENDGRID_FROM_EMAIL,
+              from: process.env.RESEND_FROM_EMAIL,
               subject: `New lead for ${clientName} — assigned to ${salesperson.name}`,
               html: renderManagerNewLeadEmail({
                 lead,
@@ -351,9 +351,9 @@ export async function notifyDealWon(
   if (!mp.dealWon.email || !hasEmail) {
     return;
   }
-  if (!process.env.SENDGRID_FROM_EMAIL) {
+  if (!process.env.RESEND_FROM_EMAIL) {
     await logMessage(
-      { ok: false, error: "SENDGRID_FROM_EMAIL not set", errorCode: "NO_FROM_EMAIL" },
+      { ok: false, error: "RESEND_FROM_EMAIL not set", errorCode: "NO_FROM_EMAIL" },
       {
         userId: manager.id,
         leadId: lead.id,
@@ -363,14 +363,14 @@ export async function notifyDealWon(
         recipient: manager.email!,
       }
     );
-    console.error("[notifyDealWon] SENDGRID_FROM_EMAIL not set — manager email not sent");
+    console.error("[notifyDealWon] RESEND_FROM_EMAIL not set — manager email not sent");
     return;
   }
   const dealSubject = formatCurrencyUsd(lead.deal_value ?? null);
   const r = await sendEmailWithLog({
     mail: {
       to: manager.email!,
-      from: process.env.SENDGRID_FROM_EMAIL,
+      from: process.env.RESEND_FROM_EMAIL,
       subject: `Deal won — ${lead.name ?? "Lead"} · ${dealSubject}`,
       html: renderManagerDealWonEmail({
         lead,
@@ -475,12 +475,12 @@ export async function notifyUncontactedLeadToManager(
     });
   }
 
-  if (prefs.uncontactedLead.email && manager.email?.trim() && process.env.SENDGRID_FROM_EMAIL) {
+  if (prefs.uncontactedLead.email && manager.email?.trim() && process.env.RESEND_FROM_EMAIL) {
     background("uncontactedLeadManagerEmail", async () => {
       const r = await sendEmailWithLog({
         mail: {
           to: manager.email as string,
-          from: process.env.SENDGRID_FROM_EMAIL!,
+          from: process.env.RESEND_FROM_EMAIL!,
           subject: `Uncontacted lead: ${lead.name ?? "Lead"} (${hoursUncontacted}h)`,
           html: renderManagerUncontactedLeadEmail({
             lead: { id: lead.id, name: lead.name },
@@ -578,12 +578,12 @@ export async function notifyAdminsNoSalesperson(params: {
     .select("id, email")
     .eq("role", "AGENCY_ADMIN")
     .eq("is_active", true);
-  const key = process.env.SENDGRID_API_KEY;
+  const key = process.env.RESEND_API_KEY;
   if (!key || !admins?.length) {
-    console.warn("[notifyAdminsNoSalesperson] skipped — SendGrid not configured or no admins");
+    console.warn("[notifyAdminsNoSalesperson] skipped — Resend not configured or no admins");
     return;
   }
-  const from = process.env.SENDGRID_FROM_EMAIL || "noreply@example.com";
+  const from = process.env.RESEND_FROM_EMAIL || "noreply@example.com";
   const text = `A new lead (${params.leadId}) was created but no active salespeople exist for client ${params.clientName}.`;
   for (const a of admins) {
     const r = await sendEmailWithLog({
@@ -620,8 +620,8 @@ export async function sendTokenExpiryAlert(clientId: string): Promise<void> {
     .eq("role", "AGENCY_ADMIN")
     .eq("is_active", true);
 
-  if (!process.env.SENDGRID_API_KEY || !process.env.SENDGRID_FROM_EMAIL) {
-    console.warn("[sendTokenExpiryAlert] SendGrid not configured");
+  if (!process.env.RESEND_API_KEY || !process.env.RESEND_FROM_EMAIL) {
+    console.warn("[sendTokenExpiryAlert] Resend not configured");
     return;
   }
 
@@ -640,7 +640,7 @@ export async function sendTokenExpiryAlert(clientId: string): Promise<void> {
     const r = await sendEmailWithLog({
       mail: {
         to: admin.email as string,
-        from: process.env.SENDGRID_FROM_EMAIL!,
+        from: process.env.RESEND_FROM_EMAIL!,
         subject: `Facebook connection expired — ${client.name as string}`,
         html,
       },

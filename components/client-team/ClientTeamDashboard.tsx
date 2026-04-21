@@ -250,7 +250,7 @@ export function ClientTeamDashboard({
 
       {selectedMember && data ? (
         <div
-          className="fixed inset-0 z-50 flex items-center justify-center bg-[var(--surface-overlay)] p-4"
+          className="fixed inset-0 z-50 flex flex-col bg-[var(--surface-overlay)] p-0 md:items-center md:justify-center md:p-4"
           role="dialog"
           aria-modal="true"
           aria-labelledby="team-modal-title"
@@ -258,10 +258,7 @@ export function ClientTeamDashboard({
             if (e.target === e.currentTarget) setModalUserId(null);
           }}
         >
-          <div
-            className="max-h-[90vh] w-full max-w-[720px] overflow-y-auto border border-border bg-surface-card p-6 shadow-lg"
-            style={{ borderRadius: 10 }}
-          >
+          <div className="flex h-full w-full max-w-[720px] flex-col overflow-y-auto border border-border bg-surface-card p-4 shadow-lg md:max-h-[90vh] md:rounded-[10px] md:p-6">
             <div className="flex items-start justify-between gap-4">
               <div className="flex items-center gap-4">
                 <ClientAvatar name={selectedMember.name} size={56} />
@@ -279,7 +276,7 @@ export function ClientTeamDashboard({
               </button>
             </div>
 
-            <div className="mt-6 flex flex-wrap gap-2 border-b border-border pb-3">
+            <div className="-mx-1 mt-6 flex gap-2 overflow-x-auto border-b border-border px-1 pb-3 scrollbar-hide md:mx-0 md:flex-wrap md:overflow-visible md:px-0">
               {(
                 [
                   ["performance", "Performance"],

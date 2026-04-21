@@ -1,16 +1,18 @@
-import sgMail from "@sendgrid/mail";
-import type { MailDataRequired } from "@sendgrid/mail";
+import { Resend } from "resend";
 import { logMessage, type LogMessageParams, type SendResult } from "@/lib/messaging/log";
 
-function initSendgrid(): boolean {
-  const key = process.env.SENDGRID_API_KEY;
-  if (!key) return false;
-  sgMail.setApiKey(key);
-  return true;
-}
+type EmailAddress = string | { email: string; name?: string };
+
+export type EmailPayload = {
+  to: EmailAddress | EmailAddress[];
+  from: EmailAddress;
+  subject: string;
+  html?: string;
+  text?: string;
+};
 
 export type SendEmailWithLogParams = {
-  mail: MailDataRequired;
+  mail: EmailPayload;
   context: Omit<LogMessageParams, "channel" | "recipient" | "templateKey" | "payloadPreview"> & {
     recipientOverride?: string;
   };
@@ -19,10 +21,9 @@ export type SendEmailWithLogParams = {
 
 export async function sendEmailWithLog(params: SendEmailWithLogParams): Promise<SendResult & { channel: "email" }> {
   const to = Array.isArray(params.mail.to) ? params.mail.to[0] : params.mail.to;
+  const toEmail = typeof to === "string" ? to : to?.email;
   const recipient =
-    params.context.recipientOverride ||
-    (typeof to === "string" ? to : (to as { email?: string })?.email) ||
-    "";
+    params.context.recipientOverride || (typeof toEmail === "string" ? toEmail : "") || "";
 
   const baseLog: LogMessageParams = {
     userId: params.context.userId,
@@ -43,23 +44,43 @@ export async function sendEmailWithLog(params: SendEmailWithLogParams): Promise<
     return { ...result, channel: "email" };
   }
 
-  if (!initSendgrid()) {
-    const result: SendResult = { ok: false, error: "SendGrid not configured", errorCode: "NO_SENDGRID" };
+  const key = process.env.RESEND_API_KEY;
+  if (!key) {
+    const result: SendResult = { ok: false, error: "Resend not configured", errorCode: "NO_RESEND" };
     await logMessage(result, baseLog);
     return { ...result, channel: "email" };
   }
 
   try {
-    const [response] = await sgMail.send(params.mail);
-    const id = response.headers["x-message-id"] as string | undefined;
-    const result: SendResult = { ok: true, providerId: id };
+    const resend = new Resend(key);
+    const response = await resend.emails.send({
+      from: typeof params.mail.from === "string" ? params.mail.from : params.mail.from.email,
+      to: Array.isArray(params.mail.to)
+        ? params.mail.to.map((addr) => (typeof addr === "string" ? addr : addr.email))
+        : typeof params.mail.to === "string"
+          ? params.mail.to
+          : params.mail.to.email,
+      subject: params.mail.subject,
+      html: params.mail.html,
+      text: params.mail.text,
+    });
+    if (response.error) {
+      const result: SendResult = {
+        ok: false,
+        error: response.error.message || "Resend send failed",
+        errorCode: response.error.name ?? "RESEND_ERROR",
+      };
+      await logMessage(result, baseLog);
+      return { ...result, channel: "email" };
+    }
+    const result: SendResult = { ok: true, providerId: response.data?.id };
     await logMessage(result, baseLog);
     return { ...result, channel: "email" };
   } catch (err: unknown) {
     const e = err as { message?: string; code?: number };
     const result: SendResult = {
       ok: false,
-      error: e.message || "SendGrid send failed",
+      error: e.message || "Resend send failed",
       errorCode: e.code,
     };
     await logMessage(result, baseLog);
