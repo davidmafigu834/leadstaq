@@ -276,12 +276,13 @@ export function AgencySettingsClient() {
       if (!res.ok) throw new Error(j.error ?? "Invite failed");
       const user = j.user;
       const temporaryPassword = j.temporaryPassword;
-      if (user?.id && temporaryPassword) {
-        const email = typeof user.email === "string" ? user.email : inviteEmail.trim();
+      const userId = user?.id;
+      if (userId && temporaryPassword) {
+        const email = typeof user?.email === "string" ? user.email : inviteEmail.trim();
         setPendingAdminPasswords((prev) => [
-          ...prev.filter((p) => p.userId !== user.id),
+          ...prev.filter((p) => p.userId !== userId),
           {
-            userId: user.id,
+            userId,
             email,
             password: temporaryPassword,
             expiresAt: Date.now() + AGENCY_TEAM_TEMP_PASS_TTL_MS,
