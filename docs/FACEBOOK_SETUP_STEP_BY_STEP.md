@@ -79,7 +79,7 @@ After the webhook endpoint verifies:
 
 ### 1.8 Permissions and app mode (Live vs Development)
 
-- OAuth scopes Leadstaq requests include things like **pages**, **leads retrieval**, **business_management**, **ads_read** (see `app/api/facebook/oauth/start/route.ts` in the repo).
+- OAuth scopes Leadstaq requests include things like **pages**, **leads retrieval**, **pages_manage_ads**, **business_management**, **ads_read** (see `app/api/facebook/oauth/start/route.ts` in the repo). Add **`pages_manage_ads`** in the Meta app’s **App Review → Permissions** (or use a developer/test user in Development mode) if Graph reports missing that permission.
 - In **Development** mode, only **testers / roles** added under **Roles** in the app can complete OAuth for a real Page in some setups.
 - For production Pages and real customers, you typically need **Live** mode and any **App Review** Meta requires for those permissions.
 

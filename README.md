@@ -76,7 +76,7 @@ For outbound email, verify the sending domain for `RESEND_FROM_EMAIL` in Resend 
 
 ## Facebook Lead Ads
 
-1. Create a Meta app with **Facebook Login** and the permissions used by Leadstaq (`leads_retrieval`, `pages_show_list`, `pages_read_engagement`, `pages_manage_metadata`, `business_management`).
+1. Create a Meta app with **Facebook Login** and the permissions used by Leadstaq (`leads_retrieval`, `pages_show_list`, `pages_read_engagement`, `pages_manage_metadata`, `pages_manage_ads`, `business_management`, `ads_read`).
 2. In the app’s **Facebook Login** settings, add **Valid OAuth Redirect URIs**: the same value as `FACEBOOK_REDIRECT_URI` (for production, e.g. `https://app.leadstaq.com/api/facebook/oauth/callback`).
 3. Set `FACEBOOK_APP_ID`, `FACEBOOK_APP_SECRET`, `FACEBOOK_REDIRECT_URI`, `FACEBOOK_WEBHOOK_VERIFY_TOKEN`, and optionally `FACEBOOK_API_VERSION` in your environment.
 4. Configure the **Webhooks** product: callback `https://your-domain/api/facebook/webhook`, verify token = `FACEBOOK_WEBHOOK_VERIFY_TOKEN`, subscribe to `leadgen` at the **Page** level (the in-app flow subscribes the app when you select a Page).

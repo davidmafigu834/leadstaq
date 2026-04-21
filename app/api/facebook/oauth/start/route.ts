@@ -65,6 +65,7 @@ export async function GET(req: Request) {
     "pages_show_list",
     "pages_read_engagement",
     "pages_manage_metadata",
+    "pages_manage_ads",
     "business_management",
     "ads_read",
   ].join(",");

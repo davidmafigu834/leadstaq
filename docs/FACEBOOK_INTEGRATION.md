@@ -24,7 +24,7 @@ This guide describes how Leadstaq connects to Meta (Facebook) Lead Ads, what to 
 ## Meta Developer App (outside Leadstaq)
 
 1. Create a **Business** type app in [Meta for Developers](https://developers.facebook.com/).
-2. Request/use permissions aligned with the OAuth scopes in code (including **`ads_read`** for the Campaigns dashboard).
+2. Request/use permissions aligned with the OAuth scopes in code (including **`ads_read`** for the Campaigns dashboard and **`pages_manage_ads`** where Graph returns `(#200) Requires pages_manage_ads permission` for Page-linked ad objects).
 3. **Valid OAuth Redirect URIs:** add exactly the value of `FACEBOOK_REDIRECT_URI` (e.g. `https://yourdomain.com/api/facebook/oauth/callback`).
 4. **Webhooks**
    - **Callback URL:** `https://yourdomain.com/api/facebook/webhook`
