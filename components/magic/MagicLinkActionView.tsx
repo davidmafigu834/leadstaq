@@ -141,42 +141,48 @@ export function MagicLinkActionView({ lead, token }: { lead: MagicLeadForView; t
   const hasHistory = localLogs.length > 0;
 
   return (
-    <div className="min-h-screen bg-white pb-28 text-ink-primary">
-      <header className="sticky top-0 z-30 flex h-[52px] items-center justify-between border-b border-border bg-white/95 px-4 backdrop-blur-sm">
-        <span className="font-serif text-lg tracking-tight text-ink-primary">Leadstaq</span>
-        <StatusPill status={lead.status} />
+    <div className="min-h-[100dvh] w-full min-w-0 max-w-[100vw] overflow-x-hidden bg-white pb-[max(7rem,env(safe-area-inset-bottom))] text-ink-primary [-webkit-tap-highlight-color:transparent]">
+      <header className="safe-top sticky top-0 z-30 flex min-h-[52px] w-full min-w-0 max-w-[100vw] items-center justify-between gap-2 border-b border-border bg-white/95 px-3 backdrop-blur-sm sm:gap-3 sm:px-4">
+        <span className="shrink-0 font-serif text-lg tracking-tight text-ink-primary">Leadstaq</span>
+        <div className="flex min-w-0 shrink justify-end pl-1 sm:pl-2">
+          <StatusPill status={lead.status} />
+        </div>
       </header>
 
-      <div className="mx-auto max-w-md px-4 pt-6 text-center">
-        <h1 className="font-serif text-[28px] leading-tight text-ink-primary">{lead.name ?? "Lead"}</h1>
+      <div className="mx-auto w-full min-w-0 max-w-md px-3 pt-5 text-center sm:px-4 sm:pt-6">
+        <h1 className="break-words px-0.5 font-serif text-[clamp(1.25rem,5.5vw,1.75rem)] leading-tight text-ink-primary">
+          {lead.name ?? "Lead"}
+        </h1>
         {phone ? (
-          <p className="mt-2 font-mono text-[15px] text-ink-tertiary">{lead.phone}</p>
+          <p className="mt-2 break-all font-mono text-[15px] text-ink-tertiary">{lead.phone}</p>
         ) : (
           <p className="mt-2 font-mono text-[15px] text-ink-tertiary">No phone on file</p>
         )}
         {client ? (
-          <div className="mt-4 flex items-center justify-center gap-2">
+          <div className="mt-4 flex flex-wrap items-center justify-center gap-2 px-1">
             <ClientAvatar name={client.name} size={28} />
-            <span className="text-sm text-ink-secondary">
+            <span className="min-w-0 max-w-full text-pretty text-sm text-ink-secondary">
               <span className="font-medium text-ink-primary">{client.name}</span> lead
             </span>
           </div>
         ) : null}
-        <p className="mt-3 font-mono text-[11px] uppercase tracking-[0.12em] text-ink-tertiary">
+        <p className="mt-3 break-words px-1 font-mono text-[10px] uppercase tracking-[0.08em] text-ink-tertiary sm:text-[11px] sm:tracking-[0.12em]">
           {formatSourceLabel(lead.source as string)} · {formatTimeAgo(lead.created_at)}
         </p>
       </div>
 
       {phone ? (
-        <div className="sticky top-[52px] z-20 border-b border-border bg-white px-4 py-3">
+        <div className="sticky top-[calc(52px+env(safe-area-inset-top,0px))] z-20 w-full min-w-0 max-w-[100vw] border-b border-border bg-white px-3 py-3 sm:px-4">
           <a
             href={`tel:${phone}`}
-            className="flex w-full items-center justify-center gap-3 rounded-lg bg-accent py-4 text-base font-medium text-[var(--accent-ink)] transition-transform active:scale-[0.98]"
+            className="flex w-full min-w-0 touch-manipulation items-center justify-center gap-2 rounded-lg bg-accent px-3 py-3.5 text-base font-medium text-[var(--accent-ink)] transition-transform active:scale-[0.98] sm:gap-3 sm:py-4"
           >
-            <Phone className="h-5 w-5" strokeWidth={2.2} />
-            Call {firstName(lead.name)}
+            <Phone className="h-5 w-5 shrink-0" strokeWidth={2.2} />
+            <span className="min-w-0 truncate">
+              Call {firstName(lead.name)}
+            </span>
           </a>
-          <div className="mt-3 flex items-center justify-center gap-6 text-sm">
+          <div className="mt-3 flex flex-wrap items-center justify-center gap-x-6 gap-y-2 text-sm">
             <a href={`sms:${phone}`} className="text-ink-secondary underline-offset-2 hover:text-ink-primary hover:underline">
               SMS
             </a>
@@ -197,7 +203,7 @@ export function MagicLinkActionView({ lead, token }: { lead: MagicLeadForView; t
         </div>
       ) : null}
 
-      <div className="mx-auto max-w-md">
+      <div className="mx-auto w-full max-w-md min-w-0">
         <FormAnswersSection
           formData={lead.form_data}
           lead={{
@@ -205,11 +211,11 @@ export function MagicLinkActionView({ lead, token }: { lead: MagicLeadForView; t
             project_type: lead.project_type,
             timeline: lead.timeline,
           }}
-          className="border-b-0 px-4"
+          className="border-b-0 px-3 sm:px-4"
         />
 
         {hasHistory ? (
-          <div className="border-b border-border px-4 py-4">
+          <div className="border-b border-border px-3 py-4 sm:px-4">
             <button
               type="button"
               className="flex w-full items-center justify-between text-left"
@@ -239,7 +245,7 @@ export function MagicLinkActionView({ lead, token }: { lead: MagicLeadForView; t
           </div>
         ) : null}
 
-        <div className="px-4 py-6">
+        <div className="min-w-0 px-3 py-5 sm:px-4 sm:py-6">
           {!saveSuccess ? (
             <LogCallForm
               leadId={lead.id}
@@ -248,13 +254,13 @@ export function MagicLinkActionView({ lead, token }: { lead: MagicLeadForView; t
               onMagicSubmitSuccess={onMagicSubmitSuccess}
             />
           ) : (
-            <div className="py-10 text-center">
+            <div className="min-w-0 py-8 text-center sm:py-10">
               <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-[var(--success-bg)]">
                 <Check className="h-8 w-8 text-[var(--success-fg)]" strokeWidth={2.2} />
               </div>
-              <h2 className="mb-2 font-serif text-2xl text-ink-primary">Call logged</h2>
-              <p className="mx-auto mb-8 max-w-xs text-sm text-ink-secondary">{successMessage}</p>
-              <div className="mx-auto flex max-w-xs flex-col gap-2">
+              <h2 className="mb-2 px-1 font-serif text-xl text-ink-primary sm:text-2xl">Call logged</h2>
+              <p className="mx-auto mb-8 max-w-xs px-1 text-pretty text-sm text-ink-secondary">{successMessage}</p>
+              <div className="mx-auto flex w-full min-w-0 max-w-xs flex-col gap-2 px-1">
                 <Link
                   href="/login"
                   className="rounded-md bg-surface-sidebar py-3 text-center text-sm font-medium text-[var(--text-on-dark)]"
@@ -274,12 +280,12 @@ export function MagicLinkActionView({ lead, token }: { lead: MagicLeadForView; t
         </div>
       </div>
 
-      <footer className="mx-auto max-w-md px-4 pb-10 text-center text-[11px] text-ink-tertiary">
-        <p>
+      <footer className="mx-auto w-full min-w-0 max-w-md px-3 pb-[max(2.5rem,env(safe-area-inset-bottom))] text-center text-[11px] text-ink-tertiary sm:px-4">
+        <p className="break-words">
           Leadstaq · Secure link
           {daysLeft != null ? (daysLeft === 0 ? " has expired" : ` expires in ${daysLeft} day${daysLeft === 1 ? "" : "s"}`) : " is active"}
         </p>
-        <p className="mt-1">Not expecting this? Forward to your manager.</p>
+        <p className="mt-1 break-words">Not expecting this? Forward to your manager.</p>
       </footer>
     </div>
   );

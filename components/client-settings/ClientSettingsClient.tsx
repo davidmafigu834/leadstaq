@@ -104,6 +104,8 @@ export function ClientSettingsClient({
   const [tempPass, setTempPass] = useState<string | null>(null);
   const [tempPassExpiresAt, setTempPassExpiresAt] = useState<number | null>(null);
 
+  const savedClientName = useMemo(() => String(client.name ?? "").trim(), [client.name]);
+
   const rrList = useMemo(
     () => [...sales].filter((s) => s.is_active).sort((a, b) => a.round_robin_order - b.round_robin_order),
     [sales]
@@ -469,18 +471,21 @@ export function ClientSettingsClient({
             <div className="mt-12 border-t border-[var(--danger-border)] pt-8">
               <h3 className="text-sm font-semibold text-[var(--danger-fg)]">Danger zone</h3>
               <p className="mt-2 text-sm text-ink-secondary">
-                Type the client name <strong>{String(client.name)}</strong> to archive and hide this client.
+                Type the <strong>saved</strong> client name <strong>{savedClientName || "—"}</strong> to archive and hide
+                this client. If you edited the name above, click <strong>Save</strong> first so the confirmation matches
+                what is stored.
               </p>
               <input
                 className="mt-3 max-w-md rounded-md border border-border px-3 py-2 text-sm"
                 placeholder="Client name"
                 value={deleteConfirm}
                 onChange={(e) => setDeleteConfirm(e.target.value)}
+                autoComplete="off"
               />
               <button
                 type="button"
                 className="mt-3 block rounded-md border border-[var(--danger-border)] bg-[var(--danger-bg)] px-4 py-2 text-sm text-[var(--danger-fg)]"
-                disabled={saving || deleteConfirm.trim() !== String(client.name)}
+                disabled={saving || !savedClientName || deleteConfirm.trim() !== savedClientName}
                 onClick={() => void deleteClient()}
               >
                 Delete client

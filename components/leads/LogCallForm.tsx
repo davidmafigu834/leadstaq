@@ -89,9 +89,11 @@ export function LogCallForm({
 
   const minDate = todayLocalISO();
 
+  const fieldZoomClass = isMagic ? "text-base sm:text-sm" : "";
+
   return (
     <form
-      className="space-y-4"
+      className={isMagic ? "min-w-0 max-w-full space-y-4" : "space-y-4"}
       onSubmit={async (e) => {
         e.preventDefault();
         const fd = new FormData(e.currentTarget);
@@ -187,14 +189,21 @@ export function LogCallForm({
       <div className="font-mono text-[11px] uppercase text-ink-tertiary">Log call</div>
       <div>
         <span className="mb-2 block font-mono text-[11px] uppercase text-ink-secondary">Outcome</span>
-        <div className="flex flex-wrap gap-1 rounded-md bg-surface-card-alt p-1">
+        <div
+          className={
+            isMagic
+              ? "grid grid-cols-2 gap-1 rounded-md bg-surface-card-alt p-1 sm:flex sm:flex-wrap"
+              : "flex flex-wrap gap-1 rounded-md bg-surface-card-alt p-1"
+          }
+        >
           {OUTCOMES.map((opt) => (
             <button
               key={opt.value}
               type="button"
               onClick={() => setOutcome(opt.value)}
               className={[
-                "rounded px-3 py-1.5 text-sm transition-all",
+                "rounded px-2 py-1.5 transition-all sm:px-3",
+                isMagic ? "min-h-[44px] text-xs sm:min-h-0 sm:text-sm" : "text-sm",
                 outcome === opt.value
                   ? "bg-surface-card font-medium text-ink-primary shadow-sm"
                   : "text-ink-secondary hover:text-ink-primary",
@@ -207,7 +216,11 @@ export function LogCallForm({
       </div>
       <label className="block font-mono text-[11px] uppercase text-ink-secondary">
         Notes
-        <textarea name="notes" className="input-base mt-1 min-h-[80px] py-2" rows={3} />
+        <textarea
+          name="notes"
+          className={`input-base mt-1 min-h-[80px] min-w-0 py-2 ${fieldZoomClass}`}
+          rows={3}
+        />
       </label>
       {outcome === "FOLLOW_UP" ? (
         <div>
@@ -216,7 +229,7 @@ export function LogCallForm({
             <input
               name="followUpDate"
               type="date"
-              className="input-base mt-1"
+              className={`input-base mt-1 min-w-0 max-w-full ${fieldZoomClass}`}
               min={minDate}
               required={outcome === "FOLLOW_UP"}
               value={followUpDate}
@@ -250,7 +263,7 @@ export function LogCallForm({
                 setDealValueFieldError(null);
               }}
               placeholder="80000"
-              className="input-base mt-0 w-full py-2 pl-7 pr-3"
+              className={`input-base mt-0 min-w-0 w-full py-2 pl-7 pr-3 ${fieldZoomClass}`}
             />
           </div>
           <p className="mt-1.5 text-xs text-ink-tertiary">
@@ -267,7 +280,7 @@ export function LogCallForm({
             Reason lost <span className="text-[#DC2626]">*</span>
             <input
               type="text"
-              className="input-base mt-1"
+              className={`input-base mt-1 min-w-0 ${fieldZoomClass}`}
               placeholder="e.g. Went with competitor, project cancelled, budget cut"
               maxLength={500}
               value={lostReason}
@@ -287,7 +300,7 @@ export function LogCallForm({
       <div className={`flex flex-wrap items-center gap-3 ${isMagic ? "flex-col" : ""}`}>
         <button
           type="submit"
-          className={isMagic ? "btn-primary w-full py-3" : "btn-primary flex-1"}
+          className={isMagic ? "btn-primary min-h-[48px] w-full touch-manipulation py-3 text-base sm:min-h-0 sm:text-[13px]" : "btn-primary flex-1"}
           disabled={
             (outcome === "FOLLOW_UP" && !followUpDate.trim()) ||
             (outcome === "LOST" && !lostReason.trim()) ||

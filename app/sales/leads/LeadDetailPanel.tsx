@@ -1,6 +1,7 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useLayoutEffect, useState } from "react";
+import { createPortal } from "react-dom";
 import { useSession } from "next-auth/react";
 import { format } from "date-fns";
 import { ChevronLeft, X } from "lucide-react";
@@ -49,6 +50,11 @@ export function LeadDetailPanel({
   const { data: session } = useSession();
   const role = session?.role;
   const [logRefresh, setLogRefresh] = useState(0);
+  const [portalEl, setPortalEl] = useState<HTMLElement | null>(null);
+
+  useLayoutEffect(() => {
+    setPortalEl(document.body);
+  }, []);
 
   const isReadOnly = readOnlyProp === true || role === "CLIENT_MANAGER";
 
@@ -75,8 +81,8 @@ export function LeadDetailPanel({
     if (res.ok && json.lead) onLeadUpdated(json.lead);
   }
 
-  return (
-    <div className="fixed inset-0 z-50 md:flex md:justify-end">
+  const panel = (
+    <div className="fixed inset-0 z-[60] md:flex md:justify-end">
       <button
         type="button"
         className="absolute inset-0 hidden bg-black/30 md:block"
@@ -84,14 +90,14 @@ export function LeadDetailPanel({
         onClick={handleClose}
       />
       <div
-        className="relative flex h-full w-full max-w-none flex-col border-l border-border bg-surface-card md:max-w-[520px]"
+        className="relative flex h-[100dvh] max-h-[100dvh] w-full min-w-0 max-w-none flex-col border-l border-border bg-surface-card shadow-[0_0_0_1px_rgba(0,0,0,0.04)] md:max-w-[520px]"
         role="dialog"
         aria-modal
       >
-        <div className="flex h-12 shrink-0 items-center gap-3 bg-surface-sidebar px-4 text-[var(--text-on-dark)] md:px-5">
+        <div className="safe-top flex h-12 shrink-0 items-center gap-3 bg-surface-sidebar px-4 text-[var(--text-on-dark)] md:px-5">
           <button
             type="button"
-            className="-ml-1 flex h-9 w-9 items-center justify-center text-[var(--text-on-dark)] md:hidden"
+            className="-ml-1 flex h-9 w-9 shrink-0 items-center justify-center text-[var(--text-on-dark)] md:hidden"
             onClick={handleClose}
             aria-label="Back"
           >
@@ -107,10 +113,10 @@ export function LeadDetailPanel({
             <X className="h-4 w-4" strokeWidth={1.5} />
           </button>
         </div>
-        <div className="min-h-0 flex-1 divide-y divide-border overflow-y-auto text-sm">
-          <div className="space-y-3 p-5">
+        <div className="min-h-0 flex-1 divide-y divide-border overflow-y-auto overflow-x-hidden pb-[max(1.25rem,env(safe-area-inset-bottom))] text-sm">
+          <div className="space-y-3 p-4 sm:p-5">
             {isReadOnly ? (
-              <div className="text-[13px] text-ink-secondary">
+              <div className="min-w-0 break-words text-[13px] text-ink-secondary">
                 {phone ? (
                   <>
                     Phone:{" "}
@@ -123,12 +129,12 @@ export function LeadDetailPanel({
                 )}
               </div>
             ) : (
-              <a className="font-mono text-lg text-[var(--info)] underline" href={`tel:${phone}`}>
+              <a className="block min-w-0 break-all font-mono text-lg text-[var(--info)] underline" href={`tel:${phone}`}>
                 {activeLead.phone}
               </a>
             )}
-            <div className="text-ink-secondary">{activeLead.email}</div>
-            <div className="font-mono text-[11px] uppercase text-ink-tertiary">
+            <div className="min-w-0 break-all text-ink-secondary">{activeLead.email}</div>
+            <div className="break-words font-mono text-[11px] uppercase text-ink-tertiary">
               Source · {activeLead.source} · {format(new Date(activeLead.created_at), "MMM d, yyyy")}
             </div>
             <MagicLinkButton token={activeLead.magic_token} />
@@ -191,6 +197,9 @@ export function LeadDetailPanel({
       </div>
     </div>
   );
+
+  if (!portalEl) return null;
+  return createPortal(panel, portalEl);
 }
 
 function AgencyLeadAdminSection({

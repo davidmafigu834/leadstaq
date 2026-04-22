@@ -55,7 +55,11 @@ export async function PATCH(req: Request, { params }: { params: { clientId: stri
   }
 
   if (body.deleteConfirmName !== undefined) {
-    if (body.deleteConfirmName.trim() !== (existing.name as string)) {
+    const savedName = String(existing.name ?? "").trim();
+    if (!savedName) {
+      return NextResponse.json({ error: "Client has no saved name — cannot confirm delete" }, { status: 400 });
+    }
+    if (body.deleteConfirmName.trim() !== savedName) {
       return NextResponse.json({ error: "Name does not match — delete cancelled" }, { status: 400 });
     }
     const { error } = await supabase

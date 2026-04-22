@@ -106,6 +106,8 @@ export function AgencySettingsClient() {
   const skipNextPersistRef = useRef(true);
   const [messageLogs, setMessageLogs] = useState<MessageLogRow[]>([]);
   const [logsLoading, setLogsLoading] = useState(false);
+  /** Optional override for test notification email (blank = use login email on server). */
+  const [testNotificationEmail, setTestNotificationEmail] = useState("");
 
   async function load() {
     setLoading(true);
@@ -241,11 +243,25 @@ export function AgencySettingsClient() {
   async function testNotification() {
     setSaving(true);
     try {
-      const res = await fetch("/api/settings/test-notification", { method: "POST" });
-      const j = (await res.json()) as { whatsapp?: string; email?: string; detail?: string };
-      if (!res.ok) throw new Error((j as { error?: string }).error ?? "Failed");
+      const res = await fetch("/api/settings/test-notification", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          testEmail: testNotificationEmail.trim() || undefined,
+        }),
+      });
+      const j = (await res.json()) as {
+        whatsapp?: string;
+        email?: string;
+        emailTo?: string | null;
+        detail?: string;
+        error?: string;
+      };
+      if (!res.ok) throw new Error(j.error ?? "Failed");
+      const emailHint =
+        j.email === "ok" && j.emailTo ? ` (sent to ${j.emailTo})` : j.email === "skipped" ? " (email skipped)" : "";
       setToast(
-        `Test: WhatsApp ${j.whatsapp ?? "?"}, Email ${j.email ?? "?"}` + (j.detail ? ` — ${j.detail}` : "")
+        `Test: WhatsApp ${j.whatsapp ?? "?"}, Email ${j.email ?? "?"}${emailHint}` + (j.detail ? ` — ${j.detail}` : "")
       );
       const lr = await fetch("/api/agency/message-logs");
       if (lr.ok) {
@@ -472,9 +488,26 @@ export function AgencySettingsClient() {
                 </p>
               </div>
             </div>
-            <button type="button" className="btn-primary h-11 md:h-9" disabled={saving} onClick={() => void testNotification()}>
-              Test notification
-            </button>
+            <div className="max-w-lg space-y-2">
+              <label className="block">
+                <span className="font-mono text-[10px] uppercase text-ink-tertiary">Test email recipient (optional)</span>
+                <input
+                  type="email"
+                  className="input-base mt-1"
+                  placeholder="you@example.com — any inbox you want"
+                  value={testNotificationEmail}
+                  onChange={(e) => setTestNotificationEmail(e.target.value)}
+                  autoComplete="email"
+                />
+              </label>
+              <p className="text-xs text-ink-secondary">
+                Leave this blank to send the test to your Leadstaq login email. Or enter any valid address (work,
+                personal, a colleague) to confirm Resend delivery there.
+              </p>
+              <button type="button" className="btn-primary h-11 md:h-9" disabled={saving} onClick={() => void testNotification()}>
+                Test notification
+              </button>
+            </div>
 
             <div className="mt-10">
               <h3 className="font-display text-lg text-ink-primary">Recent notifications</h3>

@@ -34,7 +34,7 @@ export function StatusPill({ status }: { status: LeadStatus | string | null | un
   const s = normalizeStatus(status);
   return (
     <span
-      className={`inline-flex h-[22px] items-center rounded-sm px-2.5 text-[11px] font-medium leading-none ${classes[s]}`}
+      className={`inline-flex h-[22px] min-w-0 max-w-full items-center overflow-hidden text-ellipsis whitespace-nowrap rounded-sm px-2.5 text-[11px] font-medium leading-none ${classes[s]}`}
     >
       {labelFor(s)}
     </span>

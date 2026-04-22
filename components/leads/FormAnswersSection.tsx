@@ -74,13 +74,13 @@ export function FormAnswersSection({ formData, lead, className }: Props) {
   if (entries.length === 0) return null;
 
   return (
-    <div className={["border-b border-border px-5 py-5", className].filter(Boolean).join(" ")}>
+    <div className={["min-w-0 border-b border-border px-5 py-5", className].filter(Boolean).join(" ")}>
       <div className="mb-4 font-mono text-[11px] uppercase tracking-[0.1em] text-ink-tertiary">Form answers</div>
       <dl className="grid grid-cols-1 gap-x-6 gap-y-4 sm:grid-cols-2">
         {entries.map((entry, i) => (
           <div key={`${entry.label}-${i}`} className={entry.value.length > 60 ? "col-span-2" : ""}>
             <dt className="mb-1 font-mono text-[11px] uppercase tracking-[0.08em] text-ink-tertiary">{entry.label}</dt>
-            <dd className="text-sm leading-relaxed text-ink-primary">{entry.value}</dd>
+            <dd className="min-w-0 break-words text-sm leading-relaxed text-ink-primary">{entry.value}</dd>
           </div>
         ))}
       </dl>
