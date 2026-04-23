@@ -1,4 +1,4 @@
-import { sendWhatsAppViaMeta, type SendWhatsAppParams, type TemplateKey } from "./meta-whatsapp";
+import { sendWhatsAppViaMeta, type SendWhatsAppParams } from "./meta-whatsapp";
 import type { SendResult } from "@/lib/messaging/log";
 
 export type { SendWhatsAppParams, TemplateKey } from "./meta-whatsapp";
