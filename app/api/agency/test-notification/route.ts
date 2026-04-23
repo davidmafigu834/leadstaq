@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { z } from "zod";
 import { requireRoles } from "@/lib/api-guards";
 import { createAdminClient } from "@/lib/supabase/admin";
-import { sendWhatsApp } from "@/lib/messaging/twilio";
+import { sendWhatsApp } from "@/lib/messaging/provider";
 import { sendEmailWithLog } from "@/lib/messaging/email";
 
 export const dynamic = "force-dynamic";
@@ -28,12 +28,16 @@ export async function POST(req: Request) {
   const { data: user } = await supabase.from("users").select("phone, email, name").eq("id", g.session.userId).single();
 
   const results: {
+    ok: boolean;
+    provider: "meta-cloud-api";
     whatsapp: "ok" | "skipped" | "error";
     email: "ok" | "skipped" | "error";
     /** When email was sent, the address it was delivered to (override or account). */
     emailTo?: string | null;
     detail?: string;
   } = {
+    ok: true,
+    provider: "meta-cloud-api",
     whatsapp: "skipped",
     email: "skipped",
   };

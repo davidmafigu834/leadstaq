@@ -10,6 +10,7 @@ import { fetchClientTeamOverview, fetchRecentLeadsForClient } from "@/lib/dashbo
 import { getPublicLandingPageUrl } from "@/lib/public-url";
 import { addMonths, startOfMonth, subHours, subMonths } from "date-fns";
 import { buildClientDetailHero } from "@/lib/client-hero";
+import { isWhatsAppDeliveryConfigured } from "@/lib/messaging/provider";
 
 export default async function ClientDetailPage({ params }: { params: { clientId: string } }) {
   const supabase = createAdminClient();
@@ -46,8 +47,7 @@ export default async function ClientDetailPage({ params }: { params: { clientId:
   const fbPageName = (client.fb_page_name as string | null) ?? null;
   const fbPageId = (client.fb_page_id as string | null) ?? null;
   const notificationsConfigured =
-    Boolean(process.env.TWILIO_ACCOUNT_SID && process.env.TWILIO_AUTH_TOKEN) &&
-    Boolean(process.env.RESEND_API_KEY && process.env.RESEND_FROM_EMAIL?.trim());
+    isWhatsAppDeliveryConfigured() && Boolean(process.env.RESEND_API_KEY && process.env.RESEND_FROM_EMAIL?.trim());
 
   const hero = buildClientDetailHero(
     {

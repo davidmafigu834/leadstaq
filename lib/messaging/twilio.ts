@@ -1,3 +1,8 @@
+/**
+ * @deprecated Leadstaq migrated to Meta WhatsApp Cloud API (April 2026).
+ * Kept for reference and optional rollback: import `sendWhatsApp` from `@/lib/messaging/provider` instead.
+ * Do not use in new code.
+ */
 import twilio from "twilio";
 import type { CountryCode } from "libphonenumber-js";
 import { normalizeToE164 } from "@/lib/phone-validate";

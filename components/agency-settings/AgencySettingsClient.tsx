@@ -17,7 +17,18 @@ type SettingsPayload = {
     privacy_url: string | null;
   };
   connections: {
-    twilio: { configured: boolean; accountSidMasked: string | null; whatsappFrom: string | null };
+    metaWhatsApp: {
+      configured: boolean;
+      provider: string;
+      phoneNumberIdMasked: string | null;
+      businessAccountIdMasked: string | null;
+    };
+    twilio: {
+      configured: boolean;
+      accountSidMasked: string | null;
+      whatsappFrom: string | null;
+      legacy?: boolean;
+    };
     resend: { configured: boolean; fromEmail: string | null };
   };
 };
@@ -251,6 +262,8 @@ export function AgencySettingsClient() {
         }),
       });
       const j = (await res.json()) as {
+        ok?: boolean;
+        provider?: string;
         whatsapp?: string;
         email?: string;
         emailTo?: string | null;
@@ -260,8 +273,10 @@ export function AgencySettingsClient() {
       if (!res.ok) throw new Error(j.error ?? "Failed");
       const emailHint =
         j.email === "ok" && j.emailTo ? ` (sent to ${j.emailTo})` : j.email === "skipped" ? " (email skipped)" : "";
+      const prov = j.provider ? ` [${j.provider}]` : "";
       setToast(
-        `Test: WhatsApp ${j.whatsapp ?? "?"}, Email ${j.email ?? "?"}${emailHint}` + (j.detail ? ` — ${j.detail}` : "")
+        `Test${prov}: WhatsApp ${j.whatsapp ?? "?"}, Email ${j.email ?? "?"}${emailHint}` +
+          (j.detail ? ` — ${j.detail}` : "")
       );
       const lr = await fetch("/api/agency/message-logs");
       if (lr.ok) {
@@ -455,21 +470,28 @@ export function AgencySettingsClient() {
               <div className="rounded-lg border border-border bg-surface-card p-4">
                 <div className="flex items-center gap-2">
                   <span
-                    className={`h-2 w-2 shrink-0 rounded-full ${data?.connections.twilio.configured ? "bg-emerald-500" : "bg-red-500"}`}
+                    className={`h-2 w-2 shrink-0 rounded-full ${
+                      data?.connections.metaWhatsApp?.configured ? "bg-emerald-500" : "bg-red-500"
+                    }`}
                   />
-                  <div className="font-mono text-[10px] uppercase text-ink-tertiary">Twilio</div>
+                  <div className="font-mono text-[10px] uppercase text-ink-tertiary">WhatsApp (Meta)</div>
                 </div>
-                <p className="mt-2 text-sm">
-                  <span className={data?.connections.twilio.configured ? "text-emerald-600" : "text-red-600"}>
-                    {data?.connections.twilio.configured ? "Connected" : "Not configured"}
-                  </span>
+                <p className="mt-2 text-sm text-ink-primary">
+                  {data?.connections.metaWhatsApp?.configured
+                    ? "Currently sending via Meta Cloud API."
+                    : "Not configured (set Meta WhatsApp env on Vercel)."}
                 </p>
                 <p className="mt-1 font-mono text-xs text-ink-secondary">
-                  Account SID: {data?.connections.twilio.accountSidMasked ?? "—"}
+                  Phone number ID: {data?.connections.metaWhatsApp?.phoneNumberIdMasked ?? "—"}
                 </p>
                 <p className="mt-1 font-mono text-xs text-ink-secondary">
-                  WhatsApp From: {data?.connections.twilio.whatsappFrom ?? "—"}
+                  WABA: {data?.connections.metaWhatsApp?.businessAccountIdMasked ?? "—"}
                 </p>
+                {data?.connections.twilio?.configured && data?.connections.twilio?.legacy ? (
+                  <p className="mt-2 text-xs text-ink-tertiary">
+                    Legacy Twilio creds are present; outbound WhatsApp uses Meta when `META_WHATSAPP_*` is set.
+                  </p>
+                ) : null}
               </div>
               <div className="rounded-lg border border-border bg-surface-card p-4">
                 <div className="flex items-center gap-2">

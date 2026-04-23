@@ -67,8 +67,8 @@ Expected response: `200 OK` with JSON body containing counts of leads processed.
 | `NEXTAUTH_SECRET` | Session encryption |
 | `NEXTAUTH_URL` | Public app URL (e.g. `https://your-app.vercel.app`) |
 | `NEXT_PUBLIC_APP_DOMAIN` | Apex domain for subdomain routing (e.g. `leadstaq.com`) |
-| `TWILIO_*` | WhatsApp (account, token, `TWILIO_WHATSAPP_FROM`) |
-| `TWILIO_CONTENT_SID_*` | Approved WhatsApp Content template SIDs (`HX…`) — see below |
+| `META_WHATSAPP_*` / `META_TEMPLATE_*` | Meta Cloud API: WhatsApp phone number ID, access token, template names — [docs/meta-whatsapp-setup.md](docs/meta-whatsapp-setup.md) |
+| `TWILIO_*` | **Deprecated** (rollback only); was Twilio Content API SIDs |
 | `DEFAULT_COUNTRY_CODE` | ISO country for parsing local phones (e.g. `ZW`) |
 | `RESEND_API_KEY` | Resend API key (server-only) |
 | `RESEND_FROM_EMAIL` | Verified sender address (e.g. `notifications@yourdomain.com`) |
@@ -95,32 +95,21 @@ For outbound email, verify the sending domain for `RESEND_FROM_EMAIL` in Resend 
 4. Configure the **Webhooks** product: callback `https://your-domain/api/facebook/webhook`, verify token = `FACEBOOK_WEBHOOK_VERIFY_TOKEN`, subscribe to `leadgen` at the **Page** level (the in-app flow subscribes the app when you select a Page).
 5. As agency admin, open **Dashboard → Client → Facebook** and run **Connect with Facebook**, then pick the Page and Lead Form. No manual database edits are required.
 
-## Twilio WhatsApp Content templates (production)
+## Meta WhatsApp (Cloud API) templates
 
-Outbound WhatsApp outside a user’s 24-hour session must use **Meta-approved** templates. Leadstaq sends via Twilio’s **Content API** (`contentSid` + `contentVariables`). In **Twilio Console → Messaging → Content → Content Template Builder**, create and submit for WhatsApp approval four templates whose bodies match these placeholders (variable numbers must match):
+Business-initiated WhatsApp uses **Meta-approved** templates only. Approve the five template names in Business Manager, then set `META_TEMPLATE_*` in `.env` to match. Placeholders in code are **1–indexed** (`1`, `2`, …) and follow this mapping:
 
-1. **`new_lead_salesperson`** (Utility, English)  
-   `New lead {{1}}.` / `Phone: {{2}}` / `Budget: {{3}}` / `Source: {{4}}` / `View: {{5}}`
+- **`new_lead_salesperson`** — five: lead name, phone, budget, source, link  
+- **`new_lead_manager`** — two: salesperson name, client name  
+- **`deal_won`** — three: salesperson, lead name, deal value  
+- **`follow_up_reminder`** — four: lead name, project type, budget, link  
+- **`uncontacted_lead_alert`** — three: lead name, hours, salesperson name  
 
-2. **`new_lead_manager`**  
-   `New lead assigned to {{1}} for {{2}}. Log in to view your pipeline.`
+Setup, webhook, and WABA: **[docs/meta-whatsapp-setup.md](docs/meta-whatsapp-setup.md)**.
 
-3. **`deal_won`**  
-   `Deal won by {{1}} — {{2}}, {{3}}.`
+Implementation: `lib/messaging/provider.ts` → `sendWhatsApp` → `lib/messaging/meta-whatsapp.ts`. Delivery and status updates (read receipts) are recorded in **`message_logs`**. **Email** is unchanged (Resend).
 
-4. **`follow_up_reminder`**  
-   `Follow-up reminder: Call {{1}} today. {{2}} | {{3}}` / `View: {{4}}`
-
-After approval, copy each template’s **`HX…` SID** into `.env.local`:
-
-- `TWILIO_CONTENT_SID_NEW_LEAD_SALESPERSON`
-- `TWILIO_CONTENT_SID_NEW_LEAD_MANAGER`
-- `TWILIO_CONTENT_SID_DEAL_WON`
-- `TWILIO_CONTENT_SID_FOLLOW_UP_REMINDER`
-
-If these are **unset**, the app falls back to **freeform `body`** messages (fine for the **Twilio WhatsApp sandbox** in development). Production must set all four.
-
-Implementation: `lib/messaging/twilio.ts` (`sendWhatsApp`). Delivery attempts are recorded in the **`message_logs`** table (run migration `012_message_logs.sql`).
+**Rollback:** set `lib/messaging/provider.ts` to use the deprecated `lib/messaging/twilio.ts` and keep `TWILIO_*` in env.
 
 ## Deployment
 

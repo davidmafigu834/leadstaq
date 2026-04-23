@@ -217,7 +217,7 @@ create index if not exists idx_notifications_user on public.notifications(user_i
 create index if not exists idx_notifications_read on public.notifications(read);
 
 -- ---------------------------------------------------------------------------
--- message_logs (outbound Twilio / Resend delivery audit)
+-- message_logs (outbound WhatsApp Meta + Resend delivery audit)
 -- ---------------------------------------------------------------------------
 create table if not exists public.message_logs (
   id uuid primary key default gen_random_uuid(),

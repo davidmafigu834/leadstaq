@@ -3,6 +3,7 @@ import { z } from "zod";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { requireRoles } from "@/lib/api-guards";
 import { getAgencySettings } from "@/lib/agency-settings";
+import { isWhatsAppDeliveryConfigured } from "@/lib/messaging/provider";
 
 export const dynamic = "force-dynamic";
 
@@ -21,6 +22,8 @@ export async function GET() {
   if ("error" in g) return g.error;
 
   const settings = await getAgencySettings();
+  const phoneNumberId = process.env.META_WHATSAPP_PHONE_NUMBER_ID?.trim() ?? "";
+  const metaToken = Boolean(process.env.META_WHATSAPP_ACCESS_TOKEN?.trim());
   const twilioSid = process.env.TWILIO_ACCOUNT_SID ?? "";
   const twilioFrom = process.env.TWILIO_WHATSAPP_FROM ?? "";
   const resendKey = Boolean(process.env.RESEND_API_KEY);
@@ -31,10 +34,25 @@ export async function GET() {
   return NextResponse.json({
     settings,
     connections: {
+      metaWhatsApp: {
+        configured: Boolean(phoneNumberId && metaToken),
+        provider: "Meta Cloud API" as const,
+        phoneNumberIdMasked: phoneNumberId
+          ? `${phoneNumberId.slice(0, 4)}…${phoneNumberId.slice(-4)}`
+          : null,
+        businessAccountIdMasked: (() => {
+          const w = (process.env.META_WHATSAPP_BUSINESS_ACCOUNT_ID || "").trim();
+          if (!w) return null;
+          if (w.length <= 8) return `${w.slice(0, 2)}…`;
+          return `${w.slice(0, 4)}…${w.slice(-4)}`;
+        })(),
+      },
       twilio: {
+        /** @deprecated — rollback only; primary transport is Meta Cloud API. */
         configured: Boolean(twilioSid && process.env.TWILIO_AUTH_TOKEN),
         accountSidMasked: twilioSid ? `${twilioSid.slice(0, 4)}…${twilioSid.slice(-4)}` : null,
         whatsappFrom: twilioFrom || null,
+        legacy: isWhatsAppDeliveryConfigured() && !Boolean(phoneNumberId && metaToken),
       },
       resend: {
         configured: resendReady,

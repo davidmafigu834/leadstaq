@@ -1,4 +1,5 @@
 import { createAdminClient } from "@/lib/supabase/admin";
+import { isWhatsAppDeliveryConfigured } from "@/lib/messaging/provider";
 
 /** Serializable hero status for `ClientDetailView` (built on the server). */
 export type ClientDetailHeroProps = {
@@ -13,10 +14,7 @@ export type ClientDetailHeroProps = {
 
 export function agencyNotificationsEnvConfigured(): boolean {
   return Boolean(
-    process.env.TWILIO_ACCOUNT_SID &&
-      process.env.TWILIO_AUTH_TOKEN &&
-      process.env.RESEND_API_KEY &&
-      process.env.RESEND_FROM_EMAIL?.trim()
+    isWhatsAppDeliveryConfigured() && process.env.RESEND_API_KEY && process.env.RESEND_FROM_EMAIL?.trim()
   );
 }
 

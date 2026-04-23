@@ -13,7 +13,7 @@ import {
   type ManagerNotificationPrefs,
   type SalesNotificationPrefs,
 } from "@/lib/notification-prefs";
-import { sendWhatsApp } from "@/lib/messaging/twilio";
+import { sendWhatsApp } from "@/lib/messaging/provider";
 import { sendEmailWithLog } from "@/lib/messaging/email";
 import { logMessage } from "@/lib/messaging/log";
 import { background } from "@/lib/background";

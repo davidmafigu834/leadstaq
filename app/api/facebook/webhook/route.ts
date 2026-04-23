@@ -4,6 +4,7 @@ import { createLead } from "@/lib/leads/createLead";
 import { graphCall } from "@/lib/facebook/graph";
 import { verifyFacebookSignature } from "@/lib/facebook/signature";
 import { fbLog } from "@/lib/facebook/log";
+import { handleWhatsAppEvent } from "@/lib/facebook/whatsapp-events";
 
 type ClientRow = {
   id: string;
@@ -12,6 +13,17 @@ type ClientRow = {
 
 type LeadgenPayload = {
   field_data?: { name: string; values: string[] }[];
+};
+
+type WebhookPayload = {
+  object?: string;
+  entry?: {
+    id?: string;
+    changes?: {
+      field?: string;
+      value?: { leadgen_id?: string; page_id?: string | number; form_id?: string | number; [k: string]: unknown };
+    }[];
+  }[];
 };
 
 async function processLead({ leadgen_id, client }: { leadgen_id: string; client: ClientRow }) {
@@ -80,15 +92,22 @@ async function processLead({ leadgen_id, client }: { leadgen_id: string; client:
 }
 
 export async function GET(req: Request) {
-  const url = new URL(req.url);
-  const mode = url.searchParams.get("hub.mode");
-  const token = url.searchParams.get("hub.verify_token");
-  const challenge = url.searchParams.get("hub.challenge");
-  if (mode === "subscribe" && token === process.env.FACEBOOK_WEBHOOK_VERIFY_TOKEN) {
-    fbLog("fb.webhook.verified", { mode });
-    return new NextResponse(challenge ?? "", { status: 200 });
+  const { searchParams } = new URL(req.url);
+  const mode = searchParams.get("hub.mode");
+  const token = searchParams.get("hub.verify_token");
+  const challenge = searchParams.get("hub.challenge");
+  if (mode !== "subscribe" || !challenge) {
+    return new NextResponse("Bad request", { status: 400 });
   }
-  return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+  const validTokens = [process.env.FACEBOOK_WEBHOOK_VERIFY_TOKEN, process.env.META_WHATSAPP_WEBHOOK_VERIFY_TOKEN].filter(
+    (t): t is string => Boolean(t && t.trim())
+  );
+  if (!validTokens.length || !token || !validTokens.includes(token)) {
+    return new NextResponse("Forbidden", { status: 403 });
+  }
+  console.log("LEADSTAQ_FB_WEBHOOK", "GET subscribe challenge ok (Meta webhook verification)");
+  fbLog("fb.webhook.verified", { mode, tokenMatch: "ok" });
+  return new NextResponse(challenge, { status: 200 });
 }
 
 export async function POST(req: Request) {
@@ -102,43 +121,62 @@ export async function POST(req: Request) {
   }
 
   if (!verifyFacebookSignature(rawBody, signature, appSecret)) {
+    console.warn("LEADSTAQ_FB_WEBHOOK", "POST signature invalid — check FACEBOOK_APP_SECRET in Vercel", {
+      signatureHeaderPresent: Boolean(signature),
+    });
     fbLog("fb.webhook.signature_failed", { signaturePrefix: signature?.slice(0, 16) ?? null });
     return new Response("Invalid signature", { status: 403 });
   }
 
-  let payload: {
-    object?: string;
-    entry?: { changes?: { field?: string; value?: { leadgen_id?: string; page_id?: string | number; form_id?: string | number } }[] }[];
-  };
+  let payload: WebhookPayload;
   try {
-    payload = JSON.parse(rawBody) as typeof payload;
+    payload = JSON.parse(rawBody) as WebhookPayload;
   } catch {
     return new Response("Invalid JSON", { status: 400 });
   }
 
-  if (payload.object !== "page") {
+  if (payload.object !== "page" && payload.object !== "whatsapp_business_account") {
+    console.log("LEADSTAQ_FB_WEBHOOK", "POST ignored object (not page/waba)", { object: payload.object });
     fbLog("fb.webhook.object_mismatch", { object: payload.object });
     return new Response("OK", { status: 200 });
   }
 
-  fbLog("fb.webhook.received", { entries: payload.entry?.length ?? 0 });
+  console.log("LEADSTAQ_FB_WEBHOOK", "POST received", {
+    object: payload.object,
+    entryCount: payload.entry?.length ?? 0,
+  });
+  fbLog("fb.webhook.received", { object: payload.object, entries: payload.entry?.length ?? 0 });
 
   const supabase = createAdminClient();
 
   try {
     for (const entry of payload.entry || []) {
       for (const change of entry.changes || []) {
-        if (change.field !== "leadgen") continue;
+        if (change.field === "messages") {
+          if (change.value) await handleWhatsAppEvent(change.value);
+          continue;
+        }
+
+        if (change.field !== "leadgen") {
+          if (change.field) fbLog("fb.webhook.unknown_field", { field: change.field, object: payload.object });
+          continue;
+        }
+
+        if (payload.object !== "page") {
+          continue;
+        }
 
         const value = change.value || {};
-        const leadgen_id = value.leadgen_id != null ? String(value.leadgen_id) : "";
-        const page_id = value.page_id != null ? String(value.page_id) : "";
-        const form_id = value.form_id != null ? String(value.form_id) : "";
+        const leadgen_id = value.leadgen_id != null ? String(value.leadgen_id).trim() : "";
+        const page_id = value.page_id != null ? String(value.page_id).trim() : "";
+        const form_id = value.form_id != null ? String(value.form_id).trim() : "";
 
         if (!leadgen_id || !page_id || !form_id) {
           fbLog("fb.webhook.malformed", { value });
           continue;
         }
+
+        fbLog("fb.webhook.leadgen_incoming", { leadgen_id, page_id, form_id });
 
         const { data: client, error } = await supabase
           .from("clients")
