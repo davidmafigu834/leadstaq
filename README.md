@@ -44,6 +44,19 @@ Lead management for marketing agencies and their service-business clients. Built
 
    Open [http://localhost:3000](http://localhost:3000).
 
+## Development
+
+### Testing cron endpoints locally
+
+```bash
+# Set CRON_SECRET in your .env.local
+curl -X GET \
+  -H "Authorization: Bearer $(grep CRON_SECRET .env.local | cut -d= -f2)" \
+  http://localhost:3000/api/cron/check-leads
+```
+
+Expected response: `200 OK` with JSON body containing counts of leads processed. In `NODE_ENV=development`, `lib/cron-auth.ts` also allows unauthenticated cron calls for quick local testing.
+
 ## Environment variables
 
 | Variable | Purpose |
@@ -63,7 +76,7 @@ Lead management for marketing agencies and their service-business clients. Built
 | `FACEBOOK_REDIRECT_URI` | Must match app settings exactly, e.g. `https://your-app.vercel.app/api/facebook/oauth/callback` |
 | `FACEBOOK_WEBHOOK_VERIFY_TOKEN` | Same value configured on the Meta webhook |
 | `FACEBOOK_API_VERSION` | Graph API version (default `v19.0`) |
-| `CRON_SECRET` | `Authorization: Bearer` for cron routes in production (set on Vercel; Vercel Cron sends it automatically) |
+| `CRON_SECRET` | `Authorization: Bearer` for `/api/cron/*` in production. Set the same value on Vercel, in the repo’s Actions secrets (GitHub cron), and in `.env.local` for manual curl tests. |
 
 For outbound email, verify the sending domain for `RESEND_FROM_EMAIL` in Resend (SPF and DKIM records) so messages authenticate correctly.
 
@@ -109,13 +122,17 @@ If these are **unset**, the app falls back to **freeform `body`** messages (fine
 
 Implementation: `lib/messaging/twilio.ts` (`sendWhatsApp`). Delivery attempts are recorded in the **`message_logs`** table (run migration `012_message_logs.sql`).
 
+## Deployment
+
+**Cron & GitHub Actions:** On Vercel Hobby, arbitrary schedules are not available for Vercel Cron. Production schedules for uncontacted-lead checks (every 30 min), follow-up reminders, and the weekly-digest hook are run via **GitHub Actions** (see [`.github/README.md`](.github/README.md) for `APP_URL` / `CRON_SECRET` setup, schedule table, and manual “Run workflow” tests).
+
 ## Deploy (Vercel)
 
 - **NextAuth (login):** In production, **`NEXTAUTH_SECRET` is required**. If it is missing, sign-in shows `/api/auth/error` — *“There is a problem with the server configuration.”* Generate one locally: `openssl rand -base64 32`, add it under Vercel → Project → Settings → Environment Variables, then redeploy.
 - Set **`NEXTAUTH_URL`** to your live site origin with **no path**, e.g. `https://leadstaq.tech` (must match how users open the app; avoid `http://` or a wrong host).
-- **Hobby (free):** Vercel only allows cron expressions that run **at most once per day**. This repo uses a single daily job: `vercel.json` → `/api/cron/daily` at **06:00 UTC**, which runs **uncontacted-lead checks** and **follow-up reminders** in one request.
-- Set **`CRON_SECRET`** in the Vercel project environment. Vercel Cron will send `Authorization: Bearer <CRON_SECRET>` automatically.
-- For **more frequent** uncontacted checks (e.g. every 30 minutes) without upgrading Vercel, use a free external cron (e.g. [cron-job.org](https://cron-job.org)) to `GET` your deployed URL **`/api/cron/check-leads`** with the same `Authorization: Bearer <CRON_SECRET>` header.
+- **Hobby (free):** Vercel only allows cron expressions that run **at most once per day**. This repo can still use a single daily job: `vercel.json` → `/api/cron/daily` at **06:00 UTC** (uncontacted-lead + follow-up in one request). If you also use **GitHub Actions** for the same work on sub-daily or different times, consider trimming `vercel.json` crons to avoid duplicate runs.
+- Set **`CRON_SECRET`** in the Vercel project environment. It must match the **`CRON_SECRET`** GitHub Actions secret; any caller (Vercel Cron, GitHub Actions) sends `Authorization: Bearer <CRON_SECRET>`.
+- For ad-hoc external pings (e.g. [cron-job.org](https://cron-job.org)), `GET` **`/api/cron/check-leads`** with the same `Authorization` header and value as in production.
 - Set all other env vars in the Vercel project (including **`NEXT_PUBLIC_SUPABASE_URL`** and **`SUPABASE_SERVICE_ROLE_KEY`**).
 
 ## Build
