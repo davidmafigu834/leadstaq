@@ -96,6 +96,12 @@ export async function GET(req: Request) {
   const mode = searchParams.get("hub.mode");
   const token = searchParams.get("hub.verify_token");
   const challenge = searchParams.get("hub.challenge");
+  // console.error: visible under Vercel "Error" and default filters; use search LEADSTAQ_FB_WEBHOOK
+  console.error("LEADSTAQ_FB_WEBHOOK", "GET", {
+    mode,
+    hasToken: Boolean(token),
+    hasChallenge: Boolean(challenge),
+  });
   if (mode !== "subscribe" || !challenge) {
     return new NextResponse("Bad request", { status: 400 });
   }
@@ -103,27 +109,42 @@ export async function GET(req: Request) {
     (t): t is string => Boolean(t && t.trim())
   );
   if (!validTokens.length || !token || !validTokens.includes(token)) {
+    console.error("LEADSTAQ_FB_WEBHOOK", "GET forbidden — verify token mismatch; check FACEBOOK_WEBHOOK_VERIFY_TOKEN and META_WHATSAPP_WEBHOOK_VERIFY_TOKEN in Vercel");
     return new NextResponse("Forbidden", { status: 403 });
   }
-  console.log("LEADSTAQ_FB_WEBHOOK", "GET subscribe challenge ok (Meta webhook verification)");
+  console.error("LEADSTAQ_FB_WEBHOOK", "GET 200 (subscribe challenge — Meta can deliver webhooks to this host)");
   fbLog("fb.webhook.verified", { mode, tokenMatch: "ok" });
   return new NextResponse(challenge, { status: 200 });
 }
 
 export async function POST(req: Request) {
+  const host = (() => {
+    try {
+      return new URL(req.url).host;
+    } catch {
+      return "unknown";
+    }
+  })();
   const signature = req.headers.get("x-hub-signature-256");
   const rawBody = await req.text();
 
+  // Always log once per POST so you can confirm Vercel received the request (even if signature fails).
+  console.error("LEADSTAQ_FB_WEBHOOK", "POST received", {
+    host,
+    bodyBytes: rawBody.length,
+    hasSignatureHeader: Boolean(signature),
+  });
+
   const appSecret = process.env.FACEBOOK_APP_SECRET;
   if (!appSecret) {
+    console.error("LEADSTAQ_FB_WEBHOOK", "FACEBOOK_APP_SECRET not set in environment");
     console.error("[fb webhook] FACEBOOK_APP_SECRET not configured");
     return new Response("Misconfigured", { status: 500 });
   }
 
   if (!verifyFacebookSignature(rawBody, signature, appSecret)) {
-    console.warn("LEADSTAQ_FB_WEBHOOK", "POST signature invalid — check FACEBOOK_APP_SECRET in Vercel", {
-      signatureHeaderPresent: Boolean(signature),
-    });
+    console.error("LEADSTAQ_FB_WEBHOOK", "POST 403 — invalid signature; compare FACEBOOK_APP_SECRET to App Dashboard → App secret");
+    console.error("LEADSTAQ_FB_WEBHOOK", { signatureHeaderPrefix: signature?.slice(0, 12) ?? null });
     fbLog("fb.webhook.signature_failed", { signaturePrefix: signature?.slice(0, 16) ?? null });
     return new Response("Invalid signature", { status: 403 });
   }
@@ -132,16 +153,17 @@ export async function POST(req: Request) {
   try {
     payload = JSON.parse(rawBody) as WebhookPayload;
   } catch {
+    console.error("LEADSTAQ_FB_WEBHOOK", "POST 400 — body is not JSON");
     return new Response("Invalid JSON", { status: 400 });
   }
 
   if (payload.object !== "page" && payload.object !== "whatsapp_business_account") {
-    console.log("LEADSTAQ_FB_WEBHOOK", "POST ignored object (not page/waba)", { object: payload.object });
+    console.error("LEADSTAQ_FB_WEBHOOK", "POST 200 (ignored object, not page/waba)", { object: payload.object });
     fbLog("fb.webhook.object_mismatch", { object: payload.object });
     return new Response("OK", { status: 200 });
   }
 
-  console.log("LEADSTAQ_FB_WEBHOOK", "POST received", {
+  console.error("LEADSTAQ_FB_WEBHOOK", "POST signature ok", {
     object: payload.object,
     entryCount: payload.entry?.length ?? 0,
   });

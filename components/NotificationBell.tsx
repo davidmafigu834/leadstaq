@@ -2,6 +2,7 @@
 
 import { Bell, ChevronLeft } from "lucide-react";
 import { useState, useEffect, useRef } from "react";
+import { useRouter } from "next/navigation";
 import { formatTimeAgo } from "@/lib/format";
 import Link from "next/link";
 import type { UserRole } from "@/types";
@@ -23,10 +24,18 @@ type NotificationRow = {
   created_at: string;
 };
 
+const fetchOpts: RequestInit = { credentials: "same-origin" };
+
+function countUnread(rows: NotificationRow[]) {
+  return rows.filter((n) => !n.read).length;
+}
+
 export function NotificationBell({ initialUnread = 0, role }: { initialUnread?: number; role: UserRole }) {
+  const router = useRouter();
   const [open, setOpen] = useState(false);
   const [items, setItems] = useState<NotificationRow[]>([]);
   const [loading, setLoading] = useState(false);
+  const [loadError, setLoadError] = useState<string | null>(null);
   const [unreadCount, setUnreadCount] = useState(initialUnread);
   const ref = useRef<HTMLDivElement>(null);
 
@@ -44,24 +53,52 @@ export function NotificationBell({ initialUnread = 0, role }: { initialUnread?: 
     }
   }, [open]);
 
+  async function loadNotifications() {
+    setLoading(true);
+    setLoadError(null);
+    try {
+      const res = await fetch("/api/notifications?limit=15", fetchOpts);
+      if (!res.ok) {
+        const err = (await res.json().catch(() => ({}))) as { error?: string };
+        setLoadError(
+          err.error ?? (res.status === 401 ? "Sign in to see notifications" : "Could not load notifications")
+        );
+        setItems([]);
+        if (res.status === 401) setUnreadCount(0);
+        return;
+      }
+      const data = (await res.json()) as { notifications?: NotificationRow[] };
+      const list = data.notifications ?? [];
+      setItems(list);
+      setUnreadCount(countUnread(list));
+    } catch {
+      setLoadError("Network error");
+      setItems([]);
+    } finally {
+      setLoading(false);
+    }
+  }
+
   async function handleOpen() {
     setOpen(true);
-    if (items.length === 0) {
-      setLoading(true);
-      try {
-        const res = await fetch("/api/notifications?limit=15");
-        const data = (await res.json()) as { notifications?: NotificationRow[] };
-        setItems(data.notifications ?? []);
-      } finally {
-        setLoading(false);
-      }
-    }
+    await loadNotifications();
   }
 
   async function markAllRead() {
     setUnreadCount(0);
     setItems((prev) => prev.map((n) => ({ ...n, read: true })));
-    await fetch("/api/notifications/mark-read", { method: "POST" });
+    try {
+      const res = await fetch("/api/notifications/mark-read", { method: "POST", ...fetchOpts });
+      if (res.ok) {
+        router.refresh();
+      } else {
+        setLoadError("Could not mark as read. Try again.");
+        await loadNotifications();
+      }
+    } catch {
+      setLoadError("Could not mark as read. Try again.");
+      await loadNotifications();
+    }
   }
 
   function leadHref(n: NotificationRow): string {
@@ -85,16 +122,21 @@ export function NotificationBell({ initialUnread = 0, role }: { initialUnread?: 
   }
 
   return (
-    <div ref={ref} className="relative">
+    <div ref={ref} className="relative z-40">
       <button
         type="button"
-        onClick={() => (open ? setOpen(false) : handleOpen())}
-        className="relative flex h-9 w-9 items-center justify-center rounded-sm text-ink-secondary transition-colors hover:bg-surface-card-alt"
-        aria-label="Notifications"
+        onClick={() => (open ? setOpen(false) : void handleOpen())}
+        className="relative flex h-9 w-9 shrink-0 items-center justify-center rounded-sm text-ink-secondary transition-colors hover:bg-surface-card-alt"
+        aria-label={unreadCount > 0 ? `Notifications, ${unreadCount} unread` : "Notifications"}
       >
         <Bell className="h-4 w-4" strokeWidth={1.75} />
         {unreadCount > 0 ? (
-          <span className="absolute right-1.5 top-1.5 h-1.5 w-1.5 rounded-full bg-accent ring-2 ring-surface-canvas" />
+          <span
+            className="absolute -right-0.5 -top-0.5 flex h-[18px] min-w-[18px] items-center justify-center rounded-full bg-accent px-0.5 text-[10px] font-bold leading-none text-white ring-2 ring-surface-canvas"
+            aria-hidden
+          >
+            {unreadCount > 9 ? "9+" : unreadCount}
+          </span>
         ) : null}
       </button>
 
@@ -110,10 +152,10 @@ export function NotificationBell({ initialUnread = 0, role }: { initialUnread?: 
               <ChevronLeft className="h-5 w-5" strokeWidth={1.5} />
             </button>
             <h3 className="min-w-0 flex-1 font-display text-lg text-ink-primary">Notifications</h3>
-            {unreadCount > 0 ? (
+            {unreadCount > 0 && !loading ? (
               <button
                 type="button"
-                onClick={markAllRead}
+                onClick={() => void markAllRead()}
                 className="shrink-0 text-xs text-ink-secondary hover:text-ink-primary"
               >
                 Mark all read
@@ -126,14 +168,27 @@ export function NotificationBell({ initialUnread = 0, role }: { initialUnread?: 
               <div className="py-8 text-center text-sm text-ink-tertiary">Loading…</div>
             ) : null}
 
-            {!loading && items.length === 0 ? (
+            {loadError ? (
+              <div className="px-4 py-6 text-center">
+                <p className="text-sm text-[var(--danger-fg,theme(colors.red.600))]">{loadError}</p>
+                <button
+                  type="button"
+                  className="mt-3 text-sm font-medium text-accent"
+                  onClick={() => void loadNotifications()}
+                >
+                  Retry
+                </button>
+              </div>
+            ) : null}
+
+            {!loading && !loadError && items.length === 0 ? (
               <div className="py-12 text-center">
                 <Bell className="mx-auto mb-3 h-8 w-8 text-ink-tertiary" strokeWidth={1.5} />
                 <p className="text-sm text-ink-secondary">No notifications yet</p>
               </div>
             ) : null}
 
-            {!loading
+            {!loading && !loadError
               ? items.map((n) => (
                   <Link
                     key={n.id}

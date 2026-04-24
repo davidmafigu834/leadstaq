@@ -45,7 +45,7 @@ export function ClientReadOnlyKanban({
   leads: ActivePipelineLead[];
   onOpenLead: (leadId: string) => void;
 }) {
-  const isMobile = useMediaQuery("(max-width: 767px)");
+  const isMobile = useMediaQuery("(max-width: 1023px)");
   const [activeCol, setActiveCol] = useState<KanbanCol>("NEW");
   const [touchStartX, setTouchStartX] = useState<number | null>(null);
 

@@ -1,9 +1,23 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { signIn } from "next-auth/react";
+import { useRouter } from "next/navigation";
 import { format, parseISO } from "date-fns";
 import { VerticalSettingsNav } from "@/components/settings/VerticalSettingsNav";
 import { ClientAvatar } from "@/components/ClientAvatar";
+
+function passwordStrength(pw: string): "weak" | "medium" | "strong" {
+  if (pw.length < 8) return "weak";
+  let score = 0;
+  if (pw.length >= 12) score++;
+  if (/[0-9]/.test(pw)) score++;
+  if (/[^A-Za-z0-9]/.test(pw)) score++;
+  if (/[A-Z]/.test(pw) && /[a-z]/.test(pw)) score++;
+  if (score >= 3) return "strong";
+  if (score >= 1) return "medium";
+  return "weak";
+}
 
 type SettingsPayload = {
   settings: {
@@ -84,6 +98,7 @@ function parsePendingAdminPasswords(raw: string | null): PendingAdminPassword[] 
 
 const TABS = [
   { id: "general", label: "General" },
+  { id: "account", label: "Account" },
   { id: "notifications", label: "Notifications" },
   { id: "team", label: "Agency team" },
   { id: "billing", label: "Billing" },
@@ -91,6 +106,7 @@ const TABS = [
 ];
 
 export function AgencySettingsClient() {
+  const router = useRouter();
   const [tab, setTab] = useState("general");
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -98,6 +114,12 @@ export function AgencySettingsClient() {
   const [savedGeneral, setSavedGeneral] = useState(false);
   const [data, setData] = useState<SettingsPayload | null>(null);
   const [admins, setAdmins] = useState<AdminRow[]>([]);
+  const [accountEmail, setAccountEmail] = useState("");
+  const [newEmail, setNewEmail] = useState("");
+  const [emailCurrentPassword, setEmailCurrentPassword] = useState("");
+  const [currentPw, setCurrentPw] = useState("");
+  const [newPw, setNewPw] = useState("");
+  const [confirmPw, setConfirmPw] = useState("");
 
   const [form, setForm] = useState({
     agency_name: "",
@@ -123,7 +145,18 @@ export function AgencySettingsClient() {
   async function load() {
     setLoading(true);
     try {
-      const [sRes, aRes] = await Promise.all([fetch("/api/agency/settings"), fetch("/api/agency/admins")]);
+      const [meRes, sRes, aRes] = await Promise.all([
+        fetch("/api/users/me"),
+        fetch("/api/agency/settings"),
+        fetch("/api/agency/admins"),
+      ]);
+      if (meRes.ok) {
+        const meJson = (await meRes.json()) as { user?: { email?: string } };
+        const em = meJson.user?.email;
+        if (typeof em === "string" && em) {
+          setAccountEmail(em);
+        }
+      }
       const sJson = (await sRes.json()) as SettingsPayload;
       const aJson = (await aRes.json()) as { admins: AdminRow[] };
       if (sRes.ok) {
@@ -244,6 +277,83 @@ export function AgencySettingsClient() {
       if (!res.ok) throw new Error(j.error ?? "Save failed");
       setToast("Saved legal URLs.");
       await load();
+    } catch (e) {
+      setToast(e instanceof Error ? e.message : "Error");
+    } finally {
+      setSaving(false);
+    }
+  }
+
+  async function changeEmail() {
+    if (!newEmail.trim()) {
+      setToast("Enter a new email address");
+      return;
+    }
+    const pw = emailCurrentPassword;
+    if (!pw) {
+      setToast("Enter your current password to confirm the change");
+      return;
+    }
+    setSaving(true);
+    try {
+      const res = await fetch("/api/users/me/email", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ newEmail: newEmail.trim(), currentPassword: pw }),
+      });
+      const j = (await res.json()) as { error?: string; email?: string };
+      if (!res.ok) throw new Error(j.error ?? "Could not update email");
+      const next = j.email ?? newEmail.trim();
+      setAccountEmail(next);
+      setNewEmail("");
+      setEmailCurrentPassword("");
+      const r = await signIn("credentials", {
+        email: next,
+        password: pw,
+        redirect: false,
+      });
+      if (r?.error) {
+        setToast("Email updated — sign in with your new address if you are signed out.");
+      } else {
+        setToast("Email updated.");
+      }
+      router.refresh();
+    } catch (e) {
+      setToast(e instanceof Error ? e.message : "Error");
+    } finally {
+      setSaving(false);
+    }
+  }
+
+  async function changePassword() {
+    if (newPw !== confirmPw) {
+      setToast("New passwords do not match");
+      return;
+    }
+    const nextPw = newPw;
+    setSaving(true);
+    try {
+      const res = await fetch("/api/users/me/password", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ currentPassword: currentPw, newPassword: nextPw }),
+      });
+      const j = await res.json();
+      if (!res.ok) throw new Error((j as { error?: string }).error ?? "Failed");
+      const r = await signIn("credentials", {
+        email: accountEmail,
+        password: nextPw,
+        redirect: false,
+      });
+      if (r?.error) {
+        setToast("Password updated — please sign in again.");
+      } else {
+        setToast("Password updated.");
+      }
+      setCurrentPw("");
+      setNewPw("");
+      setConfirmPw("");
+      router.refresh();
     } catch (e) {
       setToast(e instanceof Error ? e.message : "Error");
     } finally {
@@ -456,6 +566,103 @@ export function AgencySettingsClient() {
                 ) : null}
               </div>
             </div>
+          </div>
+        ) : null}
+
+        {tab === "account" ? (
+          <div className="max-w-lg space-y-10">
+            <div>
+              <h2 className="font-display text-2xl text-ink-primary">Account</h2>
+              <p className="mt-1 text-sm text-ink-secondary">Your login for this platform.</p>
+            </div>
+
+            <section className="space-y-4">
+              <h3 className="font-mono text-[10px] uppercase tracking-wide text-ink-tertiary">Login email</h3>
+              {accountEmail ? (
+                <p className="text-sm text-ink-secondary">
+                  Currently <span className="font-mono text-ink-primary">{accountEmail}</span>
+                </p>
+              ) : (
+                <p className="text-sm text-ink-tertiary">Loading email…</p>
+              )}
+              <label className="block">
+                <span className="font-mono text-[10px] uppercase text-ink-tertiary">New email</span>
+                <input
+                  type="email"
+                  className="input-base mt-1"
+                  value={newEmail}
+                  onChange={(e) => setNewEmail(e.target.value)}
+                  autoComplete="email"
+                  inputMode="email"
+                />
+              </label>
+              <label className="block">
+                <span className="font-mono text-[10px] uppercase text-ink-tertiary">Current password (to confirm)</span>
+                <input
+                  type="password"
+                  className="input-base mt-1"
+                  value={emailCurrentPassword}
+                  onChange={(e) => setEmailCurrentPassword(e.target.value)}
+                  autoComplete="current-password"
+                />
+              </label>
+              <button
+                type="button"
+                className="btn-primary h-11 md:h-9"
+                disabled={saving || !accountEmail}
+                onClick={() => void changeEmail()}
+              >
+                {saving ? "Saving…" : "Update email"}
+              </button>
+            </section>
+
+            <section className="space-y-4">
+              <h3 className="font-mono text-[10px] uppercase tracking-wide text-ink-tertiary">Change password</h3>
+              <label className="block">
+                <span className="font-mono text-[10px] uppercase text-ink-tertiary">Current password</span>
+                <input
+                  type="password"
+                  className="input-base mt-1"
+                  value={currentPw}
+                  onChange={(e) => setCurrentPw(e.target.value)}
+                  autoComplete="current-password"
+                />
+              </label>
+              <label className="block">
+                <span className="font-mono text-[10px] uppercase text-ink-tertiary">New password</span>
+                <input
+                  type="password"
+                  className="input-base mt-1"
+                  value={newPw}
+                  onChange={(e) => setNewPw(e.target.value)}
+                  autoComplete="new-password"
+                />
+                {newPw ? (
+                  <span className="mt-1 block text-xs text-ink-tertiary">
+                    Strength: <span className="capitalize text-ink-primary">{passwordStrength(newPw)}</span>
+                  </span>
+                ) : null}
+              </label>
+              <label className="block">
+                <span className="font-mono text-[10px] uppercase text-ink-tertiary">Confirm new password</span>
+                <input
+                  type="password"
+                  className="input-base mt-1"
+                  value={confirmPw}
+                  onChange={(e) => setConfirmPw(e.target.value)}
+                  autoComplete="new-password"
+                />
+              </label>
+              <p className="text-xs text-ink-tertiary">Use at least 8 characters and include a number or symbol.</p>
+              <button
+                type="button"
+                className="btn-primary h-11 md:h-9"
+                disabled={saving || !accountEmail}
+                onClick={() => void changePassword()}
+              >
+                {saving ? "Updating…" : "Update password"}
+              </button>
+            </section>
           </div>
         ) : null}
 

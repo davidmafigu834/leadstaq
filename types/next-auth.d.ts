@@ -24,5 +24,6 @@ declare module "next-auth/jwt" {
     role: UserRole;
     clientId: string | null;
     sessionVersion?: number;
+    email?: string | null;
   }
 }

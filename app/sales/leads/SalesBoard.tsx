@@ -78,7 +78,8 @@ export function SalesBoard({
   const [tab, setTab] = useState<"active" | "closed">(initialTab);
   const [searchQuery, setSearchQuery] = useState("");
   const [debouncedQuery, setDebouncedQuery] = useState("");
-  const isMobileKanban = useMediaQuery("(max-width: 767px)");
+  /** Single-column pipeline + column tabs below `lg` — full kanban from `lg` up (1024px+). */
+  const isMobileKanban = useMediaQuery("(max-width: 1023px)");
   const [activeColumn, setActiveColumn] = useState<BoardColumn>("NEW");
   const [touchStartX, setTouchStartX] = useState<number | null>(null);
 
@@ -195,7 +196,7 @@ export function SalesBoard({
 
   if (tab === "closed") {
     return (
-      <div>
+      <div className="w-full min-w-0 max-w-full">
         <div className="mb-6 flex gap-6 border-b border-border">
           <button
             type="button"
@@ -243,7 +244,7 @@ export function SalesBoard({
 
   if (showFullEmpty) {
     return (
-      <div>
+      <div className="w-full min-w-0 max-w-full">
         <div className="mb-6 flex flex-wrap items-center justify-between gap-4 border-b border-border">
           <div className="flex gap-6">
             <button type="button" className="relative pb-3 text-sm font-medium text-ink-primary">
@@ -275,9 +276,9 @@ export function SalesBoard({
   }
 
   return (
-    <div>
-      <div className="mb-6 flex flex-wrap items-center justify-between gap-4 border-b border-border">
-        <div className="flex gap-6">
+    <div className="w-full min-w-0 max-w-full">
+      <div className="mb-6 flex flex-col gap-4 border-b border-border sm:flex-row sm:flex-wrap sm:items-center sm:justify-between sm:gap-4">
+        <div className="flex shrink-0 gap-6">
           <button type="button" className="relative pb-3 text-sm font-medium text-ink-primary">
             Active
             <span className="absolute bottom-0 left-0 right-0 h-0.5 bg-[var(--accent)]" />
@@ -290,8 +291,8 @@ export function SalesBoard({
             Closed
           </button>
         </div>
-        <div className="flex items-center gap-2">
-          <span className="rounded-sm border border-border bg-surface-card-alt px-2 py-1 font-mono text-[11px] text-ink-tertiary">
+        <div className="flex w-full min-w-0 flex-col gap-2 sm:w-auto sm:max-w-md sm:flex-row sm:items-center sm:justify-end sm:gap-2 sm:pl-0">
+          <span className="shrink-0 self-start rounded-sm border border-border bg-surface-card-alt px-2 py-1 font-mono text-[11px] text-ink-tertiary sm:self-center">
             Board
           </span>
           <input
@@ -299,7 +300,7 @@ export function SalesBoard({
             placeholder="Search leads by name, phone, or email"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="input-base h-8 w-48 text-xs sm:w-56"
+            className="input-base h-10 w-full min-w-0 text-sm sm:h-8 sm:max-w-[min(100%,20rem)] sm:text-xs"
             aria-label="Search leads"
           />
         </div>
@@ -321,8 +322,8 @@ export function SalesBoard({
           </button>
         </div>
       ) : isMobileKanban ? (
-        <div className="flex min-h-[60svh] max-h-[calc(100svh-220px)] flex-col">
-          <div className="-mx-4 flex gap-1 overflow-x-auto border-b border-border px-4 pb-3 scrollbar-hide">
+        <div className="flex min-h-0 min-h-[45svh] max-h-[calc(100dvh-10.5rem)] flex-1 flex-col">
+          <div className="-mx-4 flex min-w-0 gap-1 overflow-x-auto border-b border-border px-4 pb-3 scrollbar-hide">
             {COLS.map((col) => {
               const count = grouped[col].length;
               const isActive = activeColumn === col;
@@ -398,7 +399,7 @@ export function SalesBoard({
         </div>
       ) : (
         <DragDropContext onDragEnd={onDragEnd}>
-          <div className="flex snap-x snap-mandatory gap-5 overflow-x-auto pb-4">
+          <div className="-mx-1 flex min-w-0 snap-x snap-mandatory gap-4 overflow-x-auto overscroll-x-contain pb-4 [scrollbar-gutter:stable] sm:gap-5">
             {COLS.map((col) => (
               <Droppable droppableId={col} key={col}>
                 {(provided, snapshot) => (

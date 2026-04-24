@@ -89,7 +89,9 @@ export function LogCallForm({
 
   const minDate = todayLocalISO();
 
-  const fieldZoomClass = isMagic ? "text-base sm:text-sm" : "";
+  const fieldZoomClass = isMagic
+    ? "text-base sm:text-sm"
+    : "text-[16px] sm:text-sm";
 
   return (
     <form
@@ -189,21 +191,17 @@ export function LogCallForm({
       <div className="font-mono text-[11px] uppercase text-ink-tertiary">Log call</div>
       <div>
         <span className="mb-2 block font-mono text-[11px] uppercase text-ink-secondary">Outcome</span>
-        <div
-          className={
-            isMagic
-              ? "grid grid-cols-2 gap-1 rounded-md bg-surface-card-alt p-1 sm:flex sm:flex-wrap"
-              : "flex flex-wrap gap-1 rounded-md bg-surface-card-alt p-1"
-          }
-        >
+        <div className="grid grid-cols-2 gap-1 rounded-md bg-surface-card-alt p-1 sm:flex sm:flex-wrap">
           {OUTCOMES.map((opt) => (
             <button
               key={opt.value}
               type="button"
               onClick={() => setOutcome(opt.value)}
               className={[
-                "rounded px-2 py-1.5 transition-all sm:px-3",
-                isMagic ? "min-h-[44px] text-xs sm:min-h-0 sm:text-sm" : "text-sm",
+                "rounded px-2 py-1.5 text-sm transition-all touch-manipulation sm:px-3",
+                isMagic
+                  ? "min-h-[44px] text-xs sm:min-h-0 sm:text-sm"
+                  : "min-h-[44px] text-[13px] sm:min-h-0 sm:py-1.5",
                 outcome === opt.value
                   ? "bg-surface-card font-medium text-ink-primary shadow-sm"
                   : "text-ink-secondary hover:text-ink-primary",
@@ -297,10 +295,14 @@ export function LogCallForm({
         </div>
       ) : null}
       {formError ? <p className="font-sans text-[12px] text-[#DC2626]">{formError}</p> : null}
-      <div className={`flex flex-wrap items-center gap-3 ${isMagic ? "flex-col" : ""}`}>
+      <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center">
         <button
           type="submit"
-          className={isMagic ? "btn-primary min-h-[48px] w-full touch-manipulation py-3 text-base sm:min-h-0 sm:text-[13px]" : "btn-primary flex-1"}
+          className={
+            isMagic
+              ? "btn-primary min-h-[48px] w-full touch-manipulation py-3 text-base sm:min-h-0 sm:text-[13px]"
+              : "btn-primary w-full min-h-12 touch-manipulation sm:min-w-[12rem] sm:flex-1 sm:min-h-0"
+          }
           disabled={
             (outcome === "FOLLOW_UP" && !followUpDate.trim()) ||
             (outcome === "LOST" && !lostReason.trim()) ||

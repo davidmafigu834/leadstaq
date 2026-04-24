@@ -23,6 +23,8 @@ type Props = {
   formData: Record<string, unknown> | null;
   lead: LeadLite;
   className?: string;
+  /** Nicer on narrow lead panel: one column until md, wide rows span on md+ */
+  compactMobile?: boolean;
 };
 
 function formatFormValue(val: unknown): string {
@@ -47,7 +49,7 @@ function formatFormValue(val: unknown): string {
   return String(val);
 }
 
-export function FormAnswersSection({ formData, lead, className }: Props) {
+export function FormAnswersSection({ formData, lead, className, compactMobile }: Props) {
   const entries: Array<{ label: string; value: string }> = [];
 
   if (formData && typeof formData === "object") {
@@ -76,14 +78,38 @@ export function FormAnswersSection({ formData, lead, className }: Props) {
   return (
     <div className={["min-w-0 border-b border-border px-5 py-5", className].filter(Boolean).join(" ")}>
       <div className="mb-4 font-mono text-[11px] uppercase tracking-[0.1em] text-ink-tertiary">Form answers</div>
-      <dl className="grid grid-cols-1 gap-x-6 gap-y-4 sm:grid-cols-2">
-        {entries.map((entry, i) => (
-          <div key={`${entry.label}-${i}`} className={entry.value.length > 60 ? "col-span-2" : ""}>
+      <FormAnswersGrid compactMobile={compactMobile} entries={entries} />
+    </div>
+  );
+}
+
+function entryValueLong(v: { value: string }) {
+  return v.value.length > 60;
+}
+
+function FormAnswersGrid({
+  entries,
+  compactMobile,
+}: {
+  entries: Array<{ label: string; value: string }>;
+  compactMobile?: boolean;
+}) {
+  const gridClass = compactMobile
+    ? "grid grid-cols-1 gap-x-6 gap-y-4 md:grid-cols-2"
+    : "grid grid-cols-1 gap-x-6 gap-y-4 sm:grid-cols-2";
+
+  return (
+    <dl className={gridClass}>
+      {entries.map((entry, i) => {
+        const wide = entryValueLong(entry);
+        const spanClass = compactMobile ? (wide ? "md:col-span-2" : "") : wide ? "col-span-2" : "";
+        return (
+          <div key={`${entry.label}-${i}`} className={spanClass}>
             <dt className="mb-1 font-mono text-[11px] uppercase tracking-[0.08em] text-ink-tertiary">{entry.label}</dt>
             <dd className="min-w-0 break-words text-sm leading-relaxed text-ink-primary">{entry.value}</dd>
           </div>
-        ))}
-      </dl>
-    </div>
+        );
+      })}
+    </dl>
   );
 }

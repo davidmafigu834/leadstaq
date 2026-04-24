@@ -56,6 +56,15 @@ export function LeadDetailPanel({
     setPortalEl(document.body);
   }, []);
 
+  useEffect(() => {
+    if (!open || !lead) return;
+    const prev = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    return () => {
+      document.body.style.overflow = prev;
+    };
+  }, [open, lead]);
+
   const isReadOnly = readOnlyProp === true || role === "CLIENT_MANAGER";
 
   if (!open || !lead) return null;
@@ -82,39 +91,45 @@ export function LeadDetailPanel({
   }
 
   const panel = (
-    <div className="fixed inset-0 z-[60] md:flex md:justify-end">
+    <div className="fixed inset-0 z-[60] flex items-end justify-stretch sm:items-end md:items-stretch md:justify-end">
       <button
         type="button"
-        className="absolute inset-0 hidden bg-black/30 md:block"
+        className="absolute inset-0 z-0 cursor-default bg-black/50"
         aria-label="Close lead"
         onClick={handleClose}
       />
       <div
-        className="relative flex h-[100dvh] max-h-[100dvh] w-full min-w-0 max-w-none flex-col border-l border-border bg-surface-card shadow-[0_0_0_1px_rgba(0,0,0,0.04)] md:max-w-[520px]"
+        className="relative z-10 flex w-full min-w-0 max-w-full flex-col overflow-hidden bg-surface-card shadow-2xl max-md:max-h-[min(96dvh,100dvh)] max-md:rounded-t-2xl max-md:pb-[env(safe-area-inset-bottom)] md:max-h-[100dvh] md:h-[100dvh] md:max-w-[min(100%,520px)] md:rounded-none md:border-l md:border-t-0 md:border-border md:shadow-[0_0_0_1px_rgba(0,0,0,0.04)]"
         role="dialog"
         aria-modal
+        onClick={(e) => e.stopPropagation()}
       >
-        <div className="safe-top flex h-12 shrink-0 items-center gap-3 bg-surface-sidebar px-4 text-[var(--text-on-dark)] md:px-5">
+        <div
+          className="safe-top flex h-12 min-h-12 shrink-0 items-center gap-3 border-b border-border border-opacity-20 bg-surface-sidebar px-4 text-[var(--text-on-dark)] max-md:rounded-t-2xl md:min-h-0 md:px-5"
+          style={{ paddingTop: "max(0.75rem, env(safe-area-inset-top))" }}
+        >
           <button
             type="button"
-            className="-ml-1 flex h-9 w-9 shrink-0 items-center justify-center text-[var(--text-on-dark)] md:hidden"
+            className="-ml-1 flex h-11 w-11 shrink-0 items-center justify-center text-[var(--text-on-dark)] touch-manipulation md:hidden"
             onClick={handleClose}
             aria-label="Back"
           >
             <ChevronLeft className="h-5 w-5" strokeWidth={1.5} />
           </button>
-          <div className="min-w-0 flex-1 truncate font-display text-lg md:text-xl">{activeLead.name}</div>
+          <div className="min-w-0 flex-1 truncate font-display text-[17px] leading-tight sm:text-lg md:text-xl">
+            {activeLead.name}
+          </div>
           <button
             type="button"
-            className="hidden h-8 w-8 items-center justify-center text-[var(--text-on-dark-dim)] hover:text-[var(--text-on-dark)] md:flex"
+            className="hidden h-10 w-10 items-center justify-center text-[var(--text-on-dark-dim)] touch-manipulation hover:text-[var(--text-on-dark)] md:flex"
             onClick={handleClose}
             aria-label="Close"
           >
             <X className="h-4 w-4" strokeWidth={1.5} />
           </button>
         </div>
-        <div className="min-h-0 flex-1 divide-y divide-border overflow-y-auto overflow-x-hidden pb-[max(1.25rem,env(safe-area-inset-bottom))] text-sm">
-          <div className="space-y-3 p-4 sm:p-5">
+        <div className="min-h-0 flex-1 divide-y divide-border overflow-y-auto overflow-x-hidden overscroll-y-contain pb-[max(1.25rem,env(safe-area-inset-bottom))] text-sm max-md:text-[15px] [touch-action:pan-y]">
+          <div className="space-y-3 p-4 max-md:pt-3 sm:p-5">
             {isReadOnly ? (
               <div className="min-w-0 break-words text-[13px] text-ink-secondary">
                 {phone ? (
@@ -139,7 +154,10 @@ export function LeadDetailPanel({
             </div>
             <MagicLinkButton token={activeLead.magic_token} />
             {!isReadOnly ? (
-              <a className="btn-primary flex w-full justify-center py-3.5 md:py-2" href={`tel:${phone}`}>
+              <a
+                className="btn-primary flex min-h-12 w-full items-center justify-center touch-manipulation py-3.5 text-base sm:min-h-0 md:py-2 md:text-sm"
+                href={`tel:${phone}`}
+              >
                 Call {first}
               </a>
             ) : null}
@@ -148,7 +166,7 @@ export function LeadDetailPanel({
           !isReadOnly &&
           !isClosed &&
           (MOVE_COLS as readonly string[]).includes(activeLead.status) ? (
-            <div className="border-b border-border p-5 md:hidden">
+            <div className="border-b border-border p-4 max-md:px-4 sm:p-5 md:hidden">
               <label className="mb-2 block font-mono text-xs uppercase tracking-wide text-ink-tertiary">
                 Move to
               </label>
@@ -158,7 +176,7 @@ export function LeadDetailPanel({
                     key={col}
                     type="button"
                     onClick={() => void handleMoveStage(col)}
-                    className="h-9 rounded-md border border-border text-xs text-ink-primary hover:bg-surface-card-alt"
+                    className="min-h-12 rounded-md border border-border px-2 text-left text-sm text-ink-primary touch-manipulation hover:bg-surface-card-alt sm:min-h-0 sm:h-9 sm:py-0"
                   >
                     → {COL_LABEL[col]}
                   </button>
@@ -166,14 +184,19 @@ export function LeadDetailPanel({
               </div>
             </div>
           ) : null}
-          <FormAnswersSection formData={activeLead.form_data ?? {}} lead={activeLead} />
+          <FormAnswersSection
+            className="max-md:px-4"
+            formData={activeLead.form_data ?? {}}
+            lead={activeLead}
+            compactMobile
+          />
           {(role === "SALESPERSON" || role === "AGENCY_ADMIN") && !isReadOnly ? (
             <>
-              <div className="p-5">
+              <div className="p-4 sm:p-5">
                 <CallHistory leadId={activeLead.id} refreshKey={logRefresh} />
               </div>
               {!isClosed ? (
-                <div className="p-5">
+                <div className="p-4 sm:p-5">
                   <LogCallForm
                     leadId={activeLead.id}
                     onLogged={() => setLogRefresh((k) => k + 1)}
@@ -181,7 +204,7 @@ export function LeadDetailPanel({
                   />
                 </div>
               ) : (
-                <div className="p-5 text-sm text-ink-secondary">This lead is closed — call log is read-only.</div>
+                <div className="p-4 sm:p-5 text-sm text-ink-secondary">This lead is closed — call log is read-only.</div>
               )}
             </>
           ) : null}
@@ -189,7 +212,7 @@ export function LeadDetailPanel({
             <AgencyLeadAdminSection lead={activeLead} onLeadUpdated={onLeadUpdated} onAfterArchive={handleClose} />
           ) : null}
           {isReadOnly ? (
-            <div className="p-5">
+            <div className="p-4 sm:p-5">
               <CallHistory leadId={activeLead.id} refreshKey={logRefresh} />
             </div>
           ) : null}
@@ -274,17 +297,17 @@ function AgencyLeadAdminSection({
   }
 
   return (
-    <div className="space-y-4 border-t border-border p-5">
+    <div className="space-y-4 border-t border-border p-4 sm:p-5 max-md:pb-6">
       <div className="font-mono text-[11px] uppercase text-ink-tertiary">Agency</div>
       {msg ? <p className="text-[13px] text-[var(--status-lost-fg)]">{msg}</p> : null}
       <div>
         <label className="mb-1 block text-[12px] font-medium text-ink-secondary" htmlFor={`reassign-${lead.id}`}>
           Reassign to
         </label>
-        <div className="flex flex-wrap gap-2">
+        <div className="flex min-w-0 flex-col gap-2 sm:flex-row sm:flex-wrap sm:items-stretch">
           <select
             id={`reassign-${lead.id}`}
-            className="input-base h-9 min-w-[200px] flex-1"
+            className="input-base min-h-11 w-full min-w-0 sm:h-9 sm:min-w-[200px] sm:flex-1"
             value={assigneeId}
             onChange={(e) => setAssigneeId(e.target.value)}
           >
@@ -297,7 +320,7 @@ function AgencyLeadAdminSection({
           </select>
           <button
             type="button"
-            className="btn-secondary h-9 px-3 text-[13px]"
+            className="btn-secondary min-h-11 w-full touch-manipulation px-3 text-[13px] sm:min-h-0 sm:h-9 sm:w-auto"
             disabled={busy !== null}
             onClick={() => void handleReassign()}
           >
@@ -307,7 +330,7 @@ function AgencyLeadAdminSection({
       </div>
       <button
         type="button"
-        className="text-[13px] font-medium text-[var(--status-lost-fg)] underline-offset-2 hover:underline"
+        className="min-h-11 w-full text-left text-[13px] font-medium text-[var(--status-lost-fg)] underline-offset-2 touch-manipulation hover:underline sm:min-h-0 sm:w-auto"
         disabled={busy !== null}
         onClick={() => void handleArchive()}
       >
