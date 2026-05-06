@@ -16,7 +16,7 @@ export default async function ClientCampaignsPage({ params }: { params: { client
         clientId={params.clientId}
         name={client.name as string}
         industry={client.industry as string}
-        publicLandingUrl={getPublicLandingPageUrl(client.slug as string)}
+        publicProfileUrl={hero.profileSlug ? getPublicLandingPageUrl(hero.profileSlug) : null}
         hero={hero}
       >
         <CampaignsClientTab clientId={params.clientId} clientName={client.name as string} />

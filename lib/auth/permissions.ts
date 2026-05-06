@@ -66,6 +66,16 @@ export async function canModifyLead(leadId: string): Promise<
   return { allowed: false, reason: "Forbidden", status: 403 };
 }
 
+/** Client-scoped resource access: agency admin can touch any client; everyone else only their own. */
+export function canAccessClient(
+  userRole: string,
+  userClientId: string | null,
+  requestedClientId: string
+): boolean {
+  if (userRole === "AGENCY_ADMIN") return true;
+  return userClientId === requestedClientId;
+}
+
 /** Read access: wrong scope returns notFound (404) to avoid leaking lead existence. */
 export async function canReadLead(leadId: string): Promise<
   | { ok: true }

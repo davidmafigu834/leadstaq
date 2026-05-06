@@ -4,6 +4,8 @@ import { getToken } from "next-auth/jwt";
 import { createAdminClient } from "@/lib/supabase/admin";
 import type { UserRole } from "@/types";
 
+const CLOUD_PUBLIC_PATHS = ["/", "/login", "/signup", "/forgot-password"];
+
 export async function middleware(req: NextRequest) {
   const hostHeader = req.headers.get("host") || "";
   const host = hostHeader.split(":")[0];
@@ -18,7 +20,45 @@ export async function middleware(req: NextRequest) {
     .split("/")[0]
     .split(":")[0];
 
-  if (host && host !== appDomain && host.endsWith("." + appDomain)) {
+  const isCloudSubdomain = host === "cloud.leadstaq.tech" || host === "cloud.localhost";
+
+  if (isCloudSubdomain) {
+    const path = req.nextUrl.pathname;
+    const isPublic =
+      CLOUD_PUBLIC_PATHS.includes(path) ||
+      path.startsWith("/share/") ||
+      path.startsWith("/api/auth");
+    if (isPublic) return NextResponse.next();
+
+    if (path.startsWith("/dashboard")) {
+      const token = await getToken({ req, secret: process.env.NEXTAUTH_SECRET });
+      if (!token) {
+        const url = req.nextUrl.clone();
+        url.pathname = "/login";
+        url.searchParams.set("callbackUrl", path);
+        return NextResponse.redirect(url);
+      }
+      const tokenSv = Number((token as { sessionVersion?: number }).sessionVersion ?? 0);
+      const uid = (token as { userId?: string }).userId;
+      if (uid) {
+        try {
+          const supabase = createAdminClient();
+          const { data: row } = await supabase.from("users").select("session_version").eq("id", uid).maybeSingle();
+          const dbSv = Number((row as { session_version?: number } | null)?.session_version ?? 0);
+          if (dbSv !== tokenSv) {
+            const signOut = new URL("/api/auth/signout", req.url);
+            signOut.searchParams.set("callbackUrl", "/login?reason=session");
+            return NextResponse.redirect(signOut);
+          }
+        } catch {
+          /* fail open */
+        }
+      }
+    }
+    return NextResponse.next();
+  }
+
+  if (!isCloudSubdomain && host && host !== appDomain && host.endsWith("." + appDomain)) {
     const slug = host.slice(0, -(appDomain.length + 1));
     if (slug && slug !== "www") {
       const url = req.nextUrl.clone();
@@ -43,7 +83,12 @@ export async function middleware(req: NextRequest) {
     path === "/login" ||
     path.startsWith("/api/auth") ||
     path.startsWith("/lead/") ||
-    path.startsWith("/p/");
+    path.startsWith("/p/") ||
+    path === "/cloud" ||
+    path === "/cloud/login" ||
+    path === "/cloud/signup" ||
+    path === "/cloud/forgot-password" ||
+    path.startsWith("/cloud/share/");
 
   if (isPublic) return NextResponse.next();
 

@@ -21,9 +21,9 @@ export default async function ClientSettingsPage({
   const { data: client } = await supabase.from("clients").select("*").eq("id", params.clientId).maybeSingle();
   if (!client) notFound();
 
-  const { data: landing } = await supabase
-    .from("landing_pages")
-    .select("*")
+  const { data: clientProfile } = await supabase
+    .from("client_profiles")
+    .select("is_published, slug")
     .eq("client_id", params.clientId)
     .maybeSingle();
 
@@ -42,7 +42,20 @@ export default async function ClientSettingsPage({
     .eq("is_active", true)
     .limit(1);
 
-  const hero = buildClientDetailHero(client as never, Boolean((landing as { published?: boolean } | null)?.published));
+  const profileSlug = (clientProfile as { slug?: string } | null)?.slug ?? null;
+  const profilePublished = Boolean((clientProfile as { is_published?: boolean } | null)?.is_published);
+  const publicProfileUrl = profileSlug ? getPublicLandingPageUrl(profileSlug) : null;
+  const hero = buildClientDetailHero(
+    {
+      fb_form_id: client.fb_form_id as string | null,
+      fb_page_id: client.fb_page_id as string | null,
+      fb_page_name: client.fb_page_name as string | null,
+      fb_token_expired_at: client.fb_token_expired_at as string | null,
+      twilio_whatsapp_override: client.twilio_whatsapp_override as string | null,
+    },
+    profilePublished,
+    profileSlug
+  );
   const initialTab = typeof searchParams.tab === "string" ? searchParams.tab : undefined;
 
   return (
@@ -55,13 +68,12 @@ export default async function ClientSettingsPage({
         clientId={params.clientId}
         name={client.name as string}
         industry={client.industry as string}
-        publicLandingUrl={getPublicLandingPageUrl(client.slug as string)}
+        publicProfileUrl={publicProfileUrl}
         hero={hero}
       >
         <ClientSettingsClient
           clientId={params.clientId}
           initialClient={client as Record<string, unknown>}
-          initialLanding={(landing as Record<string, unknown> | null) ?? null}
           initialSalespeople={(salespeople ?? []) as never}
           initialManager={(mgrs?.[0] as never) ?? null}
           agencyDefaultHours={agency.default_response_time_limit_hours}

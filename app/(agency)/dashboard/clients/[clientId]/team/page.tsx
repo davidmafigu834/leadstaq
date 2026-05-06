@@ -22,7 +22,7 @@ export default async function ClientTeamPage({ params }: { params: { clientId: s
         clientId={params.clientId}
         name={client.name as string}
         industry={client.industry as string}
-        publicLandingUrl={getPublicLandingPageUrl(client.slug as string)}
+        publicProfileUrl={hero.profileSlug ? getPublicLandingPageUrl(hero.profileSlug) : null}
         hero={hero}
       >
         <div className="border border-border">

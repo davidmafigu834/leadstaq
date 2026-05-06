@@ -28,7 +28,7 @@ export default async function FormBuilderPage({ params }: { params: { clientId: 
         clientId={params.clientId}
         name={client.name as string}
         industry={client.industry as string}
-        publicLandingUrl={getPublicLandingPageUrl(client.slug as string)}
+        publicProfileUrl={hero.profileSlug ? getPublicLandingPageUrl(hero.profileSlug) : null}
         hero={hero}
       >
         <DesktopOnlyGate

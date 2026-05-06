@@ -16,6 +16,15 @@ const instrumentSerif = Instrument_Serif({
 export const metadata: Metadata = {
   title: "Leadstaq — Lead Platform",
   description: "Lead management for marketing agencies",
+  manifest: "/manifest.json",
+  appleWebApp: {
+    capable: true,
+    title: "Leadstaq",
+    statusBarStyle: "default",
+  },
+  other: {
+    "mobile-web-app-capable": "yes",
+  },
 };
 
 export const viewport: Viewport = {
@@ -34,6 +43,9 @@ export default function RootLayout({
       lang="en"
       className={`${instrumentSerif.variable} ${GeistSans.variable} ${GeistMono.variable}`}
     >
+      <head>
+        <link rel="apple-touch-icon" href="/icons/icon-192.png" />
+      </head>
       <body className="min-h-screen bg-surface-canvas font-sans text-sm text-ink-primary antialiased">
         <Providers>{children}</Providers>
       </body>

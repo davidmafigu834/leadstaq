@@ -25,7 +25,7 @@ export default async function ClientDetailPage({ params }: { params: { clientId:
 
   const weekAgo = subHours(new Date(), 24 * 7).toISOString();
 
-  const [{ data: wl }, { data: won }, avgCurrent, avgPrev, { data: landing }, { data: formSchema }, recentLeads, team] =
+  const [{ data: wl }, { data: won }, avgCurrent, avgPrev, { data: clientProfile }, { data: formSchema }, recentLeads, team] =
     await Promise.all([
       supabase.from("leads").select("id, status").eq("client_id", cid).gte("created_at", weekAgo),
       supabase
@@ -36,14 +36,15 @@ export default async function ClientDetailPage({ params }: { params: { clientId:
         .gte("updated_at", monthStart.toISOString()),
       getAvgResponseMinutes(monthStart, nextMonthStart, { clientId: cid }),
       getAvgResponseMinutes(prevMonthStart, monthStart, { clientId: cid }),
-      supabase.from("landing_pages").select("published").eq("client_id", cid).maybeSingle(),
+      supabase.from("client_profiles").select("is_published, slug").eq("client_id", cid).maybeSingle(),
       supabase.from("form_schemas").select("fields").eq("client_id", cid).maybeSingle(),
       fetchRecentLeadsForClient(cid),
       fetchClientTeamOverview(cid),
     ]);
 
-  const landingPublicUrl = getPublicLandingPageUrl(client.slug as string);
-  const landingPublished = Boolean(landing?.published);
+  const profileSlug = (clientProfile as { slug?: string } | null)?.slug ?? null;
+  const profilePublished = Boolean((clientProfile as { is_published?: boolean } | null)?.is_published);
+  const publicProfileUrl = profileSlug ? getPublicLandingPageUrl(profileSlug) : null;
   const fbPageName = (client.fb_page_name as string | null) ?? null;
   const fbPageId = (client.fb_page_id as string | null) ?? null;
   const notificationsConfigured =
@@ -57,7 +58,8 @@ export default async function ClientDetailPage({ params }: { params: { clientId:
       fb_token_expired_at: client.fb_token_expired_at as string | null,
       twilio_whatsapp_override: client.twilio_whatsapp_override as string | null,
     },
-    landingPublished
+    profilePublished,
+    profileSlug
   );
 
   const formFields = (formSchema?.fields as unknown[] | null) ?? [];
@@ -86,7 +88,7 @@ export default async function ClientDetailPage({ params }: { params: { clientId:
         clientId={cid}
         name={client.name as string}
         industry={client.industry as string}
-        publicLandingUrl={landingPublicUrl}
+        publicProfileUrl={publicProfileUrl}
         hero={hero}
       >
         <PulseBar metrics={pulseMetrics} />
@@ -95,8 +97,8 @@ export default async function ClientDetailPage({ params }: { params: { clientId:
           clientName={client.name as string}
           recentLeads={recentLeads}
           team={team}
-          landingPublished={landingPublished}
-          landingPublicUrl={landingPublicUrl}
+          profilePublished={profilePublished}
+          profilePublicUrl={publicProfileUrl}
           fbPageName={fbPageName}
           fbPageId={fbPageId}
           notificationsConfigured={notificationsConfigured}

@@ -26,13 +26,6 @@ const INDUSTRY_SUGGESTIONS = [
   "Plumbing",
 ];
 
-const FONTS = [
-  { id: "inter", label: "Inter" },
-  { id: "dm-sans", label: "DM Sans" },
-  { id: "instrument-serif", label: "Instrument Serif" },
-  { id: "syne", label: "Syne" },
-];
-
 function normalizeSettingsTab(tab: string | null | undefined): string {
   if (!tab) return "profile";
   return TABS.some((t) => t.id === tab) ? tab : "profile";
@@ -52,7 +45,6 @@ type ManagerRow = { id: string; name: string; email: string; phone: string | nul
 export function ClientSettingsClient({
   clientId,
   initialClient,
-  initialLanding,
   initialSalespeople,
   initialManager,
   agencyDefaultHours,
@@ -60,7 +52,6 @@ export function ClientSettingsClient({
 }: {
   clientId: string;
   initialClient: ClientRow;
-  initialLanding: Record<string, unknown> | null;
   initialSalespeople: UserRow[];
   initialManager: { id: string; name: string; email: string; phone: string | null } | null;
   agencyDefaultHours: number;
@@ -91,8 +82,6 @@ export function ClientSettingsClient({
 
   const [brandForm, setBrandForm] = useState({
     primary_color: String(initialClient.primary_color ?? "#00D4FF"),
-    font_choice: String((initialLanding?.font_choice as string) ?? "inter"),
-    custom_domain: String((initialLanding?.custom_domain as string) ?? ""),
   });
 
   const [deleteConfirm, setDeleteConfirm] = useState("");
@@ -213,8 +202,6 @@ export function ClientSettingsClient({
     try {
       await patchClient({
         primary_color: brandForm.primary_color,
-        font_choice: brandForm.font_choice,
-        custom_domain: brandForm.custom_domain.trim() || null,
       });
       setToast("Saved branding.");
     } catch (e) {
@@ -734,33 +721,6 @@ export function ClientSettingsClient({
                 />
               </div>
             </label>
-            <label className="block">
-              <span className="font-mono text-[10px] uppercase text-ink-tertiary">Landing page font</span>
-              <select
-                className="mt-1 w-full rounded-md border border-border bg-surface-card px-3 py-2 text-sm"
-                value={brandForm.font_choice}
-                onChange={(e) => setBrandForm((f) => ({ ...f, font_choice: e.target.value }))}
-              >
-                {FONTS.map((f) => (
-                  <option key={f.id} value={f.id}>
-                    {f.label}
-                  </option>
-                ))}
-              </select>
-            </label>
-            <label className="block">
-              <span className="font-mono text-[10px] uppercase text-ink-tertiary">Custom domain</span>
-              <input
-                className="mt-1 w-full rounded-md border border-border bg-surface-card px-3 py-2 text-sm"
-                value={brandForm.custom_domain}
-                onChange={(e) => setBrandForm((f) => ({ ...f, custom_domain: e.target.value }))}
-                placeholder="leads.client.com"
-              />
-            </label>
-            <p className="rounded-md border border-border bg-surface-card-alt p-3 text-xs text-ink-secondary">
-              Custom domains require a DNS CNAME to our infrastructure. Contact support to complete setup — this field
-              stores the intended hostname for when routing is enabled.
-            </p>
             <button type="button" className="btn-primary" disabled={saving} onClick={() => void saveBranding()}>
               Save
             </button>

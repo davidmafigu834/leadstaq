@@ -1,0 +1,315 @@
+"use client";
+
+import { useState } from "react";
+import Link from "next/link";
+import {
+  Share2,
+  LayoutGrid,
+  CloudUpload,
+  ArrowRight,
+  Menu,
+  X,
+  Check,
+} from "lucide-react";
+
+const INDUSTRIES = [
+  "Construction",
+  "Solar Installation",
+  "Landscaping",
+  "Electrical",
+  "Plumbing",
+  "Interior Design",
+  "Roofing",
+  "Fencing",
+  "Events",
+  "Architecture",
+  "and more",
+];
+
+const FEATURES = [
+  {
+    icon: CloudUpload,
+    title: "Upload from anywhere",
+    body: "Open the app on your phone, pick photos straight from your gallery or camera, and they're instantly organised by project. No cables, no transfers, no fuss.",
+  },
+  {
+    icon: Share2,
+    title: "Share with one link",
+    body: "Every project gets a professional share link. Send it to a client, a prospect, or your team. They see a beautiful gallery — no login required.",
+  },
+  {
+    icon: LayoutGrid,
+    title: "Build your portfolio",
+    body: "Featured projects appear on your public profile page automatically. The more you upload, the stronger your portfolio. Let your work speak for itself.",
+  },
+];
+
+const STEPS = [
+  {
+    n: "01",
+    title: "Create a project",
+    body: "Give it a name, category, and location. Takes 30 seconds.",
+  },
+  {
+    n: "02",
+    title: "Upload your photos",
+    body: "From your phone gallery or camera, directly from the job site.",
+  },
+  {
+    n: "03",
+    title: "Share instantly",
+    body: "Copy a link and send it to your client. They see everything, professionally presented.",
+  },
+  {
+    n: "04",
+    title: "Win more business",
+    body: "Your portfolio page updates automatically. Prospects see your best work before they even call.",
+  },
+];
+
+export default function CloudLandingPage() {
+  const [menuOpen, setMenuOpen] = useState(false);
+
+  return (
+    <div className="min-h-screen bg-[#0a0a0a] text-white">
+      {/* Nav */}
+      <nav className="sticky top-0 z-50 border-b border-white/10 bg-[#0a0a0a]/95 backdrop-blur-md">
+        <div className="mx-auto flex max-w-6xl items-center justify-between px-6 py-4">
+          <div className="flex items-center gap-2.5">
+            <div className="flex h-7 w-7 items-center justify-center rounded-md bg-[#D4FF4F]">
+              <CloudUpload className="h-4 w-4 text-black" strokeWidth={2.5} />
+            </div>
+            <span className="text-sm font-semibold tracking-tight text-white">Leadstaq Cloud</span>
+          </div>
+
+          {/* Desktop nav */}
+          <div className="hidden items-center gap-4 md:flex">
+            <Link
+              href="/cloud/login"
+              className="rounded-lg px-4 py-2 text-sm text-white/70 hover:text-white transition-colors"
+            >
+              Sign in
+            </Link>
+            <Link
+              href="/cloud/signup"
+              className="rounded-lg bg-[#D4FF4F] px-5 py-2 text-sm font-semibold text-black hover:bg-[#c4ef3f] transition-colors"
+            >
+              Get started free
+            </Link>
+          </div>
+
+          {/* Mobile menu toggle */}
+          <button
+            className="md:hidden text-white/70 hover:text-white"
+            onClick={() => setMenuOpen((v) => !v)}
+            aria-label="Toggle menu"
+          >
+            {menuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
+          </button>
+        </div>
+
+        {menuOpen && (
+          <div className="border-t border-white/10 px-6 py-4 flex flex-col gap-3 md:hidden">
+            <Link
+              href="/cloud/login"
+              className="rounded-lg border border-white/20 py-3 text-center text-sm font-medium text-white"
+              onClick={() => setMenuOpen(false)}
+            >
+              Sign in
+            </Link>
+            <Link
+              href="/cloud/signup"
+              className="rounded-lg bg-[#D4FF4F] py-3 text-center text-sm font-semibold text-black"
+              onClick={() => setMenuOpen(false)}
+            >
+              Get started free
+            </Link>
+          </div>
+        )}
+      </nav>
+
+      {/* Hero */}
+      <section className="relative flex min-h-[calc(100vh-65px)] flex-col items-center justify-center overflow-hidden px-6 py-20 text-center">
+        <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_80%_60%_at_50%_-10%,rgba(212,255,79,0.08),transparent)]" />
+
+        <div className="relative z-10 max-w-3xl">
+          <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-4 py-1.5 text-xs text-white/60">
+            <span className="h-1.5 w-1.5 rounded-full bg-[#D4FF4F]" />
+            For project-based businesses
+          </div>
+
+          <h1 className="font-serif text-5xl font-normal leading-[1.05] text-white md:text-7xl">
+            Every project,
+            <br />
+            <em>beautifully documented.</em>
+          </h1>
+
+          <p className="mx-auto mt-6 max-w-xl text-base text-white/55 md:text-lg">
+            Upload photos from the field. Share professional project galleries with clients.
+            Build a portfolio that wins new business.
+          </p>
+
+          <div className="mt-10 flex flex-col items-center gap-3 sm:flex-row sm:justify-center">
+            <Link
+              href="/cloud/signup"
+              className="flex items-center gap-2 rounded-xl bg-[#D4FF4F] px-8 py-3.5 text-sm font-semibold text-black hover:bg-[#c4ef3f] transition-colors"
+            >
+              Start for free
+              <ArrowRight className="h-4 w-4" />
+            </Link>
+            <a
+              href="#how-it-works"
+              className="flex items-center gap-2 rounded-xl border border-white/20 px-8 py-3.5 text-sm font-semibold text-white hover:border-white/40 transition-colors"
+            >
+              See how it works
+            </a>
+          </div>
+
+          <p className="mt-6 text-xs text-white/30">
+            Used by construction, solar, landscaping &amp; electrical teams
+          </p>
+
+          {/* Hero mockup */}
+          <div className="relative mx-auto mt-16 w-full max-w-2xl overflow-hidden rounded-2xl border border-white/10 bg-[#111111] shadow-2xl">
+            <div className="flex items-center gap-1.5 border-b border-white/10 px-4 py-3">
+              <span className="h-2.5 w-2.5 rounded-full bg-red-500/60" />
+              <span className="h-2.5 w-2.5 rounded-full bg-yellow-500/60" />
+              <span className="h-2.5 w-2.5 rounded-full bg-green-500/60" />
+              <span className="ml-3 text-[10px] text-white/30">leadstaq.cloud — Your Projects</span>
+            </div>
+            <div className="grid grid-cols-3 gap-1.5 p-3">
+              {[
+                "https://images.unsplash.com/photo-1504307651254-35680f356dfd?w=400&q=80",
+                "https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=400&q=80",
+                "https://images.unsplash.com/photo-1621905251189-08b45d6a269e?w=400&q=80",
+                "https://images.unsplash.com/photo-1497366754035-f200968a6e72?w=400&q=80",
+                "https://images.unsplash.com/photo-1513467535987-fd81bc7d62f8?w=400&q=80",
+                "https://images.unsplash.com/photo-1518780664697-55e3ad937233?w=400&q=80",
+              ].map((src, i) => (
+                <div key={i} className="aspect-[4/3] overflow-hidden rounded-lg bg-white/5">
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img src={src} alt="" className="h-full w-full object-cover opacity-80" loading="lazy" />
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Features */}
+      <section id="features" className="border-t border-white/10 px-6 py-24">
+        <div className="mx-auto max-w-6xl">
+          <p className="mb-4 text-center font-mono text-[11px] uppercase tracking-[0.2em] text-[#D4FF4F]">
+            Built for field work
+          </p>
+          <h2 className="mb-16 text-center text-3xl font-light text-white md:text-4xl">
+            Everything you need, nothing you don&apos;t
+          </h2>
+
+          <div className="grid gap-8 md:grid-cols-3">
+            {FEATURES.map((f) => (
+              <div key={f.title} className="rounded-2xl border border-white/10 bg-[#111111] p-8">
+                <div className="mb-5 flex h-11 w-11 items-center justify-center rounded-xl bg-[#D4FF4F]/10">
+                  <f.icon className="h-5 w-5 text-[#D4FF4F]" />
+                </div>
+                <h3 className="mb-3 text-lg font-semibold text-white">{f.title}</h3>
+                <p className="text-sm leading-relaxed text-white/50">{f.body}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* How it works */}
+      <section id="how-it-works" className="border-t border-white/10 px-6 py-24">
+        <div className="mx-auto max-w-6xl">
+          <p className="mb-4 text-center font-mono text-[11px] uppercase tracking-[0.2em] text-[#D4FF4F]">
+            Simple process
+          </p>
+          <h2 className="mb-16 text-center text-3xl font-light text-white md:text-4xl">
+            From job site to portfolio in minutes
+          </h2>
+
+          <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
+            {STEPS.map((s, i) => (
+              <div key={s.n} className="relative rounded-2xl border border-white/10 bg-[#111111] p-6">
+                <div className="mb-4 font-mono text-4xl font-bold text-white/10">{s.n}</div>
+                {i < STEPS.length - 1 && (
+                  <div className="pointer-events-none absolute right-0 top-1/2 hidden -translate-y-1/2 translate-x-1/2 lg:block">
+                    <ArrowRight className="h-4 w-4 text-white/20" />
+                  </div>
+                )}
+                <h3 className="mb-2 text-base font-semibold text-white">{s.title}</h3>
+                <p className="text-sm leading-relaxed text-white/50">{s.body}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Industries */}
+      <section className="border-t border-white/10 px-6 py-16">
+        <div className="mx-auto max-w-6xl text-center">
+          <p className="mb-6 font-mono text-[11px] uppercase tracking-[0.2em] text-white/40">
+            Industries we serve
+          </p>
+          <div className="flex flex-wrap justify-center gap-2">
+            {INDUSTRIES.map((ind) => (
+              <span
+                key={ind}
+                className="rounded-full border border-white/10 bg-white/5 px-4 py-1.5 text-sm text-white/60"
+              >
+                {ind}
+              </span>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* CTA */}
+      <section className="border-t border-white/10 px-6 py-24">
+        <div className="mx-auto max-w-2xl text-center">
+          <h2 className="mb-4 text-3xl font-light text-white md:text-4xl">
+            Start documenting your work today.
+          </h2>
+          <p className="mb-10 text-base text-white/50">Free to get started. No credit card required.</p>
+          <Link
+            href="/cloud/signup"
+            className="inline-flex items-center gap-2 rounded-xl bg-[#D4FF4F] px-10 py-4 text-base font-semibold text-black hover:bg-[#c4ef3f] transition-colors"
+          >
+            Create your free account
+            <ArrowRight className="h-4 w-4" />
+          </Link>
+
+          <div className="mt-10 flex flex-wrap justify-center gap-x-8 gap-y-3 text-sm text-white/30">
+            {["No credit card required", "Free to start", "Cancel anytime"].map((t) => (
+              <span key={t} className="flex items-center gap-1.5">
+                <Check className="h-3.5 w-3.5 text-[#D4FF4F]" />
+                {t}
+              </span>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Footer */}
+      <footer className="border-t border-white/10 px-6 py-8">
+        <div className="mx-auto flex max-w-6xl flex-col items-center justify-between gap-4 md:flex-row">
+          <div className="flex items-center gap-2">
+            <div className="flex h-5 w-5 items-center justify-center rounded bg-[#D4FF4F]">
+              <CloudUpload className="h-3 w-3 text-black" strokeWidth={2.5} />
+            </div>
+            <span className="text-sm text-white/50">Leadstaq Cloud · © 2026 Leadstaq</span>
+          </div>
+          <div className="flex items-center gap-6 text-sm text-white/40">
+            <Link href="/legal/privacy" className="hover:text-white/70 transition-colors">Privacy</Link>
+            <Link href="/legal/terms" className="hover:text-white/70 transition-colors">Terms</Link>
+            <a href="https://leadstaq.tech" className="hover:text-white/70 transition-colors">
+              leadstaq.tech
+            </a>
+          </div>
+        </div>
+      </footer>
+    </div>
+  );
+}

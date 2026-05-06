@@ -10,7 +10,9 @@ import type { ClientDetailHeroProps } from "@/lib/client-hero";
 const tabs = (id: string) =>
   [
     { label: "Overview", href: `/dashboard/clients/${id}` },
-    { label: "Landing page", href: `/dashboard/clients/${id}/landing-page` },
+    { label: "Projects", href: `/dashboard/clients/${id}/projects` },
+    { label: "Profile Page", href: `/dashboard/clients/${id}/profile` },
+    { label: "Testimonials", href: `/dashboard/clients/${id}/testimonials` },
     { label: "Form", href: `/dashboard/clients/${id}/form` },
     { label: "Team", href: `/dashboard/clients/${id}/team` },
     { label: "Facebook", href: `/dashboard/clients/${id}/facebook` },
@@ -48,14 +50,14 @@ export function ClientDetailView({
   clientId,
   name,
   industry,
-  publicLandingUrl,
+  publicProfileUrl,
   hero,
   children,
 }: {
   clientId: string;
   name: string;
   industry: string;
-  publicLandingUrl: string;
+  publicProfileUrl: string | null;
   hero: ClientDetailHeroProps;
   children: React.ReactNode;
 }) {
@@ -90,14 +92,14 @@ export function ClientDetailView({
             <div className="mb-1 font-mono text-[11px] uppercase tracking-[0.1em] text-ink-tertiary">
               {industry || "No industry set"}
             </div>
-            <PublicSlugCopy url={publicLandingUrl} />
+            {publicProfileUrl && <PublicSlugCopy url={publicProfileUrl} />}
           </div>
         </div>
 
         <div className="flex flex-col items-start gap-1.5 text-sm layout:items-end">
           <StatusIndicator
-            label="Landing page"
-            status={hero.landingPublished ? "live" : "draft"}
+            label="Profile page"
+            status={hero.profilePublished ? "live" : "draft"}
             liveLabel="Live"
             draftLabel="Not published"
           />

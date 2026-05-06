@@ -53,7 +53,10 @@ export async function ClientManagerLayout({
     { href: "/client/reports", label: "Reports", icon: "bar-chart-3" as const },
   ];
 
-  const secondaryNav = [{ href: "/client/account", label: "Account", icon: "settings" as const }];
+  const secondaryNav = [
+    { href: "/upload", label: "Upload Photos", icon: "camera" as const },
+    { href: "/client/account", label: "Account", icon: "settings" as const },
+  ];
 
   return (
     <AppShell

@@ -7,7 +7,7 @@ import { Check } from "lucide-react";
 type OnboardingClient = {
   id: string;
   name: string;
-  landingPublished: boolean;
+  profilePublished: boolean;
   formFieldCount: number;
   salespeopleCount: number;
   hasManager: boolean;
@@ -25,10 +25,10 @@ export function OnboardingChecklist({ client }: { client: OnboardingClient }) {
     () =>
       [
         {
-          key: "landing",
-          label: "Set up landing page",
-          done: client.landingPublished,
-          href: `landing-page`,
+          key: "profile",
+          label: "Set up profile page",
+          done: client.profilePublished,
+          href: `profile`,
           optional: false,
         },
         {

@@ -46,7 +46,10 @@ export async function SalesLayout({
     { href: "/sales/won-lost", label: "Won & Lost", icon: "archive" as const },
   ];
 
-  const secondaryNav = [{ href: "/sales/profile", label: "Profile", icon: "user" as const }];
+  const secondaryNav = [
+    { href: "/upload", label: "Upload Photos", icon: "camera" as const },
+    { href: "/sales/profile", label: "Profile", icon: "user" as const },
+  ];
 
   return (
     <AppShell

@@ -3,7 +3,8 @@ import { isWhatsAppDeliveryConfigured } from "@/lib/messaging/provider";
 
 /** Serializable hero status for `ClientDetailView` (built on the server). */
 export type ClientDetailHeroProps = {
-  landingPublished: boolean;
+  profilePublished: boolean;
+  profileSlug: string | null;
   fbFormId: string | null;
   fbPageId: string | null;
   fbPageName: string | null;
@@ -26,10 +27,12 @@ export function buildClientDetailHero(
     fb_token_expired_at?: string | null;
     twilio_whatsapp_override?: string | null;
   },
-  landingPublished: boolean
+  profilePublished: boolean,
+  profileSlug: string | null
 ): ClientDetailHeroProps {
   return {
-    landingPublished,
+    profilePublished,
+    profileSlug,
     fbFormId: client.fb_form_id ?? null,
     fbPageId: client.fb_page_id ?? null,
     fbPageName: client.fb_page_name ?? null,
@@ -45,13 +48,17 @@ export async function loadClientHeroContext(clientId: string): Promise<{
   hero: ClientDetailHeroProps;
 } | null> {
   const supabase = createAdminClient();
-  const [{ data: client }, { data: landing }] = await Promise.all([
+  const [{ data: client }, { data: profile }] = await Promise.all([
     supabase.from("clients").select("*").eq("id", clientId).maybeSingle(),
-    supabase.from("landing_pages").select("published").eq("client_id", clientId).maybeSingle(),
+    supabase.from("client_profiles").select("is_published, slug").eq("client_id", clientId).maybeSingle(),
   ]);
   if (!client) return null;
   return {
     client: client as Record<string, unknown>,
-    hero: buildClientDetailHero(client as never, Boolean(landing?.published)),
+    hero: buildClientDetailHero(
+      client as never,
+      Boolean((profile as { is_published?: boolean } | null)?.is_published),
+      (profile as { slug?: string } | null)?.slug ?? null
+    ),
   };
 }

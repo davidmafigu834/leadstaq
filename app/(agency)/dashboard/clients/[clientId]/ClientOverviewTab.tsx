@@ -11,8 +11,8 @@ export function ClientOverviewTab({
   clientName,
   recentLeads,
   team,
-  landingPublished,
-  landingPublicUrl,
+  profilePublished,
+  profilePublicUrl,
   fbPageName,
   fbPageId,
   notificationsConfigured,
@@ -22,8 +22,8 @@ export function ClientOverviewTab({
   clientName: string;
   recentLeads: RecentLeadRow[];
   team: ClientTeamOverviewRow[];
-  landingPublished: boolean;
-  landingPublicUrl: string;
+  profilePublished: boolean;
+  profilePublicUrl: string | null;
   fbPageName: string | null;
   fbPageId: string | null;
   notificationsConfigured: boolean;
@@ -42,7 +42,7 @@ export function ClientOverviewTab({
         client={{
           id: clientId,
           name: clientName,
-          landingPublished,
+          profilePublished,
           formFieldCount: onboarding.formFieldCount,
           salespeopleCount: onboarding.salespeopleCount,
           hasManager: onboarding.hasManager,
@@ -107,16 +107,16 @@ export function ClientOverviewTab({
         </div>
         <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
           <IntegrationCard
-            label="Landing page"
-            statusDotClass={landingPublished ? "bg-[var(--success)]" : "bg-ink-tertiary"}
+            label="Profile page"
+            statusDotClass={profilePublished ? "bg-[var(--success)]" : "bg-ink-tertiary"}
             statusText={
-              landingPublished ? (
-                <span className="truncate">{landingPublicUrl}</span>
+              profilePublished && profilePublicUrl ? (
+                <span className="truncate">{profilePublicUrl}</span>
               ) : (
                 <span className="text-ink-secondary">Not published</span>
               )
             }
-            href={`/dashboard/clients/${clientId}/landing-page`}
+            href={`/dashboard/clients/${clientId}/profile`}
             linkLabel="Manage →"
           />
           <IntegrationCard

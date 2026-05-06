@@ -3,7 +3,9 @@ import {
   Archive,
   BarChart3,
   Building2,
+  Camera,
   Clock,
+  Globe,
   Home,
   Inbox,
   LayoutGrid,
@@ -27,6 +29,8 @@ export const SHELL_ICONS: Record<string, LucideIcon> = {
   clock: Clock,
   archive: Archive,
   user: User,
+  camera: Camera,
+  globe: Globe,
 };
 
 export function ShellIcon({

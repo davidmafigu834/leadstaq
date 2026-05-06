@@ -6,6 +6,29 @@ import { getDefaultResponseHoursForNewClients } from "@/lib/agency-settings";
 
 export const dynamic = "force-dynamic";
 
+export async function GET() {
+  const g = await requireRoles(["AGENCY_ADMIN", "CLIENT_MANAGER", "SALESPERSON"]);
+  if ("error" in g) return g.error;
+  const supabase = createAdminClient();
+  if (g.session.role !== "AGENCY_ADMIN") {
+    if (!g.session.clientId) return NextResponse.json([], { status: 200 });
+    const { data } = await supabase
+      .from("clients")
+      .select("id, name, slug")
+      .eq("id", g.session.clientId)
+      .eq("is_active", true)
+      .maybeSingle();
+    return NextResponse.json(data ? [data] : []);
+  }
+  const { data, error } = await supabase
+    .from("clients")
+    .select("id, name, slug")
+    .eq("is_active", true)
+    .order("name", { ascending: true });
+  if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+  return NextResponse.json(data ?? []);
+}
+
 const createSchema = z.object({
   name: z.string().min(1).max(200),
   industry: z.string().min(1).max(120),
@@ -51,11 +74,10 @@ export async function POST(req: Request) {
     fields: [],
   });
 
-  await supabase.from("landing_pages").insert({
+  await supabase.from("client_profiles").insert({
     client_id: client.id as string,
-    published: false,
-    primary_color: (client as { primary_color?: string }).primary_color ?? "#00D4FF",
-    font_choice: "inter",
+    slug: parsed.data.slug.trim(),
+    is_published: false,
   });
 
   return NextResponse.json({ client });

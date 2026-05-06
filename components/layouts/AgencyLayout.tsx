@@ -65,10 +65,12 @@ export async function AgencyLayout({
     { href: "/dashboard/clients", label: "Clients", icon: "building2" as const },
     { href: "/dashboard/campaigns", label: "Campaigns", icon: "megaphone" as const },
     { href: "/dashboard/reports", label: "Reports", icon: "bar-chart-3" as const },
-    { href: "/dashboard/templates", label: "Templates", icon: "layout-template" as const },
   ];
 
-  const secondaryNav = [{ href: "/dashboard/settings", label: "Settings", icon: "settings" as const }];
+  const secondaryNav = [
+    { href: "/upload", label: "Upload", icon: "camera" as const },
+    { href: "/dashboard/settings", label: "Settings", icon: "settings" as const },
+  ];
 
   return (
     <AppShell

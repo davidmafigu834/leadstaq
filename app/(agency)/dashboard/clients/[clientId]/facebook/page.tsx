@@ -43,7 +43,7 @@ export default async function FacebookPage({ params }: { params: { clientId: str
         clientId={params.clientId}
         name={client.name as string}
         industry={client.industry as string}
-        publicLandingUrl={getPublicLandingPageUrl(client.slug as string)}
+        publicProfileUrl={hero.profileSlug ? getPublicLandingPageUrl(hero.profileSlug) : null}
         hero={hero}
       >
         <Suspense fallback={<p className="text-sm text-ink-secondary">Loading…</p>}>
