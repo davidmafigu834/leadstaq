@@ -314,7 +314,6 @@ export default function CloudUploadPage() {
               type="file"
               accept="image/*"
               multiple
-              capture="environment"
               className="hidden"
               onChange={handleFileSelect}
             />
@@ -394,9 +393,9 @@ export default function CloudUploadPage() {
 
       {/* New project bottom sheet */}
       {showNewSheet && (
-        <div className="fixed inset-0 z-50 flex flex-col justify-end">
+        <div className="fixed inset-0 z-[60] flex flex-col justify-end">
           <div className="absolute inset-0 bg-black/60" onClick={() => setShowNewSheet(false)} />
-          <div className="relative rounded-t-3xl bg-[#111111] p-6 pb-10">
+          <div className="relative rounded-t-3xl bg-[#111111] p-6 pb-12" style={{ paddingBottom: "max(3rem, calc(3rem + env(safe-area-inset-bottom)))" }}>
             <div className="mb-4 flex items-center justify-between">
               <h3 className="text-base font-semibold text-white">New project</h3>
               <button onClick={() => setShowNewSheet(false)} className="text-white/40 hover:text-white">

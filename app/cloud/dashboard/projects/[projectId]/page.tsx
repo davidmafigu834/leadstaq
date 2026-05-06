@@ -387,7 +387,6 @@ export default function ProjectDetailPage() {
           type="file"
           accept="image/*"
           multiple
-          capture="environment"
           className="hidden"
           onChange={(e) => { addFiles(Array.from(e.target.files ?? [])); e.target.value = ""; }}
         />
