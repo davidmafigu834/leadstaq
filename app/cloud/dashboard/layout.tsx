@@ -86,17 +86,17 @@ export default function CloudDashboardLayout({ children }: { children: React.Rea
         {/* User + sign out */}
         <div className="p-3 border-t border-white/[0.08]">
           <div className="flex items-center gap-2.5 px-2 py-1.5">
-            <div className="flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-md bg-[#D4FF4F] text-[10px] font-bold text-black">
+            <div className="flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-md bg-[#D4FF4F] text-[11px] font-bold text-black">
               {initials}
             </div>
             <div className="min-w-0 flex-1">
-              <p className="truncate text-[13px] font-medium text-white">{session?.user?.name ?? "—"}</p>
-              <p className="text-[11px] text-[#555] uppercase tracking-wide">{session?.role}</p>
+              <p className="truncate text-[14px] font-medium text-white">{session?.user?.name ?? "—"}</p>
+              <p className="text-[12px] text-[#555] uppercase tracking-wide">{session?.role}</p>
             </div>
           </div>
           <button
             onClick={() => void signOut({ callbackUrl: "/cloud/login" })}
-            className="flex w-full items-center gap-2 mt-2 px-2 py-1.5 text-[13px] text-[#555] hover:text-[#888] rounded-md hover:bg-[#111] transition-colors cursor-pointer"
+            className="flex w-full items-center gap-2 mt-2 px-2 py-1.5 text-[14px] text-[#555] hover:text-[#888] rounded-md hover:bg-[#111] transition-colors cursor-pointer"
           >
             <LogOut className="h-4 w-4" />
             Sign out
@@ -109,11 +109,11 @@ export default function CloudDashboardLayout({ children }: { children: React.Rea
         {/* Top bar — desktop */}
         <header className="sticky top-0 z-10 hidden h-12 shrink-0 items-center justify-between border-b border-white/[0.08] bg-black px-4 lg:flex">
           <div className="flex items-center gap-2.5">
-            <span className="text-[13px] font-medium text-white">{pageTitle}</span>
+            <span className="text-[14px] font-medium text-white">{pageTitle}</span>
           </div>
           <Link
             href="/cloud/dashboard/upload"
-            className="flex items-center gap-1.5 h-8 px-3 bg-[#D4FF4F] text-black text-[12px] font-semibold rounded-md hover:bg-[#c8f244] transition-colors"
+            className="flex items-center gap-1.5 h-8 px-3 bg-[#D4FF4F] text-black text-[13px] font-semibold rounded-md hover:bg-[#c8f244] transition-colors"
           >
             <Camera className="w-3.5 h-3.5" />
             Upload photos
@@ -134,7 +134,7 @@ export default function CloudDashboardLayout({ children }: { children: React.Rea
               <Link
                 key={href}
                 href={href}
-                className={`flex flex-1 flex-col items-center gap-1 py-2 text-[10px] transition-colors ${
+                className={`flex flex-1 flex-col items-center gap-1 py-2 text-[12px] transition-colors ${
                   isCenter ? "relative -mt-4" : active ? "text-accent" : "text-[var(--text-tertiary)]"
                 }`}
               >
