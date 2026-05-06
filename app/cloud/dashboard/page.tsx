@@ -14,20 +14,34 @@ type Project = {
   updated_at: string;
   project_media: MediaItem[];
 };
+type Stats = { total_projects: number; total_photos: number; total_bytes: number };
+
+function formatBytes(bytes: number): string {
+  if (bytes === 0) return "0 MB";
+  if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
+  if (bytes < 1024 * 1024 * 1024) return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
+  return `${(bytes / (1024 * 1024 * 1024)).toFixed(2)} GB`;
+}
 
 export default function CloudDashboardHome() {
   const { data: session, status } = useSession();
   const [projects, setProjects] = useState<Project[]>([]);
+  const [stats, setStats] = useState<Stats | null>(null);
   const [loading, setLoading] = useState(false);
   const [showNew, setShowNew] = useState(false);
 
   const fetchProjects = useCallback(() => {
     if (!session?.clientId) { setLoading(false); return; }
     setLoading(true);
-    fetch(`/api/clients/${session.clientId}/projects`)
-      .then((r) => r.json())
-      .then((data: unknown) => {
-        if (Array.isArray(data)) setProjects(data as Project[]);
+    Promise.all([
+      fetch(`/api/clients/${session.clientId}/projects`).then((r) => r.json()),
+      fetch(`/api/cloud/stats`).then((r) => r.json()),
+    ])
+      .then(([projectData, statsData]: [unknown, unknown]) => {
+        if (Array.isArray(projectData)) setProjects(projectData as Project[]);
+        if (statsData && typeof statsData === "object" && "total_projects" in (statsData as object)) {
+          setStats(statsData as Stats);
+        }
       })
       .catch(() => {})
       .finally(() => setLoading(false));
@@ -58,6 +72,22 @@ export default function CloudDashboardHome() {
 
   return (
     <div className="max-w-[1100px] mx-auto px-6 py-5">
+      {/* Stats bar */}
+      {stats && (
+        <div className="mb-6 grid grid-cols-3 divide-x divide-white/[0.06] rounded-xl border border-white/[0.08] bg-[#111]">
+          {([
+            { label: "Projects", value: stats.total_projects.toString() },
+            { label: "Photos", value: stats.total_photos.toLocaleString() },
+            { label: "Storage", value: formatBytes(stats.total_bytes) },
+          ] as { label: string; value: string }[]).map(({ label, value }) => (
+            <div key={label} className="flex flex-col gap-0.5 px-5 py-3.5">
+              <span className="text-[12px] font-medium text-white/40 uppercase tracking-wide">{label}</span>
+              <span className="text-[20px] font-semibold tabular-nums text-white">{value}</span>
+            </div>
+          ))}
+        </div>
+      )}
+
       {projects.length === 0 ? (
         /* ── Empty state ── */
         <div className="flex min-h-[60vh] flex-col items-center justify-center text-center">

@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useState } from "react";
 import { useSession } from "next-auth/react";
-import { Loader2, Save, ExternalLink, Eye, EyeOff } from "lucide-react";
+import { Loader2, Save, ExternalLink, Eye, EyeOff, HardDrive } from "lucide-react";
 
 type ClientData = {
   id: string;
@@ -47,12 +47,14 @@ export default function CloudSettingsPage() {
   const [pwSaved, setPwSaved] = useState(false);
 
   const [togglingPublish, setTogglingPublish] = useState(false);
+  const [stats, setStats] = useState<{ total_bytes: number; total_photos: number; total_projects: number } | null>(null);
 
   const fetchData = useCallback(async () => {
     if (!session?.clientId) return;
-    const [clientListRes, profileRes] = await Promise.all([
+    const [clientListRes, profileRes, statsRes] = await Promise.all([
       fetch(`/api/clients`),
       fetch(`/api/clients/${session.clientId}/profile`),
+      fetch(`/api/cloud/stats`),
     ]);
     if (clientListRes.ok) {
       const list = (await clientListRes.json()) as ClientData[];
@@ -66,6 +68,10 @@ export default function CloudSettingsPage() {
     if (profileRes.ok) {
       const p = (await profileRes.json()) as ProfileData;
       setProfile(p);
+    }
+    if (statsRes.ok) {
+      const s = (await statsRes.json()) as { total_bytes: number; total_photos: number; total_projects: number };
+      setStats(s);
     }
     setUserName(session.user?.name ?? "");
   }, [session?.clientId, session?.user?.name]);
@@ -313,6 +319,52 @@ export default function CloudSettingsPage() {
             </div>
           </section>
         )}
+
+        {/* Storage */}
+        <section className="rounded-2xl border border-white/[0.08] bg-[#111] p-6">
+          <div className="mb-5 flex items-center gap-2">
+            <HardDrive className="h-4 w-4 text-white/40" />
+            <h2 className="text-[15px] font-semibold text-white">Storage</h2>
+          </div>
+
+          {stats ? (() => {
+            const FREE_LIMIT_BYTES = 5 * 1024 * 1024 * 1024;
+            const usedBytes = stats.total_bytes;
+            const pct = Math.min(100, (usedBytes / FREE_LIMIT_BYTES) * 100);
+            const usedMB = usedBytes < 1024 * 1024 * 1024
+              ? `${(usedBytes / (1024 * 1024)).toFixed(1)} MB`
+              : `${(usedBytes / (1024 * 1024 * 1024)).toFixed(2)} GB`;
+            return (
+              <div className="space-y-4">
+                <div className="flex items-center justify-between">
+                  <span className="text-[13px] text-white/40">Used storage</span>
+                  <span className="rounded-full bg-white/10 px-2.5 py-0.5 text-[12px] font-medium text-white/60">Free plan</span>
+                </div>
+                <div className="overflow-hidden rounded-full bg-white/[0.06] h-2">
+                  <div
+                    className={`h-full rounded-full transition-all ${pct > 80 ? "bg-red-400" : "bg-[#D4FF4F]"}`}
+                    style={{ width: `${pct}%` }}
+                  />
+                </div>
+                <div className="flex items-center justify-between text-[13px]">
+                  <span className="text-white/40">{usedMB} of 5 GB used</span>
+                  <span className="text-white/30">{stats.total_photos.toLocaleString()} photos · {stats.total_projects} projects</span>
+                </div>
+                <div className="rounded-xl border border-[#D4FF4F]/20 bg-[#D4FF4F]/5 p-4">
+                  <p className="mb-1 text-[13px] font-semibold text-[#D4FF4F]">Upgrade to Pro</p>
+                  <p className="mb-3 text-[13px] text-white/40">Get 10 GB storage, unlimited projects, and a public portfolio page.</p>
+                  <button className="rounded-lg bg-[#D4FF4F] px-4 py-2 text-[13px] font-semibold text-black hover:bg-[#c4ef3f] transition-colors">
+                    Upgrade — $29 / mo
+                  </button>
+                </div>
+              </div>
+            );
+          })() : (
+            <div className="flex items-center justify-center py-8">
+              <Loader2 className="h-5 w-5 animate-spin text-white/20" />
+            </div>
+          )}
+        </section>
       </div>
     </div>
   );

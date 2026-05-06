@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useState } from "react";
 import { useSession } from "next-auth/react";
-import { Loader2, Plus, MoreVertical, X, Mail, Phone, UserCheck, AlertCircle } from "lucide-react";
+import { Loader2, Plus, MoreVertical, X, Mail, Phone, UserCheck, AlertCircle, Copy, RefreshCw } from "lucide-react";
 
 type TeamMember = {
   id: string;
@@ -78,6 +78,26 @@ export default function CloudTeamPage() {
   }, [selectedClientId, isAdmin]);
 
   useEffect(() => { fetchMembers(); }, [fetchMembers]);
+
+  function handleCopyLoginLink() {
+    const url = `${window.location.origin}/cloud/login`;
+    void navigator.clipboard.writeText(url);
+    setMenuOpen(null);
+  }
+
+  const [resendingId, setResendingId] = useState<string | null>(null);
+
+  async function handleResendInvite(member: TeamMember) {
+    if (!session?.clientId) return;
+    setResendingId(member.id);
+    setMenuOpen(null);
+    await fetch(`/api/cloud/team/resend`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ userId: member.id, clientId: session.clientId }),
+    });
+    setResendingId(null);
+  }
 
   async function handleDeactivate(member: TeamMember) {
     if (!confirm(`Deactivate ${member.name}?`)) return;
@@ -200,14 +220,32 @@ export default function CloudTeamPage() {
                 {menuOpen === m.id && (
                   <>
                     <div className="fixed inset-0 z-10" onClick={() => setMenuOpen(null)} />
-                    <div className="absolute right-0 top-8 z-20 w-40 rounded-xl border border-white/10 bg-[#1a1a1a] py-1.5 shadow-xl">
+                    <div className="absolute right-0 top-8 z-20 w-48 rounded-xl border border-white/10 bg-[#1a1a1a] py-1.5 shadow-xl">
+                      <button
+                        onClick={handleCopyLoginLink}
+                        className="flex w-full items-center gap-2.5 px-4 py-2 text-[13px] text-white/70 hover:bg-white/5 hover:text-white"
+                      >
+                        <Copy className="h-3.5 w-3.5" />
+                        Copy login link
+                      </button>
+                      <button
+                        onClick={() => void handleResendInvite(m)}
+                        disabled={resendingId === m.id}
+                        className="flex w-full items-center gap-2.5 px-4 py-2 text-[13px] text-white/70 hover:bg-white/5 hover:text-white disabled:opacity-50"
+                      >
+                        {resendingId === m.id ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <RefreshCw className="h-3.5 w-3.5" />}
+                        Resend invite
+                      </button>
                       {m.is_active && (
-                        <button
-                          onClick={() => void handleDeactivate(m)}
-                          className="flex w-full items-center gap-2.5 px-4 py-2 text-[13px] text-red-400 hover:bg-red-500/10"
-                        >
-                          Deactivate
-                        </button>
+                        <>
+                          <hr className="my-1 border-white/10" />
+                          <button
+                            onClick={() => void handleDeactivate(m)}
+                            className="flex w-full items-center gap-2.5 px-4 py-2 text-[13px] text-red-400 hover:bg-red-500/10"
+                          >
+                            Deactivate
+                          </button>
+                        </>
                       )}
                     </div>
                   </>

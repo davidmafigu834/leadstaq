@@ -266,6 +266,121 @@ export default function CloudLandingPage() {
         </div>
       </section>
 
+      {/* Social proof */}
+      <section className="border-t border-white/10 px-6 py-24">
+        <div className="mx-auto max-w-6xl">
+          <p className="mb-4 text-center font-mono text-[11px] uppercase tracking-[0.2em] text-[#D4FF4F]">
+            Trusted by contractors
+          </p>
+          <h2 className="mb-16 text-center text-3xl font-light text-white md:text-4xl">
+            Real results from real teams
+          </h2>
+
+          <div className="mx-auto mb-16 max-w-2xl rounded-2xl border border-white/10 bg-[#111111] p-8 text-center">
+            <p className="mb-6 text-xl font-light italic leading-relaxed text-white/80">
+              &ldquo;Since using Leadstaq Cloud, I&apos;ve closed two deals just by sending a portfolio link.
+              Clients actually call me back now.&rdquo;
+            </p>
+            <div className="flex items-center justify-center gap-3">
+              <div className="flex h-9 w-9 items-center justify-center rounded-full bg-[#D4FF4F] text-sm font-bold text-black">
+                J
+              </div>
+              <div className="text-left">
+                <p className="text-sm font-medium text-white">Jason M.</p>
+                <p className="text-xs text-white/40">Solar Installation, Cape Town</p>
+              </div>
+            </div>
+          </div>
+
+          <div className="grid gap-6 text-center sm:grid-cols-3">
+            {([
+              { value: "2,400+", label: "Projects documented" },
+              { value: "38,000+", label: "Photos uploaded" },
+              { value: "180+", label: "Contractors trust Leadstaq" },
+            ] as { value: string; label: string }[]).map(({ value, label }) => (
+              <div key={label} className="rounded-2xl border border-white/10 bg-[#111111] p-6">
+                <div className="mb-1 text-3xl font-semibold text-white">{value}</div>
+                <div className="text-sm text-white/40">{label}</div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Pricing */}
+      <section id="pricing" className="border-t border-white/10 px-6 py-24">
+        <div className="mx-auto max-w-6xl">
+          <p className="mb-4 text-center font-mono text-[11px] uppercase tracking-[0.2em] text-[#D4FF4F]">
+            Simple pricing
+          </p>
+          <h2 className="mb-4 text-center text-3xl font-light text-white md:text-4xl">
+            Start free. Upgrade when you&apos;re ready.
+          </h2>
+          <p className="mb-16 text-center text-base text-white/40">No credit card required. Cancel anytime.</p>
+
+          <div className="grid gap-6 md:grid-cols-3">
+            {/* Starter */}
+            <div className="rounded-2xl border border-white/10 bg-[#111111] p-8">
+              <p className="mb-2 text-sm font-medium text-white/60">Starter</p>
+              <div className="mb-6 flex items-baseline gap-1">
+                <span className="text-4xl font-bold text-white">Free</span>
+              </div>
+              <ul className="mb-8 space-y-3">
+                {["5 projects", "100 photos / month", "Share links", "Mobile upload", "1 user"].map((f) => (
+                  <li key={f} className="flex items-center gap-2.5 text-sm text-white/60">
+                    <Check className="h-4 w-4 flex-shrink-0 text-[#D4FF4F]" /> {f}
+                  </li>
+                ))}
+              </ul>
+              <Link href="/cloud/signup" className="block rounded-xl border border-white/20 py-3 text-center text-sm font-semibold text-white transition-colors hover:border-white/40">
+                Get started free
+              </Link>
+            </div>
+
+            {/* Pro */}
+            <div className="relative rounded-2xl border border-[#D4FF4F]/40 bg-[#111111] p-8">
+              <div className="absolute -top-3.5 left-1/2 -translate-x-1/2">
+                <span className="rounded-full bg-[#D4FF4F] px-3 py-1 text-xs font-bold text-black">Most popular</span>
+              </div>
+              <p className="mb-2 text-sm font-medium text-white/60">Pro</p>
+              <div className="mb-6 flex items-baseline gap-1">
+                <span className="text-4xl font-bold text-white">$29</span>
+                <span className="text-white/40">/mo</span>
+              </div>
+              <ul className="mb-8 space-y-3">
+                {["Unlimited projects", "10 GB storage", "Public portfolio page", "2 team members", "Watermark branding", "Priority email support"].map((f) => (
+                  <li key={f} className="flex items-center gap-2.5 text-sm text-white/60">
+                    <Check className="h-4 w-4 flex-shrink-0 text-[#D4FF4F]" /> {f}
+                  </li>
+                ))}
+              </ul>
+              <Link href="/cloud/signup" className="block rounded-xl bg-[#D4FF4F] py-3 text-center text-sm font-semibold text-black transition-colors hover:bg-[#c4ef3f]">
+                Start free trial
+              </Link>
+            </div>
+
+            {/* Business */}
+            <div className="rounded-2xl border border-white/10 bg-[#111111] p-8">
+              <p className="mb-2 text-sm font-medium text-white/60">Business</p>
+              <div className="mb-6 flex items-baseline gap-1">
+                <span className="text-4xl font-bold text-white">$79</span>
+                <span className="text-white/40">/mo</span>
+              </div>
+              <ul className="mb-8 space-y-3">
+                {["Unlimited projects", "50 GB storage", "10 team members", "Watermark branding", "Analytics", "Priority support"].map((f) => (
+                  <li key={f} className="flex items-center gap-2.5 text-sm text-white/60">
+                    <Check className="h-4 w-4 flex-shrink-0 text-[#D4FF4F]" /> {f}
+                  </li>
+                ))}
+              </ul>
+              <Link href="/cloud/signup" className="block rounded-xl border border-white/20 py-3 text-center text-sm font-semibold text-white transition-colors hover:border-white/40">
+                Get started
+              </Link>
+            </div>
+          </div>
+        </div>
+      </section>
+
       {/* CTA */}
       <section className="border-t border-white/10 px-6 py-24">
         <div className="mx-auto max-w-2xl text-center">

@@ -392,10 +392,9 @@ export default function CloudUploadPage() {
       </div>
 
       {/* New project bottom sheet */}
-      {showNewSheet && (
-        <div className="fixed inset-0 z-[60] flex flex-col justify-end">
+      <div className={`fixed inset-0 z-[60] flex flex-col justify-end transition-opacity duration-300 ${showNewSheet ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none"}`}>
           <div className="absolute inset-0 bg-black/60" onClick={() => setShowNewSheet(false)} />
-          <div className="relative rounded-t-3xl bg-[#111111] p-6 pb-12" style={{ paddingBottom: "max(3rem, calc(3rem + env(safe-area-inset-bottom)))" }}>
+          <div className={`relative rounded-t-3xl bg-[#111111] p-6 transform transition-transform duration-300 ease-out ${showNewSheet ? "translate-y-0" : "translate-y-full"}`} style={{ paddingBottom: "max(3rem, calc(3rem + env(safe-area-inset-bottom)))" }}>
             <div className="mb-4 flex items-center justify-between">
               <h3 className="text-[15px] font-semibold text-white">New project</h3>
               <button onClick={() => setShowNewSheet(false)} className="text-white/40 hover:text-white">
@@ -440,8 +439,7 @@ export default function CloudUploadPage() {
               )}
             </div>
           </div>
-        </div>
-      )}
+      </div>
       <InstallPrompt />
       <IOSInstallBanner />
     </div>

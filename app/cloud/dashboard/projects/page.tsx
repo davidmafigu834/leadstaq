@@ -27,6 +27,7 @@ export default function CloudProjectsPage() {
   const [loading, setLoading] = useState(false);
   const [sortKey, setSortKey] = useState<SortKey>("newest");
   const [search, setSearch] = useState("");
+  const [activeCategory, setActiveCategory] = useState<string | null>(null);
   const [showNew, setShowNew] = useState(false);
   const [menuOpen, setMenuOpen] = useState<string | null>(null);
   const [toastMsg, setToastMsg] = useState("");
@@ -59,8 +60,14 @@ export default function CloudProjectsPage() {
     });
   }
 
+  const allCategories = Array.from(new Set(projects.map((p) => p.category).filter(Boolean))) as string[];
+
   const filtered = sorted(
-    projects.filter((p) => p.title.toLowerCase().includes(search.toLowerCase()))
+    projects.filter((p) => {
+      const matchesSearch = p.title.toLowerCase().includes(search.toLowerCase());
+      const matchesCategory = !activeCategory || p.category === activeCategory;
+      return matchesSearch && matchesCategory;
+    })
   );
 
   function showToast(msg: string) {
@@ -134,6 +141,35 @@ export default function CloudProjectsPage() {
           </button>
         </div>
       </div>
+
+      {/* Category filter pills */}
+      {allCategories.length > 0 && (
+        <div className="mb-5 flex flex-wrap gap-2">
+          <button
+            onClick={() => setActiveCategory(null)}
+            className={`rounded-full px-3.5 py-1.5 text-[13px] font-medium transition-colors ${
+              activeCategory === null
+                ? "bg-white text-black"
+                : "border border-white/10 bg-white/5 text-white/60 hover:bg-white/10"
+            }`}
+          >
+            All
+          </button>
+          {allCategories.map((cat) => (
+            <button
+              key={cat}
+              onClick={() => setActiveCategory(activeCategory === cat ? null : cat)}
+              className={`rounded-full px-3.5 py-1.5 text-[13px] font-medium transition-colors ${
+                activeCategory === cat
+                  ? "bg-[#D4FF4F] text-black"
+                  : "border border-white/10 bg-white/5 text-white/60 hover:bg-white/10"
+              }`}
+            >
+              {cat}
+            </button>
+          ))}
+        </div>
+      )}
 
       {filtered.length === 0 && !loading ? (
         <div className="flex min-h-[40vh] flex-col items-center justify-center text-center">
