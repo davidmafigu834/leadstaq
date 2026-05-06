@@ -31,12 +31,12 @@ export function ResponsiveTable<T>({
     <>
       <table className="hidden w-full lg:table">
         <thead>
-          <tr className="border-b border-border-strong">
+          <tr className="border-b border-[var(--border-strong)]">
             {columns.map((col) => (
               <th
                 key={col.key}
                 style={col.width ? { width: col.width } : undefined}
-                className={`py-3 font-mono text-[11px] font-normal uppercase tracking-[0.08em] text-ink-tertiary ${
+                className={`px-4 py-2.5 text-[11px] font-medium uppercase tracking-[0.06em] text-[var(--text-tertiary)] whitespace-nowrap ${
                   col.align === "right" ? "text-right" : "text-left"
                 }`}
               >
@@ -51,15 +51,15 @@ export function ResponsiveTable<T>({
               key={rowKey(row)}
               onClick={() => onRowClick?.(row)}
               className={[
-                "border-b border-border",
-                onRowClick ? "cursor-pointer hover:bg-surface-card-alt" : "",
+                "border-b border-[var(--border)]",
+                onRowClick ? "cursor-pointer hover:bg-surface-card-alt transition-colors" : "",
                 rowClassName?.(row) ?? "",
               ]
                 .filter(Boolean)
                 .join(" ")}
             >
               {columns.map((col) => (
-                <td key={col.key} style={col.width ? { width: col.width } : undefined} className={`py-3 ${col.align === "right" ? "text-right" : ""}`}>
+                <td key={col.key} style={col.width ? { width: col.width } : undefined} className={`px-4 py-3 text-[13px] text-[var(--text-primary)] ${col.align === "right" ? "text-right" : ""}`}>
                   {col.render(row)}
                 </td>
               ))}
@@ -81,13 +81,13 @@ export function ResponsiveTable<T>({
                 </div>
               ))}
               {secondary.length > 0 ? (
-                <dl className="mt-3 grid grid-cols-2 gap-x-4 gap-y-2 border-t border-border pt-3">
+                <dl className="mt-3 grid grid-cols-2 gap-x-4 gap-y-2 border-t border-[var(--border)] pt-3">
                   {secondary.map((col) => (
                     <div key={col.key}>
-                      <dt className="mb-0.5 font-mono text-[10px] uppercase tracking-wide text-ink-tertiary">
+                      <dt className="mb-0.5 text-[10px] uppercase tracking-wide text-[var(--text-tertiary)]">
                         {col.label}
                       </dt>
-                      <dd className="text-sm text-ink-primary">{col.render(row)}</dd>
+                      <dd className="text-[13px] text-[var(--text-primary)]">{col.render(row)}</dd>
                     </div>
                   ))}
                 </dl>
@@ -101,7 +101,7 @@ export function ResponsiveTable<T>({
                 type="button"
                 onClick={() => onRowClick(row)}
                 className={[
-                  "w-full rounded-lg border border-border bg-surface-card p-4 text-left active:bg-surface-card-alt",
+                  "w-full rounded-md border border-[var(--border)] bg-surface-card p-4 text-left hover:bg-surface-card-alt hover:border-[var(--border-hover)] transition-colors",
                   extra ?? "",
                 ]
                   .filter(Boolean)
@@ -114,7 +114,7 @@ export function ResponsiveTable<T>({
           return (
             <div
               key={rowKey(row)}
-              className={["w-full rounded-lg border border-border bg-surface-card p-4", extra ?? ""].filter(Boolean).join(" ")}
+              className={["w-full rounded-md border border-[var(--border)] bg-surface-card p-4", extra ?? ""].filter(Boolean).join(" ")}
             >
               {inner}
             </div>

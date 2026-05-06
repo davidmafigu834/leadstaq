@@ -39,7 +39,7 @@ export function ActivityFeed() {
     <div>
       <div className="mb-5 flex flex-col gap-3 min-[480px]:flex-row min-[480px]:items-end min-[480px]:justify-between">
         <div>
-          <p className="flex items-center gap-2 font-mono text-[11px] font-normal uppercase tracking-[0.1em] text-ink-tertiary">
+          <p className="flex items-center gap-2 text-[11px] font-medium uppercase tracking-[0.08em] text-[var(--text-tertiary)]">
             <span>02 / Live</span>
             <motion.span
               className="relative inline-flex h-2 w-2 rounded-full bg-accent"
@@ -48,28 +48,28 @@ export function ActivityFeed() {
               transition={{ duration: 1.2, repeat: Infinity, ease: "easeInOut" }}
             />
           </p>
-          <h2 className="mt-1 font-display text-2xl tracking-display text-ink-primary">Activity</h2>
+          <h2 className="mt-1 text-[18px] font-semibold text-[var(--text-primary)]">Activity</h2>
         </div>
       </div>
 
       <div className="mb-3 flex flex-wrap items-center gap-x-4 gap-y-1 border-b border-[var(--border)] pb-3">
-        <span className="flex items-center gap-1.5 text-[11px] text-ink-tertiary">
+        <span className="flex items-center gap-1.5 text-[11px] text-[var(--text-tertiary)]">
           <span className="h-2 w-2 shrink-0 rounded-full" style={{ backgroundColor: "#3B82F6" }} aria-hidden />
           New lead
         </span>
-        <span className="flex items-center gap-1.5 text-[11px] text-ink-tertiary">
+        <span className="flex items-center gap-1.5 text-[11px] text-[var(--text-tertiary)]">
           <span className="h-2 w-2 shrink-0 rounded-full" style={{ backgroundColor: "#DC2626" }} aria-hidden />
           Flagged
         </span>
-        <span className="flex items-center gap-1.5 text-[11px] text-ink-tertiary">
+        <span className="flex items-center gap-1.5 text-[11px] text-[var(--text-tertiary)]">
           <span className="h-2 w-2 shrink-0 rounded-full" style={{ backgroundColor: "#F59E0B" }} aria-hidden />
           Follow-up
         </span>
-        <span className="flex items-center gap-1.5 text-[11px] text-ink-tertiary">
+        <span className="flex items-center gap-1.5 text-[11px] text-[var(--text-tertiary)]">
           <span className="h-2 w-2 shrink-0 rounded-full" style={{ backgroundColor: "#10B981" }} aria-hidden />
           Contacted
         </span>
-        <span className="flex items-center gap-1.5 text-[11px] text-ink-tertiary">
+        <span className="flex items-center gap-1.5 text-[11px] text-[var(--text-tertiary)]">
           <span className="h-2 w-2 shrink-0 rounded-full bg-accent" aria-hidden />
           Deal won
         </span>
@@ -92,24 +92,24 @@ export function ActivityFeed() {
                   className="absolute left-[-4px] top-[22px] h-2 w-2 rounded-full"
                   style={{
                     backgroundColor: bulletColor[e.type],
-                    boxShadow: "0 0 0 1px var(--surface-canvas)",
+                    boxShadow: "0 0 0 1px var(--bg-primary)",
                   }}
                   aria-hidden
                 />
                 <div className="flex items-start justify-between gap-3">
-                  <span className="font-mono text-[11px] font-normal uppercase tracking-wide text-[var(--text-secondary)]">
+                  <span className="text-[11px] font-medium uppercase tracking-wide text-[var(--text-tertiary)]">
                     {labelFor[e.type]}
                   </span>
-                  <span className="shrink-0 font-mono text-[11px] tabular-nums text-[var(--text-tertiary)]">
+                  <span className="shrink-0 text-[11px] tabular-nums text-[var(--text-tertiary)]">
                     {formatTimeAgo(e.timestamp)}
                   </span>
                 </div>
-                <p className="mt-1 text-[13px] text-[var(--text-primary)]">{e.message}</p>
+                <p className="mt-0.5 text-[13px] text-[var(--text-primary)]">{e.message}</p>
               </motion.li>
             ))}
           </AnimatePresence>
         </ul>
-        {!events.length ? <p className="py-4 text-[13px] text-ink-tertiary">No recent activity.</p> : null}
+        {!events.length ? <p className="py-4 text-[13px] text-[var(--text-tertiary)]">No recent activity.</p> : null}
       </div>
     </div>
   );

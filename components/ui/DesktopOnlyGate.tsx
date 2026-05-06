@@ -31,14 +31,14 @@ export function DesktopOnlyGate({
 
   if (isNarrow) {
     return (
-      <div className="fixed inset-0 z-40 flex items-center justify-center bg-surface-canvas p-8">
+      <div className="fixed inset-0 z-40 flex items-center justify-center bg-bg-primary p-8">
         <div className="max-w-sm text-center">
-          <div className="mx-auto mb-5 flex h-14 w-14 items-center justify-center rounded-full bg-surface-card-alt">
-            <Monitor className="h-6 w-6 text-ink-tertiary" strokeWidth={1.5} />
+          <div className="mx-auto mb-5 flex h-12 w-12 items-center justify-center rounded-xl border border-[var(--border)] bg-[var(--bg-tertiary)]">
+            <Monitor className="h-5 w-5 text-[var(--text-tertiary)]" strokeWidth={1.5} />
           </div>
-          <h2 className="mb-3 font-display text-2xl tracking-tight text-ink-primary">{title}</h2>
-          <p className="mb-6 text-sm leading-relaxed text-ink-secondary">{description}</p>
-          <div className="font-mono text-xs uppercase tracking-[0.1em] text-ink-tertiary">
+          <h2 className="mb-3 text-[22px] font-semibold tracking-tight text-[var(--text-primary)]">{title}</h2>
+          <p className="mb-6 text-[13px] leading-relaxed text-[var(--text-secondary)]">{description}</p>
+          <div className="text-[11px] uppercase tracking-[0.1em] text-[var(--text-tertiary)]">
             Minimum width: {minWidth}px
           </div>
         </div>

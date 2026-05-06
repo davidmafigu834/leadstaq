@@ -16,7 +16,7 @@ type Filter = "all" | "facebook" | "landing";
 function SourceCell({ source }: { source: LeadSource }) {
   if (source === "FACEBOOK") {
     return (
-      <span className="inline-flex items-center gap-1.5 text-[12px] text-ink-secondary">
+      <span className="inline-flex items-center gap-1.5 text-[12px] text-[var(--text-secondary)]">
         <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-[var(--activity-new)]" />
         Facebook
       </span>
@@ -24,15 +24,15 @@ function SourceCell({ source }: { source: LeadSource }) {
   }
   if (source === "LANDING_PAGE") {
     return (
-      <span className="inline-flex items-center gap-1.5 text-[12px] text-ink-secondary">
+      <span className="inline-flex items-center gap-1.5 text-[12px] text-[var(--text-secondary)]">
         <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-accent" />
         Landing
       </span>
     );
   }
   return (
-    <span className="inline-flex items-center gap-1.5 text-[12px] text-ink-secondary">
-      <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-ink-tertiary" />
+    <span className="inline-flex items-center gap-1.5 text-[12px] text-[var(--text-secondary)]">
+      <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-[var(--text-tertiary)]" />
       Manual
     </span>
   );
@@ -78,8 +78,8 @@ export function RecentLeadsTable({
         mobilePrimary: true,
         render: (r) => (
           <div className="min-w-0">
-            <div className="truncate text-[13px] font-medium text-ink-primary">{r.name ?? "—"}</div>
-            <div className="font-mono text-[11px] text-ink-tertiary">{r.phone ?? "—"}</div>
+            <div className="truncate text-[13px] font-medium text-[var(--text-primary)]">{r.name ?? "—"}</div>
+            <div className="text-[11px] text-[var(--text-tertiary)]">{r.phone ?? "—"}</div>
           </div>
         ),
       },
@@ -90,7 +90,7 @@ export function RecentLeadsTable({
         render: (r) => (
           <div className="flex min-w-0 items-center gap-1.5">
             <ClientAvatar name={r.clientName} size={20} />
-            <span className="text-[12px] text-ink-primary">{r.clientName}</span>
+            <span className="text-[12px] text-[var(--text-primary)]">{r.clientName}</span>
           </div>
         ),
       },
@@ -102,7 +102,7 @@ export function RecentLeadsTable({
           <div className="flex flex-col gap-0.5">
             <SourceCell source={r.source} />
             {r.budget != null && r.budget !== "" ? (
-              <span className="font-mono text-[11px] text-ink-tertiary">{r.budget}</span>
+              <span className="text-[11px] text-[var(--text-tertiary)]">{r.budget}</span>
             ) : null}
           </div>
         ),
@@ -120,7 +120,7 @@ export function RecentLeadsTable({
         render: (r) => (
           <div className="flex min-w-0 items-center gap-2">
             {r.assigneeFullName ? <ClientAvatar name={r.assigneeFullName} size={24} /> : null}
-            <span className="text-[12px] text-ink-primary">{r.assigneeFullName ?? "—"}</span>
+            <span className="text-[12px] text-[var(--text-primary)]">{r.assigneeFullName ?? "—"}</span>
           </div>
         ),
       },
@@ -128,7 +128,7 @@ export function RecentLeadsTable({
         key: "time",
         label: "Time",
         width: "80px",
-        render: (r) => <span className="font-mono text-[11px] text-ink-tertiary">{formatTimeAgo(r.createdAt)}</span>,
+        render: (r) => <span className="text-[11px] text-[var(--text-tertiary)]">{formatTimeAgo(r.createdAt)}</span>,
       },
     ],
     []
@@ -142,8 +142,8 @@ export function RecentLeadsTable({
     <div>
       <div className="mb-5 flex flex-col gap-4 min-[640px]:flex-row min-[640px]:items-end min-[640px]:justify-between">
         <div>
-          <p className="font-mono text-[11px] font-normal uppercase tracking-[0.1em] text-ink-tertiary">{eyebrow}</p>
-          <h2 className="mt-1 font-display text-2xl tracking-display text-ink-primary">{title}</h2>
+          <p className="text-[11px] font-medium uppercase tracking-[0.08em] text-[var(--text-tertiary)]">{eyebrow}</p>
+          <h2 className="mt-1 text-[18px] font-semibold text-[var(--text-primary)]">{title}</h2>
         </div>
         {showSourceFilters ? (
           <div className="-mx-1 flex gap-2 overflow-x-auto px-1 pb-1 scrollbar-hide sm:flex-wrap">
@@ -154,10 +154,10 @@ export function RecentLeadsTable({
                   key={f.id}
                   type="button"
                   onClick={() => setFilter(f.id)}
-                  className={`h-9 shrink-0 rounded-sm px-3 text-[12px] font-medium transition-colors sm:h-8 ${
+                  className={`h-7 shrink-0 rounded-md px-3 text-[12px] font-medium transition-colors ${
                     active
-                      ? "bg-ink-primary text-white"
-                      : "border border-border bg-transparent text-ink-secondary hover:bg-surface-card-alt"
+                      ? "bg-[var(--bg-quaternary)] text-[var(--text-primary)] border border-[var(--border-strong)]"
+                      : "border border-[var(--border)] bg-transparent text-[var(--text-secondary)] hover:bg-[var(--bg-tertiary)] hover:text-[var(--text-primary)]"
                   }`}
                 >
                   {f.label}
@@ -170,9 +170,9 @@ export function RecentLeadsTable({
 
       {filtered.length === 0 ? (
         <div className="flex h-[200px] flex-col items-center justify-center gap-2 text-center">
-          <Inbox className="h-8 w-8 text-ink-tertiary" strokeWidth={1.25} aria-hidden />
-          <p className="font-display text-xl tracking-display text-ink-primary">No leads yet</p>
-          <p className="text-[14px] text-ink-secondary">New submissions will show up here.</p>
+          <Inbox className="h-8 w-8 text-[var(--text-tertiary)]" strokeWidth={1.25} aria-hidden />
+          <p className="text-[14px] font-semibold text-[var(--text-primary)]">No leads yet</p>
+          <p className="text-[13px] text-[var(--text-secondary)]">New submissions will show up here.</p>
         </div>
       ) : (
         <div className="w-full">
@@ -186,11 +186,11 @@ export function RecentLeadsTable({
       )}
 
       {agencyFooter && filtered.length > 0 ? (
-        <div className="mt-4 flex flex-wrap items-center justify-between gap-2 border-t border-border pt-4">
-          <span className="text-xs text-ink-tertiary">Showing latest 10 leads</span>
+        <div className="mt-4 flex flex-wrap items-center justify-between gap-2 border-t border-[var(--border)] pt-4">
+          <span className="text-[12px] text-[var(--text-tertiary)]">Showing latest 10 leads</span>
           <Link
             href="/dashboard/leads"
-            className="text-sm text-ink-secondary transition-colors hover:text-ink-primary"
+            className="text-[12px] text-[var(--text-secondary)] transition-colors hover:text-[var(--text-primary)]"
           >
             View all leads →
           </Link>

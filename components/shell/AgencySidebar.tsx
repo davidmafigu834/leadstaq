@@ -42,25 +42,19 @@ function NavRow({
   return (
     <Link
       href={item.href}
-      className={`relative flex h-9 items-center gap-3 rounded-sm py-2 text-[13px] font-medium transition-colors ${
+      className={`relative flex h-9 items-center gap-3 rounded-md py-2 text-[13px] transition-colors ${
         mobileExpanded ? "justify-start px-3" : "justify-center px-2 layout:justify-start layout:px-3"
       } ${
         isActive
-          ? "text-[var(--accent)]"
-          : "text-[var(--text-on-dark-dim)] hover:bg-[var(--surface-sidebar-elevated)] hover:text-[var(--text-on-dark)]"
+          ? "bg-[var(--surface-sidebar-elevated)] text-[var(--text-on-dark)] font-medium"
+          : "font-normal text-[var(--text-on-dark-dim)] hover:bg-[var(--surface-sidebar-elevated)] hover:text-[var(--text-on-dark)]"
       } `}
     >
-      {isActive ? (
-        <span
-          className="pointer-events-none absolute bottom-0 left-0 top-0 w-[2px] bg-[var(--accent)]"
-          aria-hidden
-        />
-      ) : null}
       <ShellIcon name={item.icon} className="h-4 w-4 shrink-0" />
       <span className={`min-w-0 flex-1 truncate ${mobileExpanded ? "inline" : "hidden layout:inline"}`}>{item.label}</span>
       {item.badge != null && item.badge > 0 ? (
         <span
-          className={`rounded-sm bg-[var(--accent)] px-1.5 py-0 font-mono text-[10px] font-medium text-[var(--accent-ink)] ${
+          className={`rounded-[var(--radius-sm)] bg-[var(--bg-quaternary)] px-1.5 py-0 font-mono text-[10px] font-medium text-[var(--text-secondary)] border border-[var(--border)] ${
             mobileExpanded ? "inline" : "hidden layout:inline"
           }`}
         >
@@ -172,7 +166,7 @@ export function AgencySidebar({
                 <li key={c.id}>
                   <Link
                     href={`/dashboard/clients/${c.id}`}
-                    className="flex items-center gap-2 rounded-sm px-2 py-1.5 text-[13px] text-[var(--text-on-dark-dim)] transition-colors hover:bg-[var(--surface-sidebar-elevated)] hover:text-[var(--text-on-dark)]"
+                    className="flex items-center gap-2 rounded-md px-2 py-1.5 text-[12px] text-[var(--text-on-dark-dim)] transition-colors hover:bg-[var(--surface-sidebar-elevated)] hover:text-[var(--text-on-dark)]"
                   >
                     <span
                       className={`flex h-6 w-6 shrink-0 items-center justify-center rounded-sm text-[10px] font-medium ${clientTint(c.name)}`}
@@ -185,7 +179,7 @@ export function AgencySidebar({
                         .toUpperCase()}
                     </span>
                     <span className="min-w-0 flex-1 truncate">{c.name}</span>
-                    <span className="font-mono text-[10px] text-[var(--text-on-dark-dim)]">{c.leadCount}</span>
+                    <span className="font-mono text-[10px] text-[var(--text-tertiary)] bg-[var(--bg-quaternary)] border border-[var(--border)] rounded-[var(--radius-sm)] px-1.5">{c.leadCount}</span>
                   </Link>
                 </li>
               ))}
@@ -197,7 +191,7 @@ export function AgencySidebar({
       <div className="shrink-0 border-t border-[var(--surface-sidebar-border)] pt-4">
         <details className="group relative px-2 pb-2 layout:px-3">
           <summary
-            className={`flex cursor-pointer list-none items-center gap-2 rounded-sm py-2 marker:hidden hover:bg-[var(--surface-sidebar-elevated)] [&::-webkit-details-marker]:hidden ${
+            className={`flex cursor-pointer list-none items-center gap-2 rounded-md py-2 marker:hidden hover:bg-[var(--surface-sidebar-elevated)] [&::-webkit-details-marker]:hidden ${
               mobileExpanded ? "justify-start px-2" : "justify-center px-1 layout:justify-start layout:px-2"
             }`}
           >
@@ -212,10 +206,10 @@ export function AgencySidebar({
               }`}
             />
           </summary>
-          <div className="absolute bottom-full left-0 right-0 z-50 mb-1 rounded-sm border border-[var(--surface-sidebar-border)] bg-[var(--surface-sidebar-elevated)] py-1 shadow-md">
+          <div className="absolute bottom-full left-0 right-0 z-50 mb-1 rounded-md border border-[var(--border)] bg-[var(--surface-sidebar-elevated)] py-1 shadow-[var(--shadow-md)]">
             <button
               type="button"
-              className="block w-full px-3 py-2 text-left text-[13px] text-[var(--text-on-dark)] hover:bg-[var(--surface-sidebar)]"
+              className="block w-full px-3 py-2 text-left text-[12px] text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-tertiary)] transition-colors"
               onClick={() => signOut({ callbackUrl: "/login" })}
             >
               Sign out

@@ -52,7 +52,7 @@ export function ClientCard({ row }: { row: ClientPerfRow }) {
     <div
       role="link"
       tabIndex={0}
-      className="group relative block cursor-pointer rounded-[10px] border border-border bg-surface-card p-6 transition-all duration-150 ease-out hover:border-[var(--border-strong)] active:translate-y-px"
+      className="group relative block cursor-pointer rounded-lg border border-[var(--border)] bg-surface-card p-5 transition-colors duration-150 hover:border-[var(--border-hover)] hover:bg-surface-card-alt"
       onClick={() => router.push(`/dashboard/clients/${row.id}`)}
       onKeyDown={(e) => {
         if (e.key === "Enter" || e.key === " ") {
@@ -72,14 +72,14 @@ export function ClientCard({ row }: { row: ClientPerfRow }) {
           <ClientAvatar name={row.name} size={36} />
           <div className="min-w-0">
             <div className="flex flex-wrap items-baseline gap-2">
-              <div className="font-display text-xl tracking-display text-ink-primary">{row.name}</div>
+              <div className="text-[14px] font-semibold text-[var(--text-primary)]">{row.name}</div>
               {!row.is_active ? (
-                <span className="rounded-sm border border-border bg-surface-card-alt px-1.5 py-0.5 font-mono text-[10px] uppercase tracking-wide text-ink-tertiary">
+                <span className="rounded-[var(--radius-sm)] border border-[var(--border)] bg-[var(--bg-quaternary)] px-1.5 py-0.5 text-[10px] uppercase tracking-wide text-[var(--text-tertiary)]">
                   Paused
                 </span>
               ) : null}
             </div>
-            <div className="mt-0.5 font-mono text-[11px] font-normal uppercase tracking-[0.08em] text-ink-tertiary">
+            <div className="mt-0.5 text-[11px] uppercase tracking-[0.06em] text-[var(--text-tertiary)]">
               {row.industry}
             </div>
           </div>
@@ -87,7 +87,7 @@ export function ClientCard({ row }: { row: ClientPerfRow }) {
         <div className={`relative shrink-0 ${row.hasFlag ? "absolute right-9 top-4" : ""}`} ref={menuRef}>
           <button
             type="button"
-            className="flex h-8 w-8 items-center justify-center rounded-sm text-ink-tertiary hover:bg-surface-card-alt"
+            className="flex h-7 w-7 items-center justify-center rounded-md text-[var(--text-tertiary)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-quaternary)] transition-colors"
             aria-label="More"
             onClick={(e) => {
               e.stopPropagation();
@@ -97,10 +97,10 @@ export function ClientCard({ row }: { row: ClientPerfRow }) {
             <MoreHorizontal className="h-4 w-4" strokeWidth={1.5} />
           </button>
           {menuOpen ? (
-            <div className="absolute right-0 top-full z-20 mt-1 min-w-[180px] rounded-sm border border-border bg-surface-card py-1 shadow-md">
+            <div className="absolute right-0 top-full z-20 mt-1 min-w-[160px] rounded-md border border-[var(--border)] bg-[var(--surface-dropdown)] py-1 shadow-[var(--shadow-md)]">
               <button
                 type="button"
-                className="block w-full px-3 py-2 text-left text-[13px] text-ink-primary hover:bg-surface-card-alt"
+                className="block w-full px-3 py-1.5 text-left text-[12px] text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-tertiary)] transition-colors"
                 onClick={(e) => {
                   e.stopPropagation();
                   router.push(`/dashboard/clients/${row.id}`);
@@ -111,7 +111,7 @@ export function ClientCard({ row }: { row: ClientPerfRow }) {
               </button>
               <button
                 type="button"
-                className="block w-full px-3 py-2 text-left text-[13px] text-ink-primary hover:bg-surface-card-alt"
+                className="block w-full px-3 py-1.5 text-left text-[12px] text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-tertiary)] transition-colors"
                 onClick={(e) => {
                   e.stopPropagation();
                   router.push(`/dashboard/clients/${row.id}/settings`);
@@ -122,7 +122,7 @@ export function ClientCard({ row }: { row: ClientPerfRow }) {
               </button>
               <button
                 type="button"
-                className="block w-full px-3 py-2 text-left text-[13px] text-ink-primary hover:bg-surface-card-alt"
+                className="block w-full px-3 py-1.5 text-left text-[12px] text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-tertiary)] transition-colors"
                 onClick={(e) => {
                   e.stopPropagation();
                   router.push(`/dashboard/clients/${row.id}/landing-page`);
@@ -133,7 +133,7 @@ export function ClientCard({ row }: { row: ClientPerfRow }) {
               </button>
               <button
                 type="button"
-                className="w-full px-3 py-2 text-left text-[13px] text-ink-secondary hover:bg-surface-card-alt"
+                className="w-full px-3 py-1.5 text-left text-[12px] text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-tertiary)] transition-colors"
                 onClick={(e) => {
                   e.stopPropagation();
                   void handleTogglePause();
@@ -146,30 +146,30 @@ export function ClientCard({ row }: { row: ClientPerfRow }) {
         </div>
       </div>
 
-      <div className="my-5 h-px bg-border" />
+      <div className="my-4 h-px bg-[var(--border)]" />
 
-      <div className="grid grid-cols-2 gap-x-6 gap-y-4">
+      <div className="grid grid-cols-2 gap-x-5 gap-y-4">
         <div>
-          <div className="font-mono text-[10px] font-normal uppercase tracking-[0.08em] text-ink-tertiary">
+          <div className="text-[10px] font-medium uppercase tracking-[0.06em] text-[var(--text-tertiary)]">
             Leads this week
           </div>
-          <div className="mt-1 text-[22px] font-medium tabular-nums text-ink-primary">{row.leadsThisWeek}</div>
+          <div className="mt-0.5 text-[20px] font-semibold tabular-nums text-[var(--text-primary)]">{row.leadsThisWeek}</div>
         </div>
         <div>
-          <div className="font-mono text-[10px] font-normal uppercase tracking-[0.08em] text-ink-tertiary">
+          <div className="text-[10px] font-medium uppercase tracking-[0.06em] text-[var(--text-tertiary)]">
             Within SLA
           </div>
-          <div className="mt-1 text-[22px] font-medium tabular-nums text-ink-primary">{row.slaComplianceRate}%</div>
+          <div className="mt-0.5 text-[20px] font-semibold tabular-nums text-[var(--text-primary)]">{row.slaComplianceRate}%</div>
         </div>
         <div>
-          <div className="font-mono text-[10px] font-normal uppercase tracking-[0.08em] text-ink-tertiary">Deals won</div>
-          <div className="mt-1 text-[22px] font-medium tabular-nums text-ink-primary">{row.dealsWonMtd}</div>
+          <div className="text-[10px] font-medium uppercase tracking-[0.06em] text-[var(--text-tertiary)]">Deals won</div>
+          <div className="mt-0.5 text-[20px] font-semibold tabular-nums text-[var(--text-primary)]">{row.dealsWonMtd}</div>
         </div>
         <div>
-          <div className="font-mono text-[10px] font-normal uppercase tracking-[0.08em] text-ink-tertiary">
+          <div className="text-[10px] font-medium uppercase tracking-[0.06em] text-[var(--text-tertiary)]">
             Avg response
           </div>
-          <div className="mt-1 text-[22px] font-medium tabular-nums text-ink-primary">
+          <div className="mt-0.5 text-[20px] font-semibold tabular-nums text-[var(--text-primary)]">
             {formatDuration(row.avgResponseMinutes ?? null)}
           </div>
         </div>
@@ -182,7 +182,7 @@ export function ClientCard({ row }: { row: ClientPerfRow }) {
             style={{ width: `${barWidth}%` }}
           />
         </div>
-        <p className="mt-2 text-[11px] text-ink-tertiary">
+        <p className="mt-2 text-[11px] text-[var(--text-tertiary)]">
           {row.slaComplianceRate}% of leads contacted within SLA
         </p>
       </div>

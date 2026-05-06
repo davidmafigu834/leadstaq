@@ -87,8 +87,8 @@ export function AppShell({
   const hideSearch = showWorkspaceSearch === false;
   const titleClass =
     titleSize === "hero"
-      ? "font-display text-[22px] leading-[1.05] tracking-tight text-ink-primary md:text-[28px] layout:text-[40px]"
-      : "font-display text-[18px] leading-tight tracking-display text-ink-primary md:text-[22px] layout:text-[28px]";
+      ? "font-display text-[20px] leading-[1.05] tracking-tight text-[var(--text-primary)] md:text-[24px] layout:text-[28px]"
+      : "font-display text-[16px] leading-tight text-[var(--text-primary)] md:text-[18px] layout:text-[22px]";
 
   const sidebar = (
     <AgencySidebar
@@ -121,9 +121,9 @@ export function AppShell({
   );
 
   return (
-    <div className="flex min-h-screen min-h-[100svh] bg-surface-canvas layout:h-[100dvh] layout:max-h-[100dvh] layout:min-h-0 layout:overflow-hidden">
+    <div className="flex min-h-screen min-h-[100svh] bg-bg-primary layout:h-[100dvh] layout:max-h-[100dvh] layout:min-h-0 layout:overflow-hidden">
       <aside
-        className="fixed inset-y-0 left-0 z-20 hidden w-60 flex-col border-r border-[var(--surface-sidebar-border)] bg-surface-sidebar layout:flex"
+        className="fixed inset-y-0 left-0 z-20 hidden w-60 flex-col border-r border-[var(--border)] bg-surface-sidebar layout:flex"
         aria-label="Workspace navigation"
       >
         <div className="flex min-h-0 flex-1 flex-col overflow-hidden">{sidebar}</div>
@@ -133,16 +133,16 @@ export function AppShell({
         <>
           <button
             type="button"
-            className="fixed inset-0 z-50 bg-black/50 layout:hidden"
+            className="fixed inset-0 z-50 bg-black/70 backdrop-blur-sm layout:hidden"
             aria-label="Close menu"
             onClick={() => setMobileOpen(false)}
           />
-          <aside className="fixed inset-y-0 left-0 z-[51] flex w-[85vw] max-w-[320px] flex-col overflow-y-auto border-r border-[var(--surface-sidebar-border)] bg-surface-sidebar layout:hidden">
-            <div className="flex shrink-0 items-center justify-between border-b border-[var(--surface-sidebar-border)] p-4">
-              <span className="font-display text-lg text-[var(--text-on-dark)]">Menu</span>
+          <aside className="fixed inset-y-0 left-0 z-[51] flex w-[85vw] max-w-[320px] flex-col overflow-y-auto border-r border-[var(--border)] bg-surface-sidebar layout:hidden">
+            <div className="flex shrink-0 items-center justify-between border-b border-[var(--border)] p-4">
+              <span className="text-[13px] font-semibold text-[var(--text-primary)]">Menu</span>
               <button
                 type="button"
-                className="flex h-8 w-8 items-center justify-center rounded-sm text-[var(--text-on-dark)] hover:bg-[var(--surface-sidebar-elevated)]"
+                className="flex h-7 w-7 items-center justify-center rounded-md text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-tertiary)] transition-colors"
                 onClick={() => setMobileOpen(false)}
                 aria-label="Close menu"
               >
@@ -156,11 +156,11 @@ export function AppShell({
 
       <div className="flex min-h-0 flex-1 flex-col layout:ml-60 layout:min-h-0 layout:overflow-hidden">
         {hideHeader ? (
-          <header className="safe-top sticky top-0 z-30 flex flex-col gap-2 border-b border-border bg-surface-canvas px-4 py-2.5 layout:hidden">
+          <header className="safe-top sticky top-0 z-30 flex flex-col gap-2 border-b border-[var(--border)] bg-bg-primary px-4 py-2.5 layout:hidden">
             <div className="flex min-h-11 shrink-0 items-center gap-2">
               <button
                 type="button"
-                className="flex h-9 w-9 shrink-0 items-center justify-center rounded-md text-ink-primary transition-colors hover:bg-surface-card-alt"
+                className="flex h-7 w-7 shrink-0 items-center justify-center rounded-md text-[var(--text-secondary)] transition-colors hover:text-[var(--text-primary)] hover:bg-[var(--bg-tertiary)]"
                 onClick={() => setMobileOpen(true)}
                 aria-label="Open menu"
               >
@@ -196,23 +196,23 @@ export function AppShell({
               </div>
             </div>
             {!hideSearch ? (
-              <div className="min-w-0 w-full border-t border-border pt-2">
+              <div className="min-w-0 w-full border-t border-[var(--border)] pt-2">
                 <GlobalSearch role={notificationRole} />
               </div>
             ) : null}
           </header>
         ) : (
-          <header className="safe-top sticky top-0 z-30 flex min-h-14 shrink-0 flex-wrap items-center gap-3 border-b border-border bg-surface-canvas px-4 py-2.5 md:min-h-16 md:px-6 md:py-3 layout:px-10">
+          <header className="safe-top sticky top-0 z-30 flex min-h-12 shrink-0 flex-wrap items-center gap-3 border-b border-[var(--border)] bg-bg-primary px-4 py-2 md:min-h-12 md:px-6 layout:px-10">
             <button
               type="button"
-              className="flex h-9 w-9 shrink-0 items-center justify-center rounded-md text-ink-primary transition-colors hover:bg-surface-card-alt layout:hidden"
+              className="flex h-7 w-7 shrink-0 items-center justify-center rounded-md text-[var(--text-secondary)] transition-colors hover:text-[var(--text-primary)] hover:bg-[var(--bg-tertiary)] layout:hidden"
               onClick={() => setMobileOpen(true)}
               aria-label="Open menu"
             >
               <Menu className="h-5 w-5" strokeWidth={1.5} />
             </button>
             <div className="min-w-0 flex-1">
-              <div className="truncate font-mono text-[10px] uppercase tracking-[0.1em] text-ink-tertiary md:text-[11px]">
+              <div className="truncate text-[10px] font-medium uppercase tracking-[0.08em] text-[var(--text-tertiary)] md:text-[11px]">
                 {breadcrumb}
               </div>
               <h1 className={titleClass}>{pageTitle}</h1>
@@ -268,23 +268,23 @@ export function AppShell({
           </header>
         )}
 
-        <main className="flex-1 overflow-x-hidden px-4 pt-6 pb-28 md:px-6 md:pt-8 layout:pb-10 layout:min-h-0 layout:overflow-y-auto layout:overscroll-contain layout:px-10 layout:pt-10">
+        <main className="flex-1 overflow-x-hidden px-4 pt-6 pb-28 md:px-6 md:pt-8 layout:pb-10 layout:min-h-0 layout:overflow-y-auto layout:overscroll-contain layout:px-8 layout:pt-8">
           {children}
         </main>
       </div>
 
       <nav
         aria-label="Bottom navigation"
-        className="safe-bottom fixed inset-x-0 bottom-0 z-30 flex border-t border-[var(--surface-sidebar-border)] bg-surface-sidebar layout:hidden"
+        className="safe-bottom fixed inset-x-0 bottom-0 z-30 flex border-t border-[var(--border)] bg-bg-primary layout:hidden"
       >
         {primaryNav.slice(0, 5).map((item) => (
           <Link
             key={item.href}
             href={item.href}
-            className={`relative flex flex-1 flex-col items-center justify-center gap-0.5 px-1 py-2 text-[10px] font-medium leading-none ${
+            className={`relative flex flex-1 flex-col items-center justify-center gap-0.5 px-1 py-2 text-[10px] font-medium leading-none transition-colors ${
               navActive(item.href)
                 ? "text-accent"
-                : "text-[var(--text-on-dark-dim)]"
+                : "text-[var(--text-tertiary)]"
             }`}
           >
             <ShellIcon name={item.icon} className="h-5 w-5 shrink-0" />

@@ -7,14 +7,14 @@ export function ClientPerformanceGrid({ rows }: { rows: ClientPerfRow[] }) {
     <section className="mt-12">
       <div className="mb-5 flex flex-col gap-4 min-[640px]:flex-row min-[640px]:items-end min-[640px]:justify-between">
         <div>
-          <p className="font-mono text-[11px] font-normal uppercase tracking-[0.1em] text-ink-tertiary">
+          <p className="text-[11px] font-medium uppercase tracking-[0.08em] text-[var(--text-tertiary)]">
             03 / PORTFOLIO
           </p>
-          <h2 className="mt-1 font-display text-2xl tracking-display text-ink-primary">Client performance</h2>
+          <h2 className="mt-1 text-[18px] font-semibold text-[var(--text-primary)]">Client performance</h2>
         </div>
         <Link
           href="/dashboard/clients"
-          className="text-[13px] font-medium text-ink-secondary hover:text-ink-primary"
+          className="text-[12px] font-medium text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors"
         >
           View all clients →
         </Link>

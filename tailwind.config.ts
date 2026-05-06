@@ -36,6 +36,14 @@ const config: Config = {
           card: "var(--surface-card)",
           "card-alt": "var(--surface-card-alt)",
           overlay: "var(--surface-overlay)",
+          input: "var(--surface-input)",
+          modal: "var(--surface-modal)",
+        },
+        bg: {
+          primary: "var(--bg-primary)",
+          secondary: "var(--bg-secondary)",
+          tertiary: "var(--bg-tertiary)",
+          quaternary: "var(--bg-quaternary)",
         },
         ink: {
           primary: "var(--text-primary)",
@@ -48,6 +56,7 @@ const config: Config = {
           DEFAULT: "var(--accent)",
           hover: "var(--accent-hover)",
           ink: "var(--accent-ink)",
+          foreground: "var(--accent-foreground)",
         },
         semantic: {
           success: "var(--success)",
@@ -58,6 +67,8 @@ const config: Config = {
         border: {
           DEFAULT: "var(--border)",
           strong: "var(--border-strong)",
+          hover: "var(--border-hover)",
+          focus: "var(--border-focus)",
           dark: "var(--border-dark)",
         },
       },

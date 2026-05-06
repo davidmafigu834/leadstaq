@@ -54,27 +54,27 @@ export default function CloudDashboardLayout({ children }: { children: React.Rea
   const pageTitle = pageTitleFor(pathname);
 
   return (
-    <div className="flex min-h-screen bg-[#0a0a0a]">
+    <div className="flex min-h-screen bg-[var(--bg-primary)]">
       {/* Sidebar — desktop */}
-      <aside className="fixed inset-y-0 left-0 hidden w-[220px] flex-col border-r border-white/10 bg-[#111111] lg:flex">
+      <aside className="fixed inset-y-0 left-0 hidden w-[220px] flex-col border-r border-[var(--border)] bg-[var(--surface-sidebar)] lg:flex">
         {/* Logo / brand */}
-        <div className="flex items-center gap-2.5 border-b border-white/10 px-5 py-4">
-          <div className="flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-md bg-[#D4FF4F]">
-            <CloudUpload className="h-4 w-4 text-black" strokeWidth={2.5} />
+        <div className="flex items-center gap-2.5 border-b border-[var(--border)] px-4 py-3">
+          <div className="flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-md bg-[var(--accent)]">
+            <CloudUpload className="h-3.5 w-3.5 text-black" strokeWidth={2.5} />
           </div>
-          <span className="truncate text-sm font-medium text-white">{displayName}</span>
+          <span className="truncate text-[13px] font-semibold text-[var(--text-primary)]">{displayName}</span>
         </div>
 
         {/* Nav links */}
-        <nav className="flex-1 space-y-0.5 p-3">
+        <nav className="flex-1 space-y-0.5 p-2">
           {NAV.map(({ href, icon: Icon, label }) => (
             <Link
               key={href}
               href={href}
-              className={`flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm transition-colors ${
+              className={`flex items-center gap-2.5 rounded-md px-3 py-1.5 text-[13px] transition-colors ${
                 isActive(href, pathname)
-                  ? "bg-white/10 text-white"
-                  : "text-white/50 hover:bg-white/5 hover:text-white"
+                  ? "bg-[var(--surface-sidebar-elevated)] text-[var(--text-primary)] font-medium"
+                  : "font-normal text-[var(--text-secondary)] hover:bg-[var(--surface-sidebar-elevated)] hover:text-[var(--text-primary)]"
               }`}
             >
               <Icon className="h-4 w-4 flex-shrink-0" />
@@ -84,19 +84,19 @@ export default function CloudDashboardLayout({ children }: { children: React.Rea
         </nav>
 
         {/* User + sign out */}
-        <div className="border-t border-white/10 p-3">
-          <div className="flex items-center gap-3 px-3 py-2">
-            <div className="flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-full bg-[#D4FF4F] text-xs font-bold text-black">
+        <div className="border-t border-[var(--border)] p-3">
+          <div className="flex items-center gap-2.5 px-2 py-1.5">
+            <div className="flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-md bg-[var(--accent)] text-[10px] font-bold text-black">
               {initials}
             </div>
             <div className="min-w-0 flex-1">
-              <p className="truncate text-xs text-white">{session?.user?.name ?? "—"}</p>
-              <p className="text-[10px] text-white/40">{session?.role}</p>
+              <p className="truncate text-[12px] font-medium text-[var(--text-primary)]">{session?.user?.name ?? "—"}</p>
+              <p className="text-[10px] text-[var(--text-tertiary)]">{session?.role}</p>
             </div>
           </div>
           <button
             onClick={() => void signOut({ callbackUrl: "/cloud/login" })}
-            className="mt-0.5 flex w-full items-center gap-3 rounded-lg px-3 py-2 text-sm text-white/40 transition-colors hover:bg-white/5 hover:text-white"
+            className="mt-0.5 flex w-full items-center gap-2.5 rounded-md px-3 py-1.5 text-[12px] text-[var(--text-tertiary)] transition-colors hover:bg-[var(--bg-tertiary)] hover:text-[var(--text-primary)]"
           >
             <LogOut className="h-4 w-4" />
             Sign out
@@ -107,11 +107,11 @@ export default function CloudDashboardLayout({ children }: { children: React.Rea
       {/* Content area */}
       <div className="flex min-h-screen flex-1 flex-col lg:ml-[220px]">
         {/* Top bar — desktop */}
-        <header className="sticky top-0 z-10 hidden h-14 items-center justify-between border-b border-white/10 bg-[#0a0a0a] px-6 lg:flex">
-          <h1 className="text-sm font-medium text-white">{pageTitle}</h1>
+        <header className="sticky top-0 z-10 hidden h-12 items-center justify-between border-b border-[var(--border)] bg-[var(--bg-primary)] px-6 lg:flex">
+          <h1 className="text-[13px] font-medium text-[var(--text-primary)]">{pageTitle}</h1>
           <Link
             href="/cloud/dashboard/upload"
-            className="flex items-center gap-2 rounded-lg bg-[#D4FF4F] px-4 py-2 text-xs font-semibold text-black transition-colors hover:bg-[#c4ef3f]"
+            className="btn-primary"
           >
             <Camera className="h-3.5 w-3.5" />
             Upload photos
@@ -123,7 +123,7 @@ export default function CloudDashboardLayout({ children }: { children: React.Rea
       </div>
 
       {/* Bottom tab bar — mobile */}
-      <nav className="fixed inset-x-0 bottom-0 z-50 border-t border-white/10 bg-[#111111] safe-bottom lg:hidden">
+      <nav className="fixed inset-x-0 bottom-0 z-50 border-t border-[var(--border)] bg-[var(--bg-primary)] safe-bottom lg:hidden">
         <div className="flex items-end">
           {NAV.map(({ href, icon: Icon, label }, idx) => {
             const active = isActive(href, pathname);
@@ -133,13 +133,13 @@ export default function CloudDashboardLayout({ children }: { children: React.Rea
                 key={href}
                 href={href}
                 className={`flex flex-1 flex-col items-center gap-1 py-2 text-[10px] transition-colors ${
-                  isCenter ? "relative -mt-4" : active ? "text-white" : "text-white/40"
+                  isCenter ? "relative -mt-4" : active ? "text-accent" : "text-[var(--text-tertiary)]"
                 }`}
               >
                 {isCenter ? (
                   <div
                     className={`flex h-14 w-14 items-center justify-center rounded-full transition-colors ${
-                      active ? "bg-[#c4ef3f]" : "bg-[#D4FF4F]"
+                      active ? "bg-[var(--accent-hover)]" : "bg-[var(--accent)]"
                     }`}
                   >
                     <Icon className="h-6 w-6 text-black" />

@@ -35,24 +35,17 @@ function normalizeMetric(m: PulseBarMetric | LegacyPulseMetric): PulseBarMetric 
 export function PulseBar({ metrics }: { metrics: (PulseBarMetric | LegacyPulseMetric)[] }) {
   const list = metrics.map(normalizeMetric);
   return (
-    <div className="mb-8 grid min-h-[88px] grid-cols-1 divide-y divide-border overflow-hidden rounded-[10px] border border-border sm:grid-cols-2 sm:divide-x sm:divide-y-0 layout:grid-cols-4">
+    <div className="mb-8 grid min-h-[88px] grid-cols-1 divide-y divide-[var(--border)] overflow-hidden rounded-lg border border-[var(--border)] sm:grid-cols-2 sm:divide-x sm:divide-y-0 layout:grid-cols-4">
       {list.map((m, i) => (
         <motion.div
           key={`${m.eyebrow}-${i}`}
           initial={{ opacity: 0, y: 12 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.18, delay: i * 0.05, ease }}
-          className={`relative flex min-h-[88px] flex-col justify-center px-4 py-4 sm:px-5 sm:py-5 ${
-            m.variant === "dark"
-              ? "bg-surface-sidebar text-[var(--text-on-dark)]"
-              : "bg-surface-card"
-          }`}
+          className="relative flex min-h-[88px] flex-col justify-center px-4 py-4 sm:px-5 sm:py-5 bg-surface-card"
         >
           <div
-            className={`flex items-center gap-1 font-mono text-[11px] font-normal uppercase tracking-[0.08em] ${
-              m.variant === "dark" ? "text-[var(--text-on-dark-dim)]" : "text-ink-tertiary"
-            }`}
-            style={{ letterSpacing: m.variant === "dark" ? "0.1em" : "0.08em" }}
+            className="flex items-center gap-1 text-[11px] font-medium uppercase tracking-[0.08em] text-[var(--text-tertiary)]"
           >
             <span>{m.eyebrow}</span>
             {"eyebrowTooltip" in m && m.eyebrowTooltip ? (
@@ -61,32 +54,26 @@ export function PulseBar({ metrics }: { metrics: (PulseBarMetric | LegacyPulseMe
               </span>
             ) : null}
           </div>
-          <div
-            className={`font-display text-[36px] leading-none tracking-display ${
-              m.variant === "dark" ? "text-accent" : "text-ink-primary"
-            }`}
-          >
+          <div className="mt-1 text-[32px] font-semibold leading-none tracking-tight text-[var(--text-primary)]">
             {m.emptyLabel ? <EmptyValue label={m.emptyLabel} /> : m.value}
           </div>
-          {m.deltaHidden ? null : m.variant === "dark" ? (
+          {m.deltaHidden ? null : m.deltaPlain || m.variant === "dark" ? (
             <div
-              className={`mt-1 text-[11px] font-medium ${
-                m.darkDeltaMuted ? "text-[var(--text-on-dark-dim)]" : "text-accent"
+              className={`mt-1.5 text-[11px] font-medium ${
+                m.variant === "dark" && !m.darkDeltaMuted ? "text-accent" : "text-[var(--text-secondary)]"
               }`}
             >
               {m.deltaLine}
             </div>
-          ) : m.deltaPlain ? (
-            <div className="mt-1 text-[11px] font-medium text-ink-secondary">{m.deltaLine}</div>
           ) : (
-            <div className="mt-1">
+            <div className="mt-1.5">
               <span
-                className={`inline-flex rounded-full px-2 py-0.5 text-[11px] font-medium ${
+                className={`inline-flex items-center rounded-[var(--radius-sm)] px-1.5 py-0.5 text-[11px] font-medium ${
                   m.deltaKind === "negative"
-                    ? "bg-[var(--danger-bg)] text-[var(--danger-fg)]"
+                    ? "bg-[var(--error-muted)] text-[var(--error)]"
                     : m.deltaKind === "positive"
-                      ? "bg-[var(--success-bg)] text-[var(--success-fg)]"
-                      : "bg-surface-card-alt text-ink-secondary"
+                      ? "bg-[var(--success-muted)] text-[var(--success)]"
+                      : "bg-[var(--bg-quaternary)] text-[var(--text-secondary)]"
                 }`}
               >
                 {m.deltaLine}

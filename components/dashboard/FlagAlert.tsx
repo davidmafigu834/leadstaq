@@ -16,12 +16,12 @@ export function FlagAlert({ rows, totalCount, href }: { rows: UncontactedFlagRow
   const text = `${totalCount} leads uncontacted over limit — ${top.clientName} has ${top.count}${remainder}`;
 
   return (
-    <div className="mb-8 flex h-14 items-center gap-3 rounded-[10px] border border-[var(--danger-border)] bg-[var(--danger-bg)] px-4 py-0 min-[520px]:px-5">
-      <AlertTriangle className="h-[18px] w-[18px] shrink-0 text-[var(--danger-fg)]" strokeWidth={1.5} aria-hidden />
-      <p className="min-w-0 flex-1 text-[13px] text-[var(--danger-fg)]">{text}</p>
+    <div className="mb-6 flex items-center gap-3 rounded-lg border border-[var(--error-border)] bg-[var(--error-muted)] px-4 py-3 min-[520px]:px-5">
+      <AlertTriangle className="h-4 w-4 shrink-0 text-[var(--error)]" strokeWidth={1.5} aria-hidden />
+      <p className="min-w-0 flex-1 text-[12px] text-[var(--error)]">{text}</p>
       <Link
         href={href}
-        className="shrink-0 text-[13px] font-medium text-[var(--danger-fg)] hover:underline"
+        className="shrink-0 text-[12px] font-medium text-[var(--error)] underline-offset-2 hover:underline"
       >
         Review →
       </Link>
