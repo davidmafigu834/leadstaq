@@ -4,8 +4,6 @@ import { getToken } from "next-auth/jwt";
 import { createAdminClient } from "@/lib/supabase/admin";
 import type { UserRole } from "@/types";
 
-const CLOUD_PUBLIC_PATHS = ["/", "/login", "/signup", "/forgot-password"];
-
 export async function middleware(req: NextRequest) {
   const hostHeader = req.headers.get("host") || "";
   const host = hostHeader.split(":")[0];
@@ -24,17 +22,32 @@ export async function middleware(req: NextRequest) {
 
   if (isCloudSubdomain) {
     const path = req.nextUrl.pathname;
-    const isPublic =
-      CLOUD_PUBLIC_PATHS.includes(path) ||
-      path.startsWith("/share/") ||
-      path.startsWith("/api/auth");
-    if (isPublic) return NextResponse.next();
 
-    if (path.startsWith("/dashboard")) {
+    // Map incoming URL paths to internal /cloud/* paths
+    // e.g. / → /cloud, /login → /cloud/login, /dashboard/x → /cloud/dashboard/x
+    let cloudPath: string | null = null;
+    if (path === "/") {
+      cloudPath = "/cloud";
+    } else if (!path.startsWith("/cloud")) {
+      cloudPath = "/cloud" + path;
+    }
+
+    // Resolved internal path for auth checks
+    const resolved = cloudPath ?? path;
+
+    // Public cloud paths — no auth required
+    const isCloudPublic =
+      resolved === "/cloud" ||
+      resolved === "/cloud/login" ||
+      resolved === "/cloud/signup" ||
+      resolved === "/cloud/forgot-password" ||
+      resolved.startsWith("/cloud/share/");
+
+    if (!isCloudPublic) {
       const token = await getToken({ req, secret: process.env.NEXTAUTH_SECRET });
       if (!token) {
         const url = req.nextUrl.clone();
-        url.pathname = "/login";
+        url.pathname = "/login"; // cloud subdomain will rewrite this to /cloud/login
         url.searchParams.set("callbackUrl", path);
         return NextResponse.redirect(url);
       }
@@ -55,6 +68,14 @@ export async function middleware(req: NextRequest) {
         }
       }
     }
+
+    // Rewrite to the internal /cloud/* path — this avoids app/page.tsx running
+    if (cloudPath) {
+      const url = req.nextUrl.clone();
+      url.pathname = cloudPath;
+      return NextResponse.rewrite(url);
+    }
+
     return NextResponse.next();
   }
 
