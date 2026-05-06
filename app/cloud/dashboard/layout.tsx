@@ -56,13 +56,13 @@ export default function CloudDashboardLayout({ children }: { children: React.Rea
   return (
     <div className="flex min-h-screen bg-black">
       {/* Sidebar — desktop */}
-      <aside className="fixed inset-y-0 left-0 hidden w-[220px] flex-col border-r border-white/[0.08] bg-black lg:flex">
+      <aside className="fixed inset-y-0 left-0 hidden w-[240px] flex-col border-r border-white/[0.08] bg-black lg:flex">
         {/* Logo / brand */}
         <div className="flex h-12 shrink-0 items-center gap-2.5 border-b border-white/[0.08] px-4">
           <div className="flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-md bg-[#D4FF4F]">
             <CloudUpload className="h-3.5 w-3.5 text-black" strokeWidth={2.5} />
           </div>
-          <span className="max-w-[160px] truncate text-[13px] font-medium text-white">{displayName}</span>
+          <span className="max-w-[180px] truncate text-[14px] font-medium text-white">{displayName}</span>
         </div>
 
         {/* Nav links */}
@@ -71,7 +71,7 @@ export default function CloudDashboardLayout({ children }: { children: React.Rea
             <Link
               key={href}
               href={href}
-              className={`flex h-8 items-center gap-2.5 rounded-md px-3 mx-1 text-[13px] transition-colors ${
+              className={`flex h-8 items-center gap-2.5 rounded-md px-3 mx-1 text-[14px] transition-colors ${
                 isActive(href, pathname)
                   ? "bg-[#111] text-white font-medium"
                   : "text-[#888] hover:text-white hover:bg-[#111]"
@@ -90,13 +90,13 @@ export default function CloudDashboardLayout({ children }: { children: React.Rea
               {initials}
             </div>
             <div className="min-w-0 flex-1">
-              <p className="truncate text-[12px] font-medium text-white">{session?.user?.name ?? "—"}</p>
-              <p className="text-[10px] text-[#555] uppercase tracking-wide">{session?.role}</p>
+              <p className="truncate text-[13px] font-medium text-white">{session?.user?.name ?? "—"}</p>
+              <p className="text-[11px] text-[#555] uppercase tracking-wide">{session?.role}</p>
             </div>
           </div>
           <button
             onClick={() => void signOut({ callbackUrl: "/cloud/login" })}
-            className="flex w-full items-center gap-2 mt-2 px-2 py-1.5 text-[12px] text-[#555] hover:text-[#888] rounded-md hover:bg-[#111] transition-colors cursor-pointer"
+            className="flex w-full items-center gap-2 mt-2 px-2 py-1.5 text-[13px] text-[#555] hover:text-[#888] rounded-md hover:bg-[#111] transition-colors cursor-pointer"
           >
             <LogOut className="h-4 w-4" />
             Sign out
@@ -105,7 +105,7 @@ export default function CloudDashboardLayout({ children }: { children: React.Rea
       </aside>
 
       {/* Content area */}
-      <div className="flex min-h-screen flex-1 flex-col lg:ml-[220px]">
+      <div className="flex min-h-screen flex-1 flex-col lg:ml-[240px]">
         {/* Top bar — desktop */}
         <header className="sticky top-0 z-10 hidden h-12 shrink-0 items-center justify-between border-b border-white/[0.08] bg-black px-4 lg:flex">
           <div className="flex items-center gap-2.5">
