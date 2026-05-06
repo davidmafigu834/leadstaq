@@ -111,14 +111,14 @@ export default function CloudProjectsPage() {
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             placeholder="Search projects…"
-            className="w-full rounded-xl border border-white/10 bg-white/5 py-2.5 pl-9 pr-4 text-sm text-white placeholder-white/30 outline-none focus:border-[#D4FF4F]"
+            className="w-full rounded-xl border border-white/10 bg-white/5 py-2.5 pl-9 pr-4 text-[14px] text-white placeholder-white/30 outline-none focus:border-[#D4FF4F]"
           />
         </div>
         <div className="flex items-center gap-2">
           <select
             value={sortKey}
             onChange={(e) => setSortKey(e.target.value as SortKey)}
-            className="rounded-xl border border-white/10 bg-[#1a1a1a] px-3 py-2.5 text-xs text-white outline-none"
+            className="rounded-xl border border-white/10 bg-[#1a1a1a] px-3 py-2.5 text-[13px] text-white outline-none"
           >
             <option value="newest">Newest first</option>
             <option value="oldest">Oldest first</option>
@@ -127,7 +127,7 @@ export default function CloudProjectsPage() {
           </select>
           <button
             onClick={() => setShowNew(true)}
-            className="flex items-center gap-1.5 rounded-xl bg-[#D4FF4F] px-4 py-2.5 text-xs font-semibold text-black transition-colors hover:bg-[#c4ef3f]"
+            className="flex items-center gap-1.5 rounded-xl bg-[#D4FF4F] px-4 py-2.5 text-[13px] font-semibold text-black transition-colors hover:bg-[#c4ef3f]"
           >
             <Plus className="h-3.5 w-3.5" />
             New project
@@ -138,13 +138,13 @@ export default function CloudProjectsPage() {
       {filtered.length === 0 && !loading ? (
         <div className="flex min-h-[40vh] flex-col items-center justify-center text-center">
           <Folder className="mb-4 h-10 w-10 text-white/20" />
-          <p className="text-sm text-white/40">
+          <p className="text-[14px] text-white/40">
             {search ? "No projects match your search." : "No projects yet."}
           </p>
           {!search && (
             <button
               onClick={() => setShowNew(true)}
-              className="mt-4 rounded-lg bg-[#D4FF4F] px-5 py-2.5 text-sm font-semibold text-black"
+              className="mt-4 rounded-lg bg-[#D4FF4F] px-5 py-2.5 text-[14px] font-semibold text-black"
             >
               Create your first project
             </button>
@@ -178,7 +178,7 @@ export default function CloudProjectsPage() {
                 {/* Featured badge */}
                 {p.is_featured && (
                   <div className="absolute left-3 top-3">
-                    <span className="flex items-center gap-1 rounded-full bg-[#D4FF4F]/90 px-2 py-0.5 text-[10px] font-semibold text-black backdrop-blur-sm">
+                    <span className="flex items-center gap-1 rounded-full bg-[#D4FF4F]/90 px-2 py-0.5 text-[11px] font-semibold text-black backdrop-blur-sm">
                       <Star className="h-2.5 w-2.5" />
                       Featured
                     </span>
@@ -197,7 +197,7 @@ export default function CloudProjectsPage() {
                     <div className="absolute right-0 top-8 z-20 w-44 rounded-xl border border-white/10 bg-[#1a1a1a] py-1.5 shadow-xl">
                       <Link
                         href={`/cloud/dashboard/projects/${p.id}`}
-                        className="flex items-center gap-2.5 px-4 py-2 text-sm text-white/70 hover:bg-white/5 hover:text-white"
+                        className="flex items-center gap-2.5 px-4 py-2 text-[13px] text-white/70 hover:bg-white/5 hover:text-white"
                         onClick={() => setMenuOpen(null)}
                       >
                         <Edit2 className="h-3.5 w-3.5" />
@@ -205,14 +205,14 @@ export default function CloudProjectsPage() {
                       </Link>
                       <button
                         onClick={() => copyShareLink(p)}
-                        className="flex w-full items-center gap-2.5 px-4 py-2 text-sm text-white/70 hover:bg-white/5 hover:text-white"
+                        className="flex w-full items-center gap-2.5 px-4 py-2 text-[13px] text-white/70 hover:bg-white/5 hover:text-white"
                       >
                         <Copy className="h-3.5 w-3.5" />
                         Copy share link
                       </button>
                       <button
                         onClick={() => void handleToggleFeatured(p)}
-                        className="flex w-full items-center gap-2.5 px-4 py-2 text-sm text-white/70 hover:bg-white/5 hover:text-white"
+                        className="flex w-full items-center gap-2.5 px-4 py-2 text-[13px] text-white/70 hover:bg-white/5 hover:text-white"
                       >
                         <Star className="h-3.5 w-3.5" />
                         {p.is_featured ? "Unfeature" : "Set as featured"}
@@ -220,7 +220,7 @@ export default function CloudProjectsPage() {
                       <hr className="my-1 border-white/10" />
                       <button
                         onClick={() => void handleDelete(p)}
-                        className="flex w-full items-center gap-2.5 px-4 py-2 text-sm text-red-400 hover:bg-red-500/10"
+                        className="flex w-full items-center gap-2.5 px-4 py-2 text-[13px] text-red-400 hover:bg-red-500/10"
                       >
                         <Trash2 className="h-3.5 w-3.5" />
                         Delete
@@ -232,8 +232,8 @@ export default function CloudProjectsPage() {
                 {/* Info overlay */}
                 <Link href={`/cloud/dashboard/projects/${p.id}`}>
                   <div className="absolute bottom-0 left-0 right-0 p-4">
-                    <p className="truncate text-sm font-semibold text-white">{p.title}</p>
-                    <div className="mt-1 flex items-center gap-2 text-[10px] text-white/50">
+                    <p className="truncate text-[14px] font-semibold text-white">{p.title}</p>
+                    <div className="mt-1 flex items-center gap-2 text-[11px] text-white/50">
                       {p.category && <span>{p.category}</span>}
                       {p.category && p.location && <span>·</span>}
                       {p.location && <span>{p.location}</span>}
@@ -254,7 +254,7 @@ export default function CloudProjectsPage() {
 
       {/* Toast */}
       {toastMsg && (
-        <div className="fixed bottom-24 left-1/2 z-50 -translate-x-1/2 rounded-full bg-white/10 px-5 py-2.5 text-sm text-white backdrop-blur-md lg:bottom-8">
+        <div className="fixed bottom-24 left-1/2 z-50 -translate-x-1/2 rounded-full bg-white/10 px-5 py-2.5 text-[13px] text-white backdrop-blur-md lg:bottom-8">
           {toastMsg}
         </div>
       )}

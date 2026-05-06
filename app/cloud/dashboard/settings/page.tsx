@@ -144,10 +144,10 @@ export default function CloudSettingsPage() {
 
         {/* Business profile */}
         <section>
-          <h2 className="mb-4 text-base font-semibold text-white">Business profile</h2>
+          <h2 className="mb-4 text-[15px] font-semibold text-white">Business profile</h2>
           <div className="rounded-2xl border border-white/10 bg-[#111111] p-5 space-y-4">
             <div>
-              <label className="mb-1.5 block text-xs font-medium text-white/60">Business name</label>
+              <label className="mb-1.5 block text-[13px] font-medium text-white/60">Business name</label>
               <input
                 type="text"
                 value={bizName}
@@ -156,7 +156,7 @@ export default function CloudSettingsPage() {
               />
             </div>
             <div>
-              <label className="mb-1.5 block text-xs font-medium text-white/60">Industry</label>
+              <label className="mb-1.5 block text-[13px] font-medium text-white/60">Industry</label>
               <select
                 value={bizIndustry}
                 onChange={(e) => setBizIndustry(e.target.value)}
@@ -179,10 +179,10 @@ export default function CloudSettingsPage() {
 
         {/* Your account */}
         <section>
-          <h2 className="mb-4 text-base font-semibold text-white">Your account</h2>
+          <h2 className="mb-4 text-[15px] font-semibold text-white">Your account</h2>
           <div className="rounded-2xl border border-white/10 bg-[#111111] p-5 space-y-4">
             <div>
-              <label className="mb-1.5 block text-xs font-medium text-white/60">Your name</label>
+              <label className="mb-1.5 block text-[13px] font-medium text-white/60">Your name</label>
               <input
                 type="text"
                 value={userName}
@@ -191,17 +191,17 @@ export default function CloudSettingsPage() {
               />
             </div>
             <div>
-              <label className="mb-1.5 block text-xs font-medium text-white/60">Email address</label>
+              <label className="mb-1.5 block text-[13px] font-medium text-white/60">Email address</label>
               <input
                 type="email"
                 value={session?.user?.email ?? ""}
                 readOnly
                 className="w-full rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-white/40 outline-none cursor-not-allowed"
               />
-              <p className="mt-1 text-[10px] text-white/25">Contact support to change your email.</p>
+              <p className="mt-1 text-[12px] text-white/25">Contact support to change your email.</p>
             </div>
             <div>
-              <label className="mb-1.5 block text-xs font-medium text-white/60">Phone number</label>
+              <label className="mb-1.5 block text-[13px] font-medium text-white/60">Phone number</label>
               <input
                 type="tel"
                 value={userPhone}
@@ -223,10 +223,10 @@ export default function CloudSettingsPage() {
 
         {/* Change password */}
         <section>
-          <h2 className="mb-4 text-base font-semibold text-white">Change password</h2>
+          <h2 className="mb-4 text-[15px] font-semibold text-white">Change password</h2>
           <form onSubmit={(e) => void savePassword(e)} className="rounded-2xl border border-white/10 bg-[#111111] p-5 space-y-4">
             <div className="relative">
-              <label className="mb-1.5 block text-xs font-medium text-white/60">Current password</label>
+              <label className="mb-1.5 block text-[13px] font-medium text-white/60">Current password</label>
               <input
                 type={showPw ? "text" : "password"}
                 value={currentPw}
@@ -239,7 +239,7 @@ export default function CloudSettingsPage() {
               </button>
             </div>
             <div>
-              <label className="mb-1.5 block text-xs font-medium text-white/60">New password</label>
+              <label className="mb-1.5 block text-[13px] font-medium text-white/60">New password</label>
               <input
                 type={showPw ? "text" : "password"}
                 value={newPw}
@@ -250,7 +250,7 @@ export default function CloudSettingsPage() {
               />
             </div>
             <div>
-              <label className="mb-1.5 block text-xs font-medium text-white/60">Confirm new password</label>
+              <label className="mb-1.5 block text-[13px] font-medium text-white/60">Confirm new password</label>
               <input
                 type={showPw ? "text" : "password"}
                 value={confirmPw}
@@ -274,13 +274,13 @@ export default function CloudSettingsPage() {
         {/* Public profile */}
         {client && profile !== null && (
           <section>
-            <h2 className="mb-4 text-base font-semibold text-white">Public profile</h2>
+            <h2 className="mb-4 text-[15px] font-semibold text-white">Public profile</h2>
             <div className="rounded-2xl border border-white/10 bg-[#111111] p-5 space-y-4">
               {profileUrl && (
                 <div className="flex items-center justify-between rounded-xl bg-white/5 px-4 py-3">
                   <div>
-                    <p className="text-xs text-white/40">Your profile URL</p>
-                    <p className="text-sm font-mono text-white/70">leadstaq.tech{profileUrl}</p>
+                    <p className="text-[13px] text-white/40">Your profile URL</p>
+                    <p className="text-[13px] font-mono text-white/70">leadstaq.tech{profileUrl}</p>
                   </div>
                   <a
                     href={profileUrl}
@@ -295,8 +295,8 @@ export default function CloudSettingsPage() {
 
               <div className="flex items-center justify-between rounded-xl border border-white/10 px-4 py-3">
                 <div>
-                  <p className="text-sm font-medium text-white">Profile published</p>
-                  <p className="text-xs text-white/40">
+                  <p className="text-[14px] font-medium text-white">Profile published</p>
+                  <p className="text-[13px] text-white/40">
                     {profile.is_published ? "Your profile is visible to the public" : "Your profile is hidden"}
                   </p>
                 </div>

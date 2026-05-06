@@ -200,10 +200,10 @@ export default function CloudUploadPage() {
     <div className="flex min-h-screen flex-col bg-[#0a0a0a]">
       {/* Mobile-only top bar */}
       <div className="border-b border-white/10 px-6 py-4 lg:hidden">
-        <p className="text-xs text-white/30">
+        <p className="text-[13px] text-white/30">
           {session?.user?.name ?? "Leadstaq Cloud"}
         </p>
-        <h1 className="text-xl font-semibold text-white">Upload</h1>
+        <h1 className="text-[20px] font-semibold text-white">Upload</h1>
       </div>
 
       <div className="flex-1 px-6 py-6 lg:px-8">
@@ -213,22 +213,22 @@ export default function CloudUploadPage() {
             <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-[#D4FF4F]">
               <Check className="h-8 w-8 text-black" strokeWidth={2.5} />
             </div>
-            <h2 className="mb-1 text-xl font-semibold text-white">
+            <h2 className="mb-1 text-[20px] font-semibold text-white">
               {doneFiles.length} photo{doneFiles.length !== 1 ? "s" : ""} added
             </h2>
-            <p className="mb-8 text-sm text-white/50">
+            <p className="mb-8 text-[14px] text-white/50">
               to <span className="text-white">{selectedProject?.title}</span>
             </p>
             <div className="flex w-full max-w-xs flex-col gap-3">
               <button
                 onClick={resetUpload}
-                className="w-full rounded-xl border border-white/10 py-3 text-sm font-medium text-white hover:bg-white/5"
+                className="w-full rounded-xl border border-white/10 py-3 text-[14px] font-medium text-white hover:bg-white/5"
               >
                 Upload more
               </button>
               <button
                 onClick={() => router.push(`/cloud/dashboard/projects/${selectedProject!.id}`)}
-                className="flex w-full items-center justify-center gap-2 rounded-xl bg-[#D4FF4F] py-3 text-sm font-semibold text-black"
+                className="flex w-full items-center justify-center gap-2 rounded-xl bg-[#D4FF4F] py-3 text-[14px] font-semibold text-black"
               >
                 View project
                 <ArrowRight className="h-4 w-4" />
@@ -239,7 +239,7 @@ export default function CloudUploadPage() {
           /* ── State A: no project selected ── */
           <>
             <div className="mb-4">
-              <h2 className="text-sm font-semibold text-white">Recent projects</h2>
+              <h2 className="text-[14px] font-semibold text-white">Recent projects</h2>
             </div>
 
             <div className="mb-4 space-y-2">
@@ -264,8 +264,8 @@ export default function CloudUploadPage() {
                       )}
                     </div>
                     <div className="flex-1 min-w-0">
-                      <p className="truncate text-sm font-medium text-white">{p.title}</p>
-                      <p className="text-xs text-white/40">
+                      <p className="truncate text-[14px] font-medium text-white">{p.title}</p>
+                      <p className="text-[13px] text-white/40">
                         {p.project_media?.length ?? 0} photos
                       </p>
                     </div>
@@ -278,7 +278,7 @@ export default function CloudUploadPage() {
             {projects.length > 5 && (
               <button
                 onClick={() => router.push("/cloud/dashboard/projects")}
-                className="mb-4 w-full text-center text-sm text-white/40 hover:text-white transition-colors"
+                className="mb-4 w-full text-center text-[14px] text-white/40 hover:text-white transition-colors"
               >
                 All projects →
               </button>
@@ -286,7 +286,7 @@ export default function CloudUploadPage() {
 
             <button
               onClick={() => setShowNewSheet(true)}
-              className="flex w-full items-center justify-center gap-2 rounded-2xl border-2 border-dashed border-white/15 py-5 text-sm font-medium text-white/40 transition-colors hover:border-[#D4FF4F]/40 hover:text-[#D4FF4F]"
+              className="flex w-full items-center justify-center gap-2 rounded-2xl border-2 border-dashed border-white/15 py-5 text-[14px] font-medium text-white/40 transition-colors hover:border-[#D4FF4F]/40 hover:text-[#D4FF4F]"
               style={{ minHeight: 72 }}
             >
               <Plus className="h-5 w-5" />
@@ -327,8 +327,8 @@ export default function CloudUploadPage() {
                   <Camera className="h-8 w-8 text-black" strokeWidth={1.5} />
                 </div>
                 <div className="text-center">
-                  <p className="text-base font-semibold text-white">Add photos</p>
-                  <p className="mt-1 text-sm text-white/40">Tap to open gallery</p>
+                  <p className="text-[15px] font-semibold text-white">Add photos</p>
+                  <p className="mt-1 text-[13px] text-white/40">Tap to open gallery</p>
                 </div>
               </button>
             ) : (
@@ -340,7 +340,7 @@ export default function CloudUploadPage() {
                       <img src={item.previewUrl} alt="" className="h-full w-full object-cover" />
                     </div>
                     <div className="flex-1 min-w-0">
-                      <p className="truncate text-sm text-white">{item.file.name}</p>
+                      <p className="truncate text-[14px] text-white">{item.file.name}</p>
                       {item.status === "uploading" && (
                         <div className="mt-1.5 h-1 w-full overflow-hidden rounded-full bg-white/10">
                           <div
@@ -364,7 +364,7 @@ export default function CloudUploadPage() {
             {queue.length > 0 && !uploading && !allDone && (
               <button
                 onClick={() => void uploadAll()}
-                className="mt-5 flex w-full items-center justify-center gap-2 rounded-xl bg-[#D4FF4F] py-4 text-sm font-semibold text-black hover:bg-[#c4ef3f]"
+                className="mt-5 flex w-full items-center justify-center gap-2 rounded-xl bg-[#D4FF4F] py-4 text-[14px] font-semibold text-black hover:bg-[#c4ef3f]"
               >
                 <Camera className="h-4 w-4" />
                 Upload {queue.length} photo{queue.length !== 1 ? "s" : ""}
@@ -372,13 +372,13 @@ export default function CloudUploadPage() {
             )}
 
             {uploading && (
-              <div className="mt-5 flex items-center justify-center gap-2 text-sm text-white/50">
+              <div className="mt-5 flex items-center justify-center gap-2 text-[14px] text-white/50">
                 <Loader2 className="h-4 w-4 animate-spin text-[#D4FF4F]" />
                 Uploading {pendingCount} remaining…
               </div>
             )}
 
-            <p className="mt-4 text-center text-xs text-white/25">
+            <p className="mt-4 text-center text-[12px] text-white/25">
               Or{" "}
               <button
                 onClick={() => { const i = document.createElement("input"); i.type="file"; i.accept="image/*"; i.capture="environment"; i.onchange=(e)=>{const f=(e.target as HTMLInputElement).files; if(f) handleFileSelect({target:{files:f,value:""}} as React.ChangeEvent<HTMLInputElement>);}; i.click(); }}
@@ -397,7 +397,7 @@ export default function CloudUploadPage() {
           <div className="absolute inset-0 bg-black/60" onClick={() => setShowNewSheet(false)} />
           <div className="relative rounded-t-3xl bg-[#111111] p-6 pb-12" style={{ paddingBottom: "max(3rem, calc(3rem + env(safe-area-inset-bottom)))" }}>
             <div className="mb-4 flex items-center justify-between">
-              <h3 className="text-base font-semibold text-white">New project</h3>
+              <h3 className="text-[15px] font-semibold text-white">New project</h3>
               <button onClick={() => setShowNewSheet(false)} className="text-white/40 hover:text-white">
                 <X className="h-5 w-5" />
               </button>
@@ -430,13 +430,13 @@ export default function CloudUploadPage() {
               <button
                 onClick={() => void handleCreateProject()}
                 disabled={!newTitle.trim() || creatingProject}
-                className="flex w-full items-center justify-center gap-2 rounded-xl bg-[#D4FF4F] py-3.5 text-sm font-semibold text-black disabled:opacity-60"
+                className="flex w-full items-center justify-center gap-2 rounded-xl bg-[#D4FF4F] py-3.5 text-[14px] font-semibold text-black disabled:opacity-60"
               >
                 {creatingProject ? <Loader2 className="h-4 w-4 animate-spin" /> : null}
                 {creatingProject ? "Creating…" : "Create & upload →"}
               </button>
               {createError && (
-                <p className="text-center text-sm text-red-400">{createError}</p>
+                <p className="text-center text-[14px] text-red-400">{createError}</p>
               )}
             </div>
           </div>

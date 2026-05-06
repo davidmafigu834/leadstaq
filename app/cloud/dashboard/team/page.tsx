@@ -129,12 +129,12 @@ export default function CloudTeamPage() {
     <div className="px-6 py-6 lg:px-8">
       <div className="mb-6 flex items-center justify-between">
         <div>
-          <h2 className="text-lg font-semibold text-white">Your team</h2>
+          <h2 className="text-[16px] font-semibold text-white">Your team</h2>
           {isAdmin && clients.length > 0 && (
             <select
               value={selectedClientId}
               onChange={(e) => setSelectedClientId(e.target.value)}
-              className="mt-2 rounded-lg border border-white/10 bg-[#1a1a1a] px-3 py-1.5 text-xs text-white outline-none"
+              className="mt-2 rounded-lg border border-white/10 bg-[#1a1a1a] px-3 py-1.5 text-[13px] text-white outline-none"
             >
               {clients.map((c) => <option key={c.id} value={c.id}>{c.name}</option>)}
             </select>
@@ -142,7 +142,7 @@ export default function CloudTeamPage() {
         </div>
         <button
           onClick={() => setShowInvite(true)}
-          className="flex items-center gap-1.5 rounded-xl bg-[#D4FF4F] px-4 py-2.5 text-xs font-semibold text-black hover:bg-[#c4ef3f] transition-colors"
+          className="flex items-center gap-1.5 rounded-xl bg-[#D4FF4F] px-4 py-2.5 text-[13px] font-semibold text-black hover:bg-[#c4ef3f] transition-colors"
         >
           <Plus className="h-3.5 w-3.5" />
           Invite member
@@ -156,10 +156,10 @@ export default function CloudTeamPage() {
       ) : members.length === 0 ? (
         <div className="flex flex-col items-center justify-center py-16 text-center">
           <UserCheck className="mb-3 h-10 w-10 text-white/20" />
-          <p className="text-sm text-white/40">No team members yet.</p>
+          <p className="text-[14px] text-white/40">No team members yet.</p>
           <button
             onClick={() => setShowInvite(true)}
-            className="mt-4 rounded-lg bg-[#D4FF4F] px-5 py-2.5 text-sm font-semibold text-black"
+            className="mt-4 rounded-lg bg-[#D4FF4F] px-5 py-2.5 text-[14px] font-semibold text-black"
           >
             Invite first member
           </button>
@@ -174,17 +174,17 @@ export default function CloudTeamPage() {
 
               <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-2">
-                  <p className="text-sm font-medium text-white truncate">{m.name}</p>
-                  <span className={`rounded-full px-2 py-0.5 text-[10px] font-semibold ${roleBadgeClass(m.role)}`}>
+                  <p className="text-[14px] font-medium text-white truncate">{m.name}</p>
+                  <span className={`rounded-full px-2 py-0.5 text-[11px] font-semibold ${roleBadgeClass(m.role)}`}>
                     {ROLE_LABELS[m.role] ?? m.role}
                   </span>
                   {!m.is_active && (
-                    <span className="rounded-full bg-white/5 px-2 py-0.5 text-[10px] text-white/30">
+                    <span className="rounded-full bg-white/5 px-2 py-0.5 text-[11px] text-white/30">
                       Inactive
                     </span>
                   )}
                 </div>
-                <div className="mt-0.5 flex flex-wrap items-center gap-x-3 gap-y-0.5 text-xs text-white/40">
+                <div className="mt-0.5 flex flex-wrap items-center gap-x-3 gap-y-0.5 text-[13px] text-white/40">
                   <span className="flex items-center gap-1"><Mail className="h-3 w-3" />{m.email}</span>
                   {m.phone && <span className="flex items-center gap-1"><Phone className="h-3 w-3" />{m.phone}</span>}
                 </div>
@@ -204,7 +204,7 @@ export default function CloudTeamPage() {
                       {m.is_active && (
                         <button
                           onClick={() => void handleDeactivate(m)}
-                          className="flex w-full items-center gap-2.5 px-4 py-2 text-sm text-red-400 hover:bg-red-500/10"
+                          className="flex w-full items-center gap-2.5 px-4 py-2 text-[13px] text-red-400 hover:bg-red-500/10"
                         >
                           Deactivate
                         </button>
@@ -224,7 +224,7 @@ export default function CloudTeamPage() {
           <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={() => setShowInvite(false)} />
           <div className="relative ml-auto flex h-full w-full max-w-md flex-col bg-[#111111] shadow-2xl">
             <div className="flex items-center justify-between border-b border-white/10 px-6 py-4">
-              <h2 className="text-base font-semibold text-white">Invite team member</h2>
+              <h2 className="text-[15px] font-semibold text-white">Invite team member</h2>
               <button onClick={() => setShowInvite(false)} className="text-white/40 hover:text-white">
                 <X className="h-4 w-4" />
               </button>
@@ -233,13 +233,13 @@ export default function CloudTeamPage() {
             <form onSubmit={(e) => void handleInvite(e)} className="flex flex-1 flex-col overflow-y-auto">
               <div className="flex-1 space-y-5 px-6 py-5">
                 {inviteSuccess && (
-                  <div className="rounded-xl bg-[#D4FF4F]/10 px-4 py-3 text-sm text-[#D4FF4F]">
+                  <div className="rounded-xl bg-[#D4FF4F]/10 px-4 py-3 text-[14px] text-[#D4FF4F]">
                     Invite sent successfully!
                   </div>
                 )}
 
                 <div>
-                  <label className="mb-1.5 block text-xs font-medium text-white/60">Full name</label>
+                  <label className="mb-1.5 block text-[13px] font-medium text-white/60">Full name</label>
                   <input
                     type="text"
                     value={inviteName}
@@ -252,7 +252,7 @@ export default function CloudTeamPage() {
                 </div>
 
                 <div>
-                  <label className="mb-1.5 block text-xs font-medium text-white/60">Email address</label>
+                  <label className="mb-1.5 block text-[13px] font-medium text-white/60">Email address</label>
                   <input
                     type="email"
                     value={inviteEmail}
@@ -264,7 +264,7 @@ export default function CloudTeamPage() {
                 </div>
 
                 <div>
-                  <label className="mb-1.5 block text-xs font-medium text-white/60">Phone number</label>
+                  <label className="mb-1.5 block text-[13px] font-medium text-white/60">Phone number</label>
                   <input
                     type="tel"
                     value={invitePhone}
@@ -276,7 +276,7 @@ export default function CloudTeamPage() {
                 </div>
 
                 <div>
-                  <label className="mb-1.5 block text-xs font-medium text-white/60">Role</label>
+                  <label className="mb-1.5 block text-[13px] font-medium text-white/60">Role</label>
                   <select
                     value={inviteRole}
                     onChange={(e) => setInviteRole(e.target.value as "CLIENT_MANAGER" | "SALESPERSON")}
@@ -288,7 +288,7 @@ export default function CloudTeamPage() {
                 </div>
 
                 {inviteError && (
-                  <div className="flex items-start gap-2 rounded-xl bg-red-500/10 px-4 py-3 text-sm text-red-400">
+                  <div className="flex items-start gap-2 rounded-xl bg-red-500/10 px-4 py-3 text-[14px] text-red-400">
                     <AlertCircle className="mt-0.5 h-4 w-4 flex-shrink-0" />
                     {inviteError}
                   </div>
@@ -299,7 +299,7 @@ export default function CloudTeamPage() {
                 <button
                   type="submit"
                   disabled={inviting}
-                  className="flex w-full items-center justify-center gap-2 rounded-xl bg-[#D4FF4F] py-3 text-sm font-semibold text-black disabled:opacity-60"
+                  className="flex w-full items-center justify-center gap-2 rounded-xl bg-[#D4FF4F] py-3 text-[14px] font-semibold text-black disabled:opacity-60"
                 >
                   {inviting ? <Loader2 className="h-4 w-4 animate-spin" /> : <Mail className="h-4 w-4" />}
                   {inviting ? "Sending…" : "Send invite"}
