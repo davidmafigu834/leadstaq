@@ -22,10 +22,10 @@ const config: Config = {
         "4xl": ["56px", { lineHeight: "1.05" }],
       },
       fontFamily: {
-        sans: ["var(--font-sans)", "system-ui", "sans-serif"],
-        display: ["var(--font-serif)", "ui-serif", "Georgia", "serif"],
-        serif: ["var(--font-serif)", "ui-serif", "Georgia", "serif"],
-        mono: ["var(--font-mono)", "ui-monospace", "monospace"],
+        sans: ["var(--font-geist-sans)", "system-ui", "sans-serif"],
+        display: ["var(--font-instrument-serif)", "ui-serif", "Georgia", "serif"],
+        serif: ["var(--font-instrument-serif)", "ui-serif", "Georgia", "serif"],
+        mono: ["var(--font-geist-mono)", "ui-monospace", "monospace"],
       },
       colors: {
         surface: {
