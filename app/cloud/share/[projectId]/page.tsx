@@ -58,34 +58,37 @@ export default async function CloudSharePage({ params }: { params: { projectId: 
       })()
     : null;
 
+  // Gallery photos = everything after the hero cover to avoid duplication
+  const galleryMedia = cover ? media.slice(1) : media;
+
   return (
     <div className="min-h-screen bg-white">
       {/* Nav */}
       <nav className="sticky top-0 z-10 border-b border-gray-100 bg-white/95 backdrop-blur-sm">
-        <div className="mx-auto flex max-w-7xl items-center justify-between px-6 py-4 lg:px-10">
-          <div className="flex items-center gap-4">
+        <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-3 sm:px-6 lg:px-10">
+          <div className="flex items-center gap-3 min-w-0">
             {profileSlug && (
               <Link
                 href={`/p/${profileSlug}`}
-                className="flex items-center gap-1.5 text-sm text-gray-500 hover:text-gray-900"
+                className="flex items-center gap-1.5 text-sm text-gray-500 hover:text-gray-900 whitespace-nowrap"
               >
-                <ArrowLeft className="h-4 w-4" />
-                {client?.name ?? "Back"}
+                <ArrowLeft className="h-4 w-4 flex-shrink-0" />
+                <span className="truncate max-w-[140px] sm:max-w-none">{client?.name ?? "Back"}</span>
               </Link>
             )}
           </div>
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2 flex-shrink-0">
             <Link
               href="/cloud"
-              className="flex items-center gap-1.5 text-xs text-gray-400 hover:text-gray-700"
+              className="hidden sm:flex items-center gap-1.5 text-xs text-gray-400 hover:text-gray-700"
             >
               <CloudUpload className="h-3.5 w-3.5" />
-              Powered by Leadstaq Cloud
+              Leadstaq Cloud
             </Link>
             {profileSlug && (
               <a
                 href={`/p/${profileSlug}#contact`}
-                className="rounded-md px-4 py-2 text-sm font-semibold transition-opacity hover:opacity-90"
+                className="rounded-lg px-3 py-2 text-xs font-semibold transition-opacity hover:opacity-90 sm:px-4 sm:text-sm"
                 style={{ backgroundColor: accentColor, color: "#0a0a0a" }}
               >
                 Get a Quote
@@ -97,23 +100,25 @@ export default async function CloudSharePage({ params }: { params: { projectId: 
 
       {/* Hero */}
       {cover && (
-        <div className="relative h-[55vh] max-h-[560px] overflow-hidden bg-gray-100">
+        <div className="relative h-[45vw] min-h-[220px] max-h-[520px] overflow-hidden bg-gray-100">
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img src={cover} alt={project.title as string} className="h-full w-full object-cover" />
-          <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
-          <div className="absolute bottom-0 left-0 px-8 pb-8 lg:px-14">
-            <h1 className="text-3xl font-light text-white lg:text-5xl">{project.title as string}</h1>
+          <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent" />
+          <div className="absolute bottom-0 left-0 right-0 px-5 pb-5 sm:px-8 sm:pb-8 lg:px-14 lg:pb-10">
+            <h1 className="text-2xl font-semibold text-white sm:text-3xl lg:text-5xl lg:font-light leading-tight">
+              {project.title as string}
+            </h1>
           </div>
         </div>
       )}
 
-      <div className="mx-auto max-w-7xl px-6 py-12 lg:px-10">
+      <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 sm:py-12 lg:px-10">
         {/* Project meta */}
-        <div className="mb-10 border-b border-gray-100 pb-8">
+        <div className="mb-8 border-b border-gray-100 pb-6 sm:mb-10 sm:pb-8">
           {!cover && (
-            <h1 className="mb-4 text-3xl font-light text-gray-900">{project.title as string}</h1>
+            <h1 className="mb-4 text-2xl font-light text-gray-900 sm:text-3xl">{project.title as string}</h1>
           )}
-          <div className="flex flex-wrap items-center gap-4 text-sm text-gray-500">
+          <div className="flex flex-wrap items-center gap-2 text-sm text-gray-500 sm:gap-4">
             {project.category && (
               <span className="rounded-full border border-gray-200 px-3 py-1 text-xs font-medium text-gray-700">
                 {project.category as string}
@@ -121,12 +126,12 @@ export default async function CloudSharePage({ params }: { params: { projectId: 
             )}
             {project.location && (
               <span className="flex items-center gap-1.5">
-                <MapPin className="h-4 w-4" />{project.location as string}
+                <MapPin className="h-3.5 w-3.5" />{project.location as string}
               </span>
             )}
             {project.completion_date && (
               <span className="flex items-center gap-1.5">
-                <Calendar className="h-4 w-4" />
+                <Calendar className="h-3.5 w-3.5" />
                 {new Date(project.completion_date as string).toLocaleDateString("en-US", {
                   month: "long",
                   year: "numeric",
@@ -135,28 +140,30 @@ export default async function CloudSharePage({ params }: { params: { projectId: 
             )}
           </div>
           {project.description && (
-            <p className="mt-5 max-w-2xl text-gray-600 leading-relaxed">
+            <p className="mt-4 max-w-2xl text-sm text-gray-600 leading-relaxed sm:text-base sm:mt-5">
               {project.description as string}
             </p>
           )}
         </div>
 
-        {/* Gallery */}
-        {media.length > 1 && (
-          <div className="mb-12">
-            <p className="mb-5 font-mono text-[11px] uppercase tracking-[0.18em] text-gray-400">Gallery</p>
-            <div className="columns-1 gap-4 sm:columns-2 lg:columns-3">
-              {media.map((item, idx) => (
-                <div key={item.id} className="mb-4 overflow-hidden rounded-xl">
+        {/* Gallery — all photos (cover already shown as hero) */}
+        {galleryMedia.length > 0 && (
+          <div className="mb-10 sm:mb-12">
+            <p className="mb-4 font-mono text-[11px] uppercase tracking-[0.18em] text-gray-400">
+              Photos · {media.length}
+            </p>
+            <div className="columns-2 gap-2 sm:columns-2 sm:gap-3 lg:columns-3 lg:gap-4">
+              {galleryMedia.map((item, idx) => (
+                <div key={item.id} className="mb-2 overflow-hidden rounded-lg sm:mb-3 sm:rounded-xl">
                   {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img
                     src={item.public_url}
-                    alt={item.caption ?? `Photo ${idx + 1}`}
+                    alt={item.caption ?? `Photo ${idx + 2}`}
                     className="w-full object-cover"
-                    loading={idx < 3 ? "eager" : "lazy"}
+                    loading={idx < 4 ? "eager" : "lazy"}
                   />
                   {item.caption && (
-                    <p className="mt-1.5 px-1 text-xs text-gray-400">{item.caption}</p>
+                    <p className="mt-1 px-1 text-[10px] text-gray-400 sm:text-xs">{item.caption}</p>
                   )}
                 </div>
               ))}
@@ -164,19 +171,29 @@ export default async function CloudSharePage({ params }: { params: { projectId: 
           </div>
         )}
 
+        {/* Single photo — show it in gallery too if no cover was rendered */}
+        {!cover && media.length === 1 && (
+          <div className="mb-10 overflow-hidden rounded-xl">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src={media[0].public_url} alt={media[0].caption ?? project.title as string} className="w-full object-cover rounded-xl" />
+          </div>
+        )}
+
         {/* CTA */}
         {profileSlug && (
           <div
-            className="rounded-2xl p-10 text-center"
+            className="rounded-2xl px-5 py-8 text-center sm:p-10"
             style={{ backgroundColor: `${accentColor}22` }}
           >
-            <h2 className="mb-3 text-2xl font-semibold text-gray-900">
+            <h2 className="mb-2 text-xl font-semibold text-gray-900 sm:mb-3 sm:text-2xl">
               Interested in a project like this?
             </h2>
-            <p className="mb-6 text-gray-600">Get a free quote from {client?.name ?? "us"} today.</p>
+            <p className="mb-5 text-sm text-gray-600 sm:mb-6 sm:text-base">
+              Get a free quote from {client?.name ?? "us"} today.
+            </p>
             <a
               href={`/p/${profileSlug}#contact`}
-              className="inline-flex items-center gap-2 rounded-md px-8 py-4 text-sm font-semibold transition-opacity hover:opacity-90"
+              className="inline-flex items-center gap-2 rounded-xl px-6 py-3 text-sm font-semibold transition-opacity hover:opacity-90 sm:px-8 sm:py-4"
               style={{ backgroundColor: accentColor, color: "#0a0a0a" }}
             >
               Get a Free Quote
@@ -185,8 +202,8 @@ export default async function CloudSharePage({ params }: { params: { projectId: 
         )}
       </div>
 
-      <footer className="border-t border-gray-100 py-8">
-        <div className="mx-auto max-w-7xl px-6 text-center text-sm text-gray-400 lg:px-10">
+      <footer className="border-t border-gray-100 py-6 sm:py-8">
+        <div className="mx-auto max-w-7xl px-4 text-center text-xs text-gray-400 sm:px-6 sm:text-sm lg:px-10">
           {client?.name} &middot;{" "}
           <a href="https://cloud.leadstaq.tech" className="hover:text-gray-600">
             Powered by Leadstaq Cloud
