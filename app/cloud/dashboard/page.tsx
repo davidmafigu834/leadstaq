@@ -52,7 +52,6 @@ export default function CloudDashboardHome() {
   const [showNew, setShowNew] = useState(false);
   const [clientName, setClientName] = useState("");
   const [teamMembers, setTeamMembers] = useState<TeamMember[]>([]);
-  const [unreadCount, setUnreadCount] = useState(0);
 
   const fetchProjects = useCallback(() => {
     if (!session?.clientId) { setLoading(false); return; }
@@ -94,14 +93,6 @@ export default function CloudDashboardHome() {
       .catch(() => {});
   }, [session?.userId]);
 
-  useEffect(() => {
-    if (!session?.userId) return;
-    fetch("/api/cloud/notifications?count=1")
-      .then((r) => r.json())
-      .then((data: { unread?: number }) => setUnreadCount(data.unread ?? 0))
-      .catch(() => {});
-  }, [session?.userId]);
-
   const storageUsed = stats?.total_bytes ?? 0;
   const storageLimit = 5 * 1024 * 1024 * 1024;
   const percentUsed = (storageUsed / storageLimit) * 100;
@@ -126,37 +117,10 @@ export default function CloudDashboardHome() {
   return (
     <div style={{ minHeight: "100vh", background: "#F5F5F0", fontFamily: F }}>
 
-      {/* Topbar */}
-      <div style={{ padding: "20px 20px 12px", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-        <div style={{ flex: 1, minWidth: 0, paddingRight: 12 }}>
-          <p style={{ fontSize: 10, fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase", color: "#999", marginBottom: 4, fontFamily: F }}>
-            Good {getTimeOfDay()}
-          </p>
-          <h1 style={{ fontFamily: S, fontSize: 24, color: "#0a0a0a", lineHeight: 1.1, margin: 0, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
-            {displayName}
-          </h1>
-        </div>
-        <div style={{ display: "flex", alignItems: "center", gap: 8, flexShrink: 0 }}>
-          <button
-            onClick={() => router.push("/cloud/dashboard/notifications")}
-            style={{ width: 36, height: 36, borderRadius: "50%", background: "#fff", border: "0.5px solid rgba(0,0,0,0.1)", display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer", position: "relative" }}
-            aria-label="Notifications"
-          >
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#666" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" /><path d="M13.73 21a2 2 0 0 1-3.46 0" />
-            </svg>
-            {unreadCount > 0 && (
-              <span style={{ position: "absolute", top: 2, right: 2, width: 8, height: 8, borderRadius: "50%", background: "#D4FF4F", border: "1.5px solid #F5F5F0" }} />
-            )}
-          </button>
-          <button
-            onClick={() => router.push("/cloud/dashboard/settings")}
-            style={{ width: 36, height: 36, borderRadius: "50%", background: "#0a0a0a", display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer", fontFamily: F, fontSize: 11, fontWeight: 700, color: "#D4FF4F", letterSpacing: "0.02em" }}
-            aria-label="Account settings"
-          >
-            {getInitials(displayName)}
-          </button>
-        </div>
+      {/* Greeting */}
+      <div style={{ padding: "20px 20px 8px" }}>
+        <p style={{ fontSize: 10, fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase", color: "#999", marginBottom: 4, fontFamily: F }}>Good {getTimeOfDay()}</p>
+        <h1 style={{ fontFamily: S, fontSize: 24, color: "#0a0a0a", lineHeight: 1.1, margin: 0 }}>{displayName}</h1>
       </div>
 
       {/* Storage card */}
@@ -199,8 +163,8 @@ export default function CloudDashboardHome() {
 
       {/* Projects row */}
       {projects.length === 0 ? (
-        <div style={{ margin: "0 20px", borderRadius: 20, background: "linear-gradient(160deg,#F0FFF8 0%,#E0FFF0 60%,#C8FFE0 100%)", border: "0.5px solid rgba(96,232,160,0.3)", padding: "32px 24px", display: "flex", flexDirection: "column", alignItems: "center", textAlign: "center" }}>
-          <div style={{ width: 56, height: 56, borderRadius: 16, background: "rgba(255,255,255,0.7)", display: "flex", alignItems: "center", justifyContent: "center", marginBottom: 16, border: "0.5px solid rgba(96,232,160,0.4)" }}>
+        <div style={{ margin: "0 20px", borderRadius: 20, background: "linear-gradient(135deg, #A8F0CC 0%, #5ECFA0 100%)", border: "0.5px solid rgba(0,180,100,0.3)", padding: "32px 24px", display: "flex", flexDirection: "column", alignItems: "center", textAlign: "center" }}>
+          <div style={{ width: 56, height: 56, borderRadius: 16, background: "rgba(255,255,255,0.7)", display: "flex", alignItems: "center", justifyContent: "center", marginBottom: 16, border: "0.5px solid rgba(0,180,100,0.4)" }}>
             <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#00875A" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
               <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/>
             </svg>
@@ -222,58 +186,43 @@ export default function CloudDashboardHome() {
             const coverUrl = cover(p);
             const pCount = p.project_media?.length ?? 0;
             return (
-              <div
-                key={p.id}
-                onClick={() => router.push(`/cloud/dashboard/projects/${p.id}`)}
-                style={{ minWidth: 140, borderRadius: 20, overflow: "hidden", flexShrink: 0, display: "flex", flexDirection: "column", background: cs.gradientCss, border: `0.5px solid ${cs.borderColor}`, cursor: "pointer" }}
-              >
-                <div style={{ padding: "12px 12px 8px" }}>
-                  <span style={{ fontSize: 9, fontWeight: 700, letterSpacing: "0.05em", textTransform: "uppercase", color: cs.badgeText, background: "rgba(255,255,255,0.6)", padding: "3px 8px", borderRadius: 20, fontFamily: F }}>
-                    {p.category || "Project"}
-                  </span>
-                </div>
-                <div style={{ margin: "0 12px", borderRadius: 14, overflow: "hidden", height: 100, background: cs.photoFallback, position: "relative" }}>
+              <div key={p.id} onClick={() => router.push(`/cloud/dashboard/projects/${p.id}`)} style={{ minWidth: 130, flexShrink: 0, cursor: "pointer" }}>
+                <div style={{ width: 130, height: 170, borderRadius: 16, overflow: "hidden", background: cs.photoFallback, position: "relative" }}>
                   {coverUrl ? (
                     // eslint-disable-next-line @next/next/no-img-element
                     <img src={coverUrl} alt={p.title} style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }} />
                   ) : (
                     <div style={{ width: "100%", height: "100%", display: "flex", alignItems: "center", justifyContent: "center" }}>
-                      <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke={cs.photoIcon} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" opacity="0.6">
+                      <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke={cs.photoIcon} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" opacity="0.4">
                         <rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/>
                       </svg>
                     </div>
                   )}
-                  <div style={{ position: "absolute", top: 8, right: 8, background: "#D4FF4F", color: "#0a0a0a", fontSize: 9, fontWeight: 700, padding: "2px 7px", borderRadius: 20, fontFamily: F }}>
-                    {pCount}
-                  </div>
+                  <div style={{ position: "absolute", top: 8, right: 8, background: "#D4FF4F", color: "#0a0a0a", fontSize: 9, fontWeight: 700, padding: "2px 7px", borderRadius: 20, fontFamily: F }}>{pCount}</div>
                 </div>
-                <div style={{ padding: "10px 12px 14px" }}>
-                  <p style={{ fontFamily: S, fontSize: 15, color: cs.titleColor, margin: "0 0 3px", lineHeight: 1.2, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{p.title}</p>
-                  <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginTop: 8 }}>
-                    <span style={{ fontSize: 9, fontWeight: 600, color: cs.subtextColor, fontFamily: F }}>{pCount} photos</span>
-                    <div style={{ width: 22, height: 22, borderRadius: "50%", background: "rgba(255,255,255,0.5)", display: "flex", alignItems: "center", justifyContent: "center" }}>
-                      <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke={cs.titleColor} strokeWidth="2.5" strokeLinecap="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
-                    </div>
-                  </div>
+                <div style={{ paddingTop: 8, width: 130 }}>
+                  <p style={{ fontFamily: S, fontSize: 13, color: "#0a0a0a", margin: "0 0 2px", lineHeight: 1.2, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{p.title}</p>
+                  <p style={{ fontSize: 10, color: "#999", fontFamily: F, margin: 0 }}>{p.category || "Project"} · {pCount} photos</p>
                 </div>
               </div>
             );
           })}
-          <div
-            onClick={() => setShowNew(true)}
-            style={{ minWidth: 110, borderRadius: 20, border: "1.5px dashed #D0D0C8", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 8, flexShrink: 0, background: "#EEEEE8", cursor: "pointer", aspectRatio: "3/4", padding: "0 16px" }}
-          >
-            <div style={{ width: 36, height: 36, borderRadius: "50%", background: "#fff", display: "flex", alignItems: "center", justifyContent: "center", border: "0.5px solid rgba(0,0,0,0.08)" }}>
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#666" strokeWidth="2.5" strokeLinecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+          <div onClick={() => setShowNew(true)} style={{ minWidth: 130, flexShrink: 0, cursor: "pointer" }}>
+            <div style={{ width: 130, height: 170, borderRadius: 16, border: "1.5px dashed #C8C8C0", background: "#EAEAE4", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 8 }}>
+              <div style={{ width: 36, height: 36, borderRadius: "50%", background: "#fff", display: "flex", alignItems: "center", justifyContent: "center", border: "0.5px solid rgba(0,0,0,0.08)" }}>
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#888" strokeWidth="2.5" strokeLinecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+              </div>
             </div>
-            <p style={{ fontSize: 11, color: "#999", fontWeight: 500, textAlign: "center", lineHeight: 1.3, margin: 0, fontFamily: F }}>New<br/>project</p>
+            <div style={{ paddingTop: 8, width: 130 }}>
+              <p style={{ fontFamily: S, fontSize: 13, color: "#999", margin: 0 }}>New project</p>
+            </div>
           </div>
         </div>
       )}
 
       {/* Upload shortcut */}
-      <div style={{ margin: "20px 20px 0", borderRadius: 20, background: "linear-gradient(160deg,#F0FFF8 0%,#E0FFF0 60%,#C8FFE0 100%)", border: "0.5px solid rgba(96,232,160,0.3)", padding: "14px 16px", display: "flex", alignItems: "center", gap: 12 }}>
-        <div style={{ width: 42, height: 42, borderRadius: 12, background: "rgba(255,255,255,0.6)", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0, border: "0.5px solid rgba(96,232,160,0.3)" }}>
+      <div style={{ margin: "20px 20px 0", borderRadius: 20, background: "linear-gradient(135deg, #A8F0CC 0%, #5ECFA0 100%)", border: "0.5px solid rgba(0,180,100,0.3)", padding: "14px 16px", display: "flex", alignItems: "center", gap: 12 }}>
+        <div style={{ width: 42, height: 42, borderRadius: 12, background: "rgba(255,255,255,0.6)", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0, border: "0.5px solid rgba(0,180,100,0.3)" }}>
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#00875A" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
             <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/>
           </svg>
@@ -287,7 +236,7 @@ export default function CloudDashboardHome() {
 
       {/* Team + Activity */}
       <div style={{ padding: "20px 20px 0", display: "grid", gridTemplateColumns: "1fr 1.4fr", gap: 12 }}>
-        <div onClick={() => router.push("/cloud/dashboard/team")} style={{ borderRadius: 20, background: "linear-gradient(160deg,#FFFBF0 0%,#FFF3D0 60%,#FFE8A0 100%)", border: "0.5px solid rgba(255,208,112,0.35)", padding: 16, cursor: "pointer" }}>
+        <div onClick={() => router.push("/cloud/dashboard/team")} style={{ borderRadius: 20, background: "linear-gradient(135deg, #FFE08A 0%, #FFD740 100%)", border: "0.5px solid rgba(255,185,0,0.35)", padding: 16, cursor: "pointer" }}>
           <p style={{ fontSize: 9, fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase", color: "#BF7020", margin: "0 0 10px", fontFamily: F }}>Team</p>
           {teamMembers.length > 0 ? (
             <div style={{ display: "flex", marginBottom: 10 }}>
@@ -312,7 +261,7 @@ export default function CloudDashboardHome() {
           </div>
         </div>
 
-        <div onClick={() => router.push("/cloud/dashboard/notifications")} style={{ borderRadius: 20, background: "linear-gradient(160deg,#F5F0FF 0%,#EDE5FF 60%,#DDD0FF 100%)", border: "0.5px solid rgba(196,168,255,0.35)", padding: 16, cursor: "pointer" }}>
+        <div onClick={() => router.push("/cloud/dashboard/notifications")} style={{ borderRadius: 20, background: "linear-gradient(135deg, #D4BBFF 0%, #A98EFF 100%)", border: "0.5px solid rgba(148,100,255,0.35)", padding: 16, cursor: "pointer" }}>
           <p style={{ fontSize: 9, fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase", color: "#7B5EA7", margin: "0 0 10px", fontFamily: F }}>Activity</p>
           <p style={{ fontFamily: S, fontSize: 28, color: "#2D1B6B", margin: "0 0 2px", lineHeight: 1 }}>{photoCount}</p>
           <p style={{ fontSize: 11, color: "#7B5EA7", margin: "0 0 12px", fontFamily: F }}>photos total</p>
