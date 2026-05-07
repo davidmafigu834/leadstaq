@@ -176,39 +176,32 @@ export default function CloudSettingsPage() {
 
   const profileUrl = profile?.slug ? `/p/${profile.slug}` : null;
 
+  const inputCls = "w-full rounded-xl border border-black/[0.1] bg-[#F5F5F0] px-4 py-3 text-[13px] text-[#0a0a0a] placeholder-[#999990] outline-none focus:border-black/[0.2] font-cloud-body";
+  const labelCls = "mb-1.5 block text-[12px] font-semibold text-[#666660] uppercase tracking-[0.06em] font-cloud-body";
+  const saveBtnCls = "flex items-center gap-2 rounded-xl bg-[#D4FF4F] px-5 py-2.5 text-[13px] font-bold text-black disabled:opacity-60 hover:bg-[#C8F244] transition-colors font-cloud-body";
+  const sectionCardCls = "rounded-[20px] border border-[#D0D0C0]/40 bg-gradient-to-br from-[#F8F8F4] via-[#F0F0EA] to-[#E8E8E0] p-5 space-y-4";
+
   return (
-    <div className="px-6 py-6 pb-28 lg:px-8 lg:pb-8">
-      <div className="mx-auto max-w-xl space-y-8">
+    <div className="min-h-screen bg-[#F5F5F0] font-cloud-body px-5 py-4 pb-28 lg:px-8 lg:pb-8">
+      <div className="mx-auto max-w-xl space-y-6">
 
         {/* Business profile */}
         <section>
-          <h2 className="mb-4 text-[15px] font-semibold text-white">Business profile</h2>
-          <div className="rounded-2xl border border-white/10 bg-[#111111] p-5 space-y-4">
+          <p className="text-[10px] font-bold tracking-[0.08em] text-[#999990] uppercase mb-3 font-cloud-body">Business profile</p>
+          <div className={sectionCardCls}>
             <div>
-              <label className="mb-1.5 block text-[13px] font-medium text-white/60">Business name</label>
-              <input
-                type="text"
-                value={bizName}
-                onChange={(e) => setBizName(e.target.value)}
-                className="w-full rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-white outline-none focus:border-[#D4FF4F]"
-              />
+              <label className={labelCls}>Business name</label>
+              <input type="text" value={bizName} onChange={(e) => setBizName(e.target.value)} className={inputCls} />
             </div>
             <div>
-              <label className="mb-1.5 block text-[13px] font-medium text-white/60">Industry</label>
-              <select
-                value={bizIndustry}
-                onChange={(e) => setBizIndustry(e.target.value)}
-                className="w-full rounded-xl border border-white/10 bg-[#1a1a1a] px-4 py-3 text-sm text-white outline-none focus:border-[#D4FF4F]"
-              >
+              <label className={labelCls}>Industry</label>
+              <select value={bizIndustry} onChange={(e) => setBizIndustry(e.target.value)}
+                className="w-full rounded-xl border border-black/[0.1] bg-[#F5F5F0] px-4 py-3 text-[13px] text-[#666660] outline-none focus:border-black/[0.2] font-cloud-body">
                 <option value="">Select industry…</option>
                 {INDUSTRIES.map((ind) => <option key={ind} value={ind}>{ind}</option>)}
               </select>
             </div>
-            <button
-              onClick={() => void saveBusiness()}
-              disabled={savingBiz}
-              className="flex items-center gap-2 rounded-xl bg-[#D4FF4F] px-5 py-2.5 text-sm font-semibold text-black disabled:opacity-60 hover:bg-[#c4ef3f]"
-            >
+            <button onClick={() => void saveBusiness()} disabled={savingBiz} className={saveBtnCls}>
               {savingBiz ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Save className="h-3.5 w-3.5" />}
               {bizSaved ? "Saved!" : "Save"}
             </button>
@@ -217,42 +210,23 @@ export default function CloudSettingsPage() {
 
         {/* Your account */}
         <section>
-          <h2 className="mb-4 text-[15px] font-semibold text-white">Your account</h2>
-          <div className="rounded-2xl border border-white/10 bg-[#111111] p-5 space-y-4">
+          <p className="text-[10px] font-bold tracking-[0.08em] text-[#999990] uppercase mb-3 font-cloud-body">Your account</p>
+          <div className={sectionCardCls}>
             <div>
-              <label className="mb-1.5 block text-[13px] font-medium text-white/60">Your name</label>
-              <input
-                type="text"
-                value={userName}
-                onChange={(e) => setUserName(e.target.value)}
-                className="w-full rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-white outline-none focus:border-[#D4FF4F]"
-              />
+              <label className={labelCls}>Your name</label>
+              <input type="text" value={userName} onChange={(e) => setUserName(e.target.value)} className={inputCls} />
             </div>
             <div>
-              <label className="mb-1.5 block text-[13px] font-medium text-white/60">Email address</label>
-              <input
-                type="email"
-                value={session?.user?.email ?? ""}
-                readOnly
-                className="w-full rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-white/40 outline-none cursor-not-allowed"
-              />
-              <p className="mt-1 text-[12px] text-white/25">Contact support to change your email.</p>
+              <label className={labelCls}>Email address</label>
+              <input type="email" value={session?.user?.email ?? ""} readOnly
+                className="w-full rounded-xl border border-black/[0.06] bg-black/[0.03] px-4 py-3 text-[13px] text-[#999990] outline-none cursor-not-allowed font-cloud-body" />
+              <p className="mt-1 text-[11px] text-[#BBBBAA] font-cloud-body">Contact support to change your email.</p>
             </div>
             <div>
-              <label className="mb-1.5 block text-[13px] font-medium text-white/60">Phone number</label>
-              <input
-                type="tel"
-                value={userPhone}
-                onChange={(e) => setUserPhone(e.target.value)}
-                placeholder="+1 555 000 0000"
-                className="w-full rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-white placeholder-white/30 outline-none focus:border-[#D4FF4F]"
-              />
+              <label className={labelCls}>Phone number</label>
+              <input type="tel" value={userPhone} onChange={(e) => setUserPhone(e.target.value)} placeholder="+1 555 000 0000" className={inputCls} />
             </div>
-            <button
-              onClick={() => void saveUser()}
-              disabled={savingUser}
-              className="flex items-center gap-2 rounded-xl bg-[#D4FF4F] px-5 py-2.5 text-sm font-semibold text-black disabled:opacity-60 hover:bg-[#c4ef3f]"
-            >
+            <button onClick={() => void saveUser()} disabled={savingUser} className={saveBtnCls}>
               {savingUser ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Save className="h-3.5 w-3.5" />}
               {userSaved ? "Saved!" : "Save"}
             </button>
@@ -261,48 +235,26 @@ export default function CloudSettingsPage() {
 
         {/* Change password */}
         <section>
-          <h2 className="mb-4 text-[15px] font-semibold text-white">Change password</h2>
-          <form onSubmit={(e) => void savePassword(e)} className="rounded-2xl border border-white/10 bg-[#111111] p-5 space-y-4">
+          <p className="text-[10px] font-bold tracking-[0.08em] text-[#999990] uppercase mb-3 font-cloud-body">Change password</p>
+          <form onSubmit={(e) => void savePassword(e)} className={sectionCardCls}>
             <div className="relative">
-              <label className="mb-1.5 block text-[13px] font-medium text-white/60">Current password</label>
-              <input
-                type={showPw ? "text" : "password"}
-                value={currentPw}
-                onChange={(e) => setCurrentPw(e.target.value)}
-                required
-                className="w-full rounded-xl border border-white/10 bg-white/5 px-4 py-3 pr-10 text-sm text-white outline-none focus:border-[#D4FF4F]"
-              />
-              <button type="button" onClick={() => setShowPw((v) => !v)} className="absolute right-3 bottom-3 text-white/30 hover:text-white/60">
+              <label className={labelCls}>Current password</label>
+              <input type={showPw ? "text" : "password"} value={currentPw} onChange={(e) => setCurrentPw(e.target.value)} required
+                className={`${inputCls} pr-10`} />
+              <button type="button" onClick={() => setShowPw((v) => !v)} className="absolute right-3 bottom-3 text-[#999990] hover:text-[#0a0a0a]">
                 {showPw ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
               </button>
             </div>
             <div>
-              <label className="mb-1.5 block text-[13px] font-medium text-white/60">New password</label>
-              <input
-                type={showPw ? "text" : "password"}
-                value={newPw}
-                onChange={(e) => setNewPw(e.target.value)}
-                required
-                minLength={8}
-                className="w-full rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-white outline-none focus:border-[#D4FF4F]"
-              />
+              <label className={labelCls}>New password</label>
+              <input type={showPw ? "text" : "password"} value={newPw} onChange={(e) => setNewPw(e.target.value)} required minLength={8} className={inputCls} />
             </div>
             <div>
-              <label className="mb-1.5 block text-[13px] font-medium text-white/60">Confirm new password</label>
-              <input
-                type={showPw ? "text" : "password"}
-                value={confirmPw}
-                onChange={(e) => setConfirmPw(e.target.value)}
-                required
-                className="w-full rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-white outline-none focus:border-[#D4FF4F]"
-              />
+              <label className={labelCls}>Confirm new password</label>
+              <input type={showPw ? "text" : "password"} value={confirmPw} onChange={(e) => setConfirmPw(e.target.value)} required className={inputCls} />
             </div>
-            {pwError && <p className="rounded-lg bg-red-500/10 px-4 py-2.5 text-sm text-red-400">{pwError}</p>}
-            <button
-              type="submit"
-              disabled={savingPw}
-              className="flex items-center gap-2 rounded-xl bg-[#D4FF4F] px-5 py-2.5 text-sm font-semibold text-black disabled:opacity-60 hover:bg-[#c4ef3f]"
-            >
+            {pwError && <p className="rounded-xl bg-red-50 border border-red-200 px-4 py-2.5 text-[13px] text-red-500 font-cloud-body">{pwError}</p>}
+            <button type="submit" disabled={savingPw} className={saveBtnCls}>
               {savingPw ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : null}
               {pwSaved ? "Password changed!" : "Change password"}
             </button>
@@ -312,40 +264,30 @@ export default function CloudSettingsPage() {
         {/* Public profile */}
         {client && profile !== null && (
           <section>
-            <h2 className="mb-4 text-[15px] font-semibold text-white">Public profile</h2>
-            <div className="rounded-2xl border border-white/10 bg-[#111111] p-5 space-y-4">
+            <p className="text-[10px] font-bold tracking-[0.08em] text-[#999990] uppercase mb-3 font-cloud-body">Public profile</p>
+            <div className={sectionCardCls + " !space-y-3"}>
               {profileUrl && (
-                <div className="flex items-center justify-between rounded-xl bg-white/5 px-4 py-3">
+                <div className="flex items-center justify-between rounded-xl bg-white/60 border border-black/[0.06] px-4 py-3">
                   <div>
-                    <p className="text-[13px] text-white/40">Your profile URL</p>
-                    <p className="text-[13px] font-mono text-white/70">leadstaq.tech{profileUrl}</p>
+                    <p className="text-[11px] text-[#999990] font-cloud-body">Your profile URL</p>
+                    <p className="text-[13px] font-mono text-[#0a0a0a]">leadstaq.tech{profileUrl}</p>
                   </div>
-                  <a
-                    href={profileUrl}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="rounded-lg p-2 text-white/40 hover:bg-white/10 hover:text-white"
-                  >
+                  <a href={profileUrl} target="_blank" rel="noopener noreferrer"
+                    className="rounded-lg p-2 text-[#999990] hover:text-[#0a0a0a]">
                     <ExternalLink className="h-4 w-4" />
                   </a>
                 </div>
               )}
-
-              <div className="flex items-center justify-between rounded-xl border border-white/10 px-4 py-3">
+              <div className="flex items-center justify-between rounded-xl border border-black/[0.07] bg-white/60 px-4 py-3">
                 <div>
-                  <p className="text-[14px] font-medium text-white">Profile published</p>
-                  <p className="text-[13px] text-white/40">
-                    {profile.is_published ? "Your profile is visible to the public" : "Your profile is hidden"}
+                  <p className="text-[14px] font-semibold text-[#0a0a0a] font-cloud-body">Profile published</p>
+                  <p className="text-[12px] text-[#999990] font-cloud-body">
+                    {profile.is_published ? "Visible to the public" : "Hidden from the public"}
                   </p>
                 </div>
-                <button
-                  onClick={() => void togglePublish()}
-                  disabled={togglingPublish}
-                  className={`relative h-6 w-11 rounded-full transition-colors ${profile.is_published ? "bg-[#D4FF4F]" : "bg-white/10"}`}
-                >
-                  <span
-                    className={`absolute top-0.5 h-5 w-5 rounded-full bg-white shadow transition-transform ${profile.is_published ? "translate-x-5" : "translate-x-0.5"}`}
-                  />
+                <button onClick={() => void togglePublish()} disabled={togglingPublish}
+                  className={`relative h-6 w-11 rounded-full transition-colors ${profile.is_published ? "bg-[#D4FF4F]" : "bg-black/10"}`}>
+                  <span className={`absolute top-0.5 h-5 w-5 rounded-full bg-white shadow transition-transform ${profile.is_published ? "translate-x-5" : "translate-x-0.5"}`} />
                 </button>
               </div>
             </div>
@@ -353,64 +295,62 @@ export default function CloudSettingsPage() {
         )}
 
         {/* Storage */}
-        <section className="rounded-2xl border border-white/[0.08] bg-[#111] p-6">
-          <div className="mb-5 flex items-center gap-2">
-            <HardDrive className="h-4 w-4 text-white/40" />
-            <h2 className="text-[15px] font-semibold text-white">Storage</h2>
-          </div>
-          {stats ? (() => {
-            const limitGB = (stats.limit_bytes / (1024 * 1024 * 1024)).toFixed(0);
-            const usedStr = stats.total_bytes < 1024 * 1024 * 1024
-              ? `${(stats.total_bytes / (1024 * 1024)).toFixed(1)} MB`
-              : `${(stats.total_bytes / (1024 * 1024 * 1024)).toFixed(2)} GB`;
-            const planLabel = stats.plan.charAt(0).toUpperCase() + stats.plan.slice(1);
-            return (
-              <div className="space-y-4">
-                <div className="flex items-center justify-between">
-                  <span className="text-[13px] text-white/40">Used storage</span>
-                  <span className="rounded-full bg-white/10 px-2.5 py-0.5 text-[12px] font-medium text-white/60">{planLabel} plan</span>
-                </div>
-                <div className="overflow-hidden rounded-full bg-white/[0.06] h-2">
-                  <div
-                    className={`h-full rounded-full transition-all ${stats.pct > 80 ? "bg-red-400" : "bg-[#D4FF4F]"}`}
-                    style={{ width: `${stats.pct}%` }}
-                  />
-                </div>
-                <div className="flex items-center justify-between text-[13px]">
-                  <span className="text-white/40">{usedStr} of {limitGB} GB used</span>
-                  <span className="text-white/30">{stats.total_photos.toLocaleString()} photos · {stats.total_projects} projects</span>
-                </div>
-                {stats.plan === "free" && (
-                  <div className="rounded-xl border border-[#D4FF4F]/20 bg-[#D4FF4F]/5 p-4">
-                    <p className="mb-1 text-[13px] font-semibold text-[#D4FF4F]">Upgrade to Pro</p>
-                    <p className="mb-3 text-[13px] text-white/40">Get 50 GB storage, priority support, and advanced watermarking.</p>
-                    <button className="rounded-lg bg-[#D4FF4F] px-4 py-2 text-[13px] font-semibold text-black hover:bg-[#c4ef3f] transition-colors">
-                      Upgrade — $29 / mo
-                    </button>
-                  </div>
-                )}
-              </div>
-            );
-          })() : (
-            <div className="flex items-center justify-center py-8">
-              <Loader2 className="h-5 w-5 animate-spin text-white/20" />
+        <section>
+          <p className="text-[10px] font-bold tracking-[0.08em] text-[#999990] uppercase mb-3 font-cloud-body">Storage</p>
+          <div className="rounded-[20px] border border-[#1a1a2e]/20 bg-gradient-to-br from-[#0a0a1a] via-[#111126] to-[#1a1a36] p-5">
+            <div className="flex items-center gap-2 mb-4">
+              <HardDrive className="h-4 w-4 text-white/40" />
+              <span className="text-[13px] font-semibold text-white font-cloud-body">Storage</span>
             </div>
-          )}
+            {stats ? (() => {
+              const limitGB = (stats.limit_bytes / (1024 * 1024 * 1024)).toFixed(0);
+              const usedStr = stats.total_bytes < 1024 * 1024 * 1024
+                ? `${(stats.total_bytes / (1024 * 1024)).toFixed(1)} MB`
+                : `${(stats.total_bytes / (1024 * 1024 * 1024)).toFixed(2)} GB`;
+              const planLabel = stats.plan.charAt(0).toUpperCase() + stats.plan.slice(1);
+              return (
+                <div className="space-y-4">
+                  <div className="flex items-center justify-between">
+                    <span className="text-[13px] text-white/40 font-cloud-body">Used storage</span>
+                    <span className="rounded-full bg-white/10 px-2.5 py-0.5 text-[12px] font-semibold text-white/60 font-cloud-body">{planLabel} plan</span>
+                  </div>
+                  <div className="overflow-hidden rounded-full bg-white/[0.08] h-1.5">
+                    <div className={`h-full rounded-full transition-all ${stats.pct > 80 ? "bg-red-400" : "bg-[#D4FF4F]"}`} style={{ width: `${stats.pct}%` }} />
+                  </div>
+                  <div className="flex items-center justify-between text-[12px] font-cloud-body">
+                    <span className="text-white/40">{usedStr} of {limitGB} GB used</span>
+                    <span className="text-white/30">{stats.total_photos.toLocaleString()} photos</span>
+                  </div>
+                  {stats.plan === "free" && (
+                    <div className="rounded-xl border border-[#D4FF4F]/20 bg-[#D4FF4F]/5 p-4">
+                      <p className="mb-1 text-[13px] font-semibold text-[#D4FF4F] font-cloud-body">Upgrade to Pro</p>
+                      <p className="mb-3 text-[12px] text-white/40 font-cloud-body">Get 50 GB storage, priority support, and advanced watermarking.</p>
+                      <button className="rounded-xl bg-[#D4FF4F] px-4 py-2 text-[13px] font-bold text-black hover:bg-[#C8F244] transition-colors font-cloud-body">
+                        Upgrade — $29 / mo
+                      </button>
+                    </div>
+                  )}
+                </div>
+              );
+            })() : (
+              <div className="flex items-center justify-center py-8">
+                <Loader2 className="h-5 w-5 animate-spin text-white/20" />
+              </div>
+            )}
+          </div>
         </section>
 
         {/* Watermark */}
         <section>
-          <h2 className="mb-4 text-[15px] font-semibold text-white">Watermark</h2>
-          <div className="rounded-2xl border border-white/10 bg-[#111111] p-5 space-y-5">
+          <p className="text-[10px] font-bold tracking-[0.08em] text-[#999990] uppercase mb-3 font-cloud-body">Watermark</p>
+          <div className={sectionCardCls + " !space-y-5"}>
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-[14px] font-medium text-white">Enable watermark</p>
-                <p className="text-[13px] text-white/40">Overlay your logo on shared project photos</p>
+                <p className="text-[14px] font-semibold text-[#0a0a0a] font-cloud-body">Enable watermark</p>
+                <p className="text-[12px] text-[#999990] font-cloud-body">Overlay your logo on shared project photos</p>
               </div>
-              <button
-                onClick={() => setWatermark((w) => ({ ...w, enabled: !w.enabled }))}
-                className={`relative h-6 w-11 rounded-full transition-colors ${watermark.enabled ? "bg-[#D4FF4F]" : "bg-white/10"}`}
-              >
+              <button onClick={() => setWatermark((w) => ({ ...w, enabled: !w.enabled }))}
+                className={`relative h-6 w-11 rounded-full transition-colors ${watermark.enabled ? "bg-[#D4FF4F]" : "bg-black/10"}`}>
                 <span className={`absolute top-0.5 h-5 w-5 rounded-full bg-white shadow transition-transform ${watermark.enabled ? "translate-x-5" : "translate-x-0.5"}`} />
               </button>
             </div>
@@ -418,18 +358,15 @@ export default function CloudSettingsPage() {
             {watermark.enabled && (
               <>
                 <div>
-                  <label className="mb-2 block text-[13px] font-medium text-white/60">Position</label>
+                  <label className={labelCls}>Position</label>
                   <div className="grid grid-cols-2 gap-2">
                     {(["bottom-right", "bottom-left", "bottom-center", "center"] as const).map((pos) => (
-                      <button
-                        key={pos}
-                        onClick={() => setWatermark((w) => ({ ...w, position: pos }))}
-                        className={`rounded-xl border px-3 py-2 text-[13px] font-medium transition-colors ${
+                      <button key={pos} onClick={() => setWatermark((w) => ({ ...w, position: pos }))}
+                        className={`rounded-xl border px-3 py-2 text-[12px] font-semibold transition-colors font-cloud-body ${
                           watermark.position === pos
-                            ? "border-[#D4FF4F]/50 bg-[#D4FF4F]/10 text-[#D4FF4F]"
-                            : "border-white/10 text-white/50 hover:bg-white/5"
-                        }`}
-                      >
+                            ? "border-[#0a0a0a]/20 bg-[#0a0a0a] text-white"
+                            : "border-black/[0.1] bg-white/50 text-[#666660] hover:bg-white"
+                        }`}>
                         {pos.replace("-", " ").replace(/\b\w/g, (c) => c.toUpperCase())}
                       </button>
                     ))}
@@ -437,36 +374,25 @@ export default function CloudSettingsPage() {
                 </div>
 
                 <div>
-                  <label className="mb-2 block text-[13px] font-medium text-white/60">
-                    Opacity — {watermark.opacity}%
-                  </label>
-                  <input
-                    type="range"
-                    min={10}
-                    max={90}
-                    step={5}
-                    value={watermark.opacity}
+                  <label className={labelCls}>Opacity — {watermark.opacity}%</label>
+                  <input type="range" min={10} max={90} step={5} value={watermark.opacity}
                     onChange={(e) => setWatermark((w) => ({ ...w, opacity: Number(e.target.value) }))}
-                    className="w-full accent-[#D4FF4F]"
-                  />
-                  <div className="flex justify-between text-[11px] text-white/30 mt-1">
+                    className="w-full accent-[#0a0a0a]" />
+                  <div className="flex justify-between text-[11px] text-[#999990] mt-1 font-cloud-body">
                     <span>10%</span><span>90%</span>
                   </div>
                 </div>
 
                 <div>
-                  <label className="mb-2 block text-[13px] font-medium text-white/60">Size</label>
+                  <label className={labelCls}>Size</label>
                   <div className="flex gap-2">
                     {(["small", "medium", "large"] as const).map((s) => (
-                      <button
-                        key={s}
-                        onClick={() => setWatermark((w) => ({ ...w, size: s }))}
-                        className={`flex-1 rounded-xl border py-2 text-[13px] font-medium transition-colors ${
+                      <button key={s} onClick={() => setWatermark((w) => ({ ...w, size: s }))}
+                        className={`flex-1 rounded-xl border py-2 text-[12px] font-semibold transition-colors font-cloud-body ${
                           watermark.size === s
-                            ? "border-[#D4FF4F]/50 bg-[#D4FF4F]/10 text-[#D4FF4F]"
-                            : "border-white/10 text-white/50 hover:bg-white/5"
-                        }`}
-                      >
+                            ? "border-[#0a0a0a]/20 bg-[#0a0a0a] text-white"
+                            : "border-black/[0.1] bg-white/50 text-[#666660] hover:bg-white"
+                        }`}>
                         {s.charAt(0).toUpperCase() + s.slice(1)}
                       </button>
                     ))}
@@ -475,11 +401,7 @@ export default function CloudSettingsPage() {
               </>
             )}
 
-            <button
-              onClick={() => void saveWatermark()}
-              disabled={savingWatermark}
-              className="flex items-center gap-2 rounded-xl bg-[#D4FF4F] px-5 py-2.5 text-sm font-semibold text-black disabled:opacity-60 hover:bg-[#c4ef3f]"
-            >
+            <button onClick={() => void saveWatermark()} disabled={savingWatermark} className={saveBtnCls}>
               {savingWatermark ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Droplets className="h-3.5 w-3.5" />}
               {watermarkSaved ? "Saved!" : "Save watermark"}
             </button>

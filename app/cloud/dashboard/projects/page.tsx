@@ -3,8 +3,9 @@
 import { useEffect, useState, useCallback } from "react";
 import Link from "next/link";
 import { useSession } from "next-auth/react";
-import { Plus, Folder, Star, MoreVertical, Search, Copy, Trash2, Edit2 } from "lucide-react";
+import { Plus, Folder, Star, MoreVertical, Search, Copy, Trash2, Edit2, ArrowRight } from "lucide-react";
 import { NewProjectSlideOver } from "./NewProjectSlideOver";
+import { getProjectCardStyles } from "@/app/cloud/components/ProjectCard";
 
 type MediaItem = { public_url: string; display_order: number };
 type Project = {
@@ -101,31 +102,31 @@ export default function CloudProjectsPage() {
 
   if (status === "loading" || loading) {
     return (
-      <div className="flex min-h-[60vh] items-center justify-center">
-        <div className="h-6 w-6 animate-spin rounded-full border-2 border-white/10 border-t-[#D4FF4F]" />
+      <div className="flex min-h-[60vh] items-center justify-center bg-[#F5F5F0]">
+        <div className="h-6 w-6 animate-spin rounded-full border-2 border-black/10 border-t-[#0a0a0a]" />
       </div>
     );
   }
 
   return (
-    <div className="px-6 py-6 lg:px-8">
+    <div className="min-h-screen bg-[#F5F5F0] font-cloud-body px-5 py-4 lg:px-8">
       {/* Top bar */}
-      <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-        <div className="relative flex-1 max-w-xs">
-          <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-white/30" />
+      <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+        <div className="relative flex-1 max-w-sm">
+          <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[#999990]" strokeWidth={1.8} />
           <input
             type="text"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             placeholder="Search projects…"
-            className="w-full rounded-xl border border-white/10 bg-white/5 py-2.5 pl-9 pr-4 text-[14px] text-white placeholder-white/30 outline-none focus:border-[#D4FF4F]"
+            className="w-full rounded-xl border border-black/[0.08] bg-white py-2.5 pl-9 pr-4 text-[13px] text-[#0a0a0a] placeholder-[#999990] outline-none focus:border-black/[0.2] font-cloud-body"
           />
         </div>
         <div className="flex items-center gap-2">
           <select
             value={sortKey}
             onChange={(e) => setSortKey(e.target.value as SortKey)}
-            className="rounded-xl border border-white/10 bg-[#1a1a1a] px-3 py-2.5 text-[13px] text-white outline-none"
+            className="rounded-xl border border-black/[0.08] bg-white px-3 py-2.5 text-[13px] text-[#666660] outline-none font-cloud-body"
           >
             <option value="newest">Newest first</option>
             <option value="oldest">Oldest first</option>
@@ -134,7 +135,7 @@ export default function CloudProjectsPage() {
           </select>
           <button
             onClick={() => setShowNew(true)}
-            className="flex items-center gap-1.5 rounded-xl bg-[#D4FF4F] px-4 py-2.5 text-[13px] font-semibold text-black transition-colors hover:bg-[#c4ef3f]"
+            className="flex items-center gap-1.5 rounded-xl bg-[#D4FF4F] px-4 py-2.5 text-[13px] font-bold text-black transition-colors hover:bg-[#C8F244] font-cloud-body"
           >
             <Plus className="h-3.5 w-3.5" />
             New project
@@ -144,43 +145,50 @@ export default function CloudProjectsPage() {
 
       {/* Category filter pills */}
       {allCategories.length > 0 && (
-        <div className="mb-5 flex flex-wrap gap-2">
+        <div className="mb-4 flex gap-2 overflow-x-auto pb-1 scrollbar-hide">
           <button
             onClick={() => setActiveCategory(null)}
-            className={`rounded-full px-3.5 py-1.5 text-[13px] font-medium transition-colors ${
+            className={`flex-shrink-0 rounded-full px-3.5 py-1.5 text-[12px] font-semibold transition-colors font-cloud-body ${
               activeCategory === null
-                ? "bg-white text-black"
-                : "border border-white/10 bg-white/5 text-white/60 hover:bg-white/10"
+                ? "bg-[#0a0a0a] text-white"
+                : "border border-black/[0.08] bg-white text-[#666660] hover:border-black/[0.15]"
             }`}
           >
             All
           </button>
-          {allCategories.map((cat) => (
-            <button
-              key={cat}
-              onClick={() => setActiveCategory(activeCategory === cat ? null : cat)}
-              className={`rounded-full px-3.5 py-1.5 text-[13px] font-medium transition-colors ${
-                activeCategory === cat
-                  ? "bg-[#D4FF4F] text-black"
-                  : "border border-white/10 bg-white/5 text-white/60 hover:bg-white/10"
-              }`}
-            >
-              {cat}
-            </button>
-          ))}
+          {allCategories.map((cat) => {
+            const s = getProjectCardStyles(cat);
+            const isAct = activeCategory === cat;
+            return (
+              <button
+                key={cat}
+                onClick={() => setActiveCategory(activeCategory === cat ? null : cat)}
+                className={`flex-shrink-0 rounded-full px-3.5 py-1.5 text-[12px] font-semibold transition-colors font-cloud-body border ${
+                  isAct ? `${s.gradient} ${s.border} ${s.text}` : "border-black/[0.08] bg-white text-[#666660] hover:border-black/[0.15]"
+                }`}
+              >
+                {cat}
+              </button>
+            );
+          })}
         </div>
       )}
 
       {filtered.length === 0 && !loading ? (
         <div className="flex min-h-[40vh] flex-col items-center justify-center text-center">
-          <Folder className="mb-4 h-10 w-10 text-white/20" />
-          <p className="text-[14px] text-white/40">
-            {search ? "No projects match your search." : "No projects yet."}
+          <div className="mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-white border border-black/[0.07]">
+            <Folder className="h-6 w-6 text-[#999990]" strokeWidth={1.5} />
+          </div>
+          <p className="font-cloud-display text-[18px] text-[#0a0a0a] mb-1">
+            {search ? "No results" : "No projects yet"}
+          </p>
+          <p className="text-[13px] text-[#999990] font-cloud-body mb-5">
+            {search ? "No projects match your search." : "Create your first project to get started."}
           </p>
           {!search && (
             <button
               onClick={() => setShowNew(true)}
-              className="mt-4 rounded-lg bg-[#D4FF4F] px-5 py-2.5 text-[14px] font-semibold text-black"
+              className="rounded-xl bg-[#D4FF4F] px-5 py-3 text-[14px] font-bold text-black font-cloud-body hover:bg-[#C8F244] transition-colors"
             >
               Create your first project
             </button>
@@ -188,98 +196,114 @@ export default function CloudProjectsPage() {
         </div>
       ) : (
         <div className="columns-1 gap-4 sm:columns-2 lg:columns-3">
-          {filtered.map((p) => (
-            <div key={p.id} className="mb-4 break-inside-avoid">
-              <div className="group relative overflow-hidden rounded-2xl bg-[#111111]">
-                {/* Cover */}
-                <Link href={`/cloud/dashboard/projects/${p.id}`}>
-                  <div className="relative">
-                    {cover(p) ? (
-                      /* eslint-disable-next-line @next/next/no-img-element */
-                      <img
-                        src={cover(p)!}
-                        alt={p.title}
-                        className="w-full object-cover transition-transform duration-300 group-hover:scale-105"
-                        style={{ aspectRatio: "auto" }}
-                      />
-                    ) : (
-                      <div className="flex aspect-[4/3] items-center justify-center">
-                        <Folder className="h-10 w-10 text-white/20" />
-                      </div>
+          {filtered.map((p) => {
+            const s = getProjectCardStyles(p.category);
+            return (
+              <div key={p.id} className="mb-4 break-inside-avoid">
+                <div className={`relative overflow-hidden rounded-[20px] border ${s.gradient} ${s.border}`}>
+                  {/* Top row: category badge + three-dot menu */}
+                  <div className="flex items-center justify-between px-3.5 pt-3.5 pb-1">
+                    {p.category ? (
+                      <span className={`rounded-full px-2.5 py-0.5 text-[11px] font-semibold font-cloud-body ${s.badge}`}>
+                        {p.category}
+                      </span>
+                    ) : <span />}
+                    {p.is_featured && (
+                      <span className="flex items-center gap-1 rounded-full bg-white/60 px-2 py-0.5 text-[11px] font-semibold text-[#5C7A00] font-cloud-body">
+                        <Star className="h-2.5 w-2.5" />
+                        Featured
+                      </span>
                     )}
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent" />
-                  </div>
-                </Link>
-
-                {/* Featured badge */}
-                {p.is_featured && (
-                  <div className="absolute left-3 top-3">
-                    <span className="flex items-center gap-1 rounded-full bg-[#D4FF4F]/90 px-2 py-0.5 text-[11px] font-semibold text-black backdrop-blur-sm">
-                      <Star className="h-2.5 w-2.5" />
-                      Featured
-                    </span>
-                  </div>
-                )}
-
-                {/* Three-dot menu */}
-                <div className="absolute right-2 top-2">
-                  <button
-                    onClick={() => setMenuOpen(menuOpen === p.id ? null : p.id)}
-                    className="rounded-lg bg-black/50 p-1.5 text-white/70 backdrop-blur-sm hover:text-white"
-                  >
-                    <MoreVertical className="h-4 w-4" />
-                  </button>
-                  {menuOpen === p.id && (
-                    <div className="absolute right-0 top-8 z-20 w-44 rounded-xl border border-white/10 bg-[#1a1a1a] py-1.5 shadow-xl">
-                      <Link
-                        href={`/cloud/dashboard/projects/${p.id}`}
-                        className="flex items-center gap-2.5 px-4 py-2 text-[13px] text-white/70 hover:bg-white/5 hover:text-white"
-                        onClick={() => setMenuOpen(null)}
-                      >
-                        <Edit2 className="h-3.5 w-3.5" />
-                        Edit details
-                      </Link>
+                    <div className="relative ml-auto">
                       <button
-                        onClick={() => copyShareLink(p)}
-                        className="flex w-full items-center gap-2.5 px-4 py-2 text-[13px] text-white/70 hover:bg-white/5 hover:text-white"
+                        onClick={() => setMenuOpen(menuOpen === p.id ? null : p.id)}
+                        className="rounded-lg bg-white/40 p-1.5 text-current hover:bg-white/60 transition-colors"
                       >
-                        <Copy className="h-3.5 w-3.5" />
-                        Copy share link
+                        <MoreVertical className={`h-4 w-4 ${s.text}`} />
                       </button>
-                      <button
-                        onClick={() => void handleToggleFeatured(p)}
-                        className="flex w-full items-center gap-2.5 px-4 py-2 text-[13px] text-white/70 hover:bg-white/5 hover:text-white"
-                      >
-                        <Star className="h-3.5 w-3.5" />
-                        {p.is_featured ? "Unfeature" : "Set as featured"}
-                      </button>
-                      <hr className="my-1 border-white/10" />
-                      <button
-                        onClick={() => void handleDelete(p)}
-                        className="flex w-full items-center gap-2.5 px-4 py-2 text-[13px] text-red-400 hover:bg-red-500/10"
-                      >
-                        <Trash2 className="h-3.5 w-3.5" />
-                        Delete
-                      </button>
+                      {menuOpen === p.id && (
+                        <div className="absolute right-0 top-8 z-20 w-44 rounded-xl border border-black/[0.08] bg-white py-1.5 shadow-xl">
+                          <Link
+                            href={`/cloud/dashboard/projects/${p.id}`}
+                            className="flex items-center gap-2.5 px-4 py-2 text-[13px] text-[#666660] hover:bg-[#F5F5F0] hover:text-[#0a0a0a]"
+                            onClick={() => setMenuOpen(null)}
+                          >
+                            <Edit2 className="h-3.5 w-3.5" />
+                            Edit details
+                          </Link>
+                          <button
+                            onClick={() => copyShareLink(p)}
+                            className="flex w-full items-center gap-2.5 px-4 py-2 text-[13px] text-[#666660] hover:bg-[#F5F5F0] hover:text-[#0a0a0a]"
+                          >
+                            <Copy className="h-3.5 w-3.5" />
+                            Copy share link
+                          </button>
+                          <button
+                            onClick={() => void handleToggleFeatured(p)}
+                            className="flex w-full items-center gap-2.5 px-4 py-2 text-[13px] text-[#666660] hover:bg-[#F5F5F0] hover:text-[#0a0a0a]"
+                          >
+                            <Star className="h-3.5 w-3.5" />
+                            {p.is_featured ? "Unfeature" : "Set as featured"}
+                          </button>
+                          <hr className="my-1 border-black/[0.06]" />
+                          <button
+                            onClick={() => void handleDelete(p)}
+                            className="flex w-full items-center gap-2.5 px-4 py-2 text-[13px] text-red-500 hover:bg-red-50"
+                          >
+                            <Trash2 className="h-3.5 w-3.5" />
+                            Delete
+                          </button>
+                        </div>
+                      )}
                     </div>
-                  )}
+                  </div>
+
+                  {/* Cover photo */}
+                  <Link href={`/cloud/dashboard/projects/${p.id}`}>
+                    <div className="mx-3.5 rounded-xl overflow-hidden bg-white/30" style={{ height: 110 }}>
+                      {cover(p) ? (
+                        /* eslint-disable-next-line @next/next/no-img-element */
+                        <img
+                          src={cover(p)!}
+                          alt={p.title}
+                          className="w-full h-full object-cover"
+                        />
+                      ) : (
+                        <div className="flex h-full items-center justify-center">
+                          <Folder className={`h-8 w-8 opacity-30 ${s.text}`} />
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Info */}
+                    <div className="px-3.5 py-3">
+                      <p className={`font-cloud-display text-[15px] leading-tight truncate ${s.text}`}>{p.title}</p>
+                      <div className={`mt-1 flex items-center gap-2 text-[11px] font-cloud-body ${s.subtext}`}>
+                        {p.location && <span className="truncate">{p.location}</span>}
+                        <span className="ml-auto flex items-center gap-1">
+                          {p.project_media?.length ?? 0} photos
+                          <ArrowRight className="h-3 w-3" />
+                        </span>
+                      </div>
+                    </div>
+                  </Link>
                 </div>
-
-                {/* Info overlay */}
-                <Link href={`/cloud/dashboard/projects/${p.id}`}>
-                  <div className="absolute bottom-0 left-0 right-0 p-4">
-                    <p className="truncate text-[14px] font-semibold text-white">{p.title}</p>
-                    <div className="mt-1 flex items-center gap-2 text-[11px] text-white/50">
-                      {p.category && <span>{p.category}</span>}
-                      {p.category && p.location && <span>·</span>}
-                      {p.location && <span>{p.location}</span>}
-                      <span className="ml-auto">{p.project_media?.length ?? 0} photos</span>
-                    </div>
-                  </div>
-                </Link>
               </div>
-            </div>
-          ))}
+            );
+          })}
+
+          {/* New project dashed card */}
+          <div className="mb-4 break-inside-avoid">
+            <button
+              onClick={() => setShowNew(true)}
+              className="w-full rounded-[20px] border-2 border-dashed border-[#D8D8D0] bg-[#EEEEE8] flex flex-col items-center justify-center gap-3 py-10 hover:border-[#C0C0B8] transition-colors active:scale-[0.99]"
+            >
+              <div className="w-10 h-10 rounded-full bg-white flex items-center justify-center" style={{ boxShadow: 'var(--cloud-shadow-card)' }}>
+                <Plus className="w-4 h-4 text-[#999990]" />
+              </div>
+              <span className="text-[13px] text-[#999990] font-cloud-body">New project</span>
+            </button>
+          </div>
         </div>
       )}
 
@@ -290,7 +314,7 @@ export default function CloudProjectsPage() {
 
       {/* Toast */}
       {toastMsg && (
-        <div className="fixed bottom-24 left-1/2 z-50 -translate-x-1/2 rounded-full bg-white/10 px-5 py-2.5 text-[13px] text-white backdrop-blur-md lg:bottom-8">
+        <div className="fixed bottom-24 left-1/2 z-50 -translate-x-1/2 rounded-full bg-[#0a0a0a]/90 px-5 py-2.5 text-[13px] text-white backdrop-blur-md font-cloud-body lg:bottom-8">
           {toastMsg}
         </div>
       )}

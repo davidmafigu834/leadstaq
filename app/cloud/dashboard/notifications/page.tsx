@@ -79,20 +79,20 @@ export default function NotificationsPage() {
   }
 
   return (
-    <div className="px-6 py-6 lg:px-8">
+    <div className="min-h-screen bg-[#F5F5F0] font-cloud-body px-5 py-4 lg:px-8">
       <div className="mx-auto max-w-xl">
-        <div className="mb-6 flex items-center justify-between">
+        <div className="mb-5 flex items-center justify-between">
           <div>
-            <h1 className="text-[15px] font-semibold text-white">Notifications</h1>
+            <p className="font-cloud-display text-[22px] text-[#0a0a0a]">Notifications</p>
             {unread > 0 && (
-              <p className="text-[13px] text-white/40">{unread} unread</p>
+              <p className="text-[12px] text-[#999990] font-cloud-body">{unread} unread</p>
             )}
           </div>
           {unread > 0 && (
             <button
               onClick={() => void markAllRead()}
               disabled={markingAll}
-              className="flex items-center gap-1.5 rounded-lg border border-white/10 px-3 py-1.5 text-[13px] text-white/60 hover:bg-white/5 hover:text-white transition-colors disabled:opacity-50"
+              className="flex items-center gap-1.5 rounded-xl border border-black/[0.08] bg-white px-3 py-1.5 text-[12px] font-semibold text-[#666660] hover:border-black/[0.15] hover:text-[#0a0a0a] transition-colors disabled:opacity-50 font-cloud-body"
             >
               {markingAll ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <CheckCheck className="h-3.5 w-3.5" />}
               Mark all read
@@ -102,15 +102,15 @@ export default function NotificationsPage() {
 
         {loading ? (
           <div className="flex justify-center py-20">
-            <Loader2 className="h-5 w-5 animate-spin text-white/30" />
+            <Loader2 className="h-5 w-5 animate-spin text-[#0a0a0a]/20" />
           </div>
         ) : notifications.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-20 text-center">
-            <div className="mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-white/5">
-              <Bell className="h-6 w-6 text-white/20" strokeWidth={1.5} />
+            <div className="mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-white border border-black/[0.07]">
+              <Bell className="h-6 w-6 text-[#999990]" strokeWidth={1.5} />
             </div>
-            <p className="text-[14px] font-medium text-white/50">No notifications yet</p>
-            <p className="mt-1 text-[13px] text-white/25">We&apos;ll let you know when something happens.</p>
+            <p className="font-cloud-display text-[18px] text-[#0a0a0a] mb-1">No notifications yet</p>
+            <p className="text-[13px] text-[#999990] font-cloud-body">We&apos;ll let you know when something happens.</p>
           </div>
         ) : (
           <div className="space-y-2">
@@ -118,25 +118,25 @@ export default function NotificationsPage() {
               <div
                 key={n.id}
                 onClick={() => { if (!n.read) void markOneRead(n.id); }}
-                className={`flex items-start gap-3 rounded-xl border px-4 py-3.5 transition-colors cursor-pointer ${
+                className={`flex items-start gap-3 rounded-[20px] border px-4 py-4 transition-all cursor-pointer active:scale-[0.99] ${
                   n.read
-                    ? "border-white/[0.06] bg-[#111]"
-                    : "border-[#D4FF4F]/20 bg-[#D4FF4F]/5 hover:bg-[#D4FF4F]/8"
+                    ? "border-black/[0.07] bg-white"
+                    : "border-[#C4A8FF]/30 bg-gradient-to-br from-[#F5F0FF] via-[#EDE5FF] to-[#DDD0FF]"
                 }`}
               >
                 <div
-                  className={`mt-0.5 h-2 w-2 flex-shrink-0 rounded-full ${
-                    n.read ? "bg-white/10" : "bg-[#D4FF4F]"
+                  className={`mt-1 h-2 w-2 flex-shrink-0 rounded-full ${
+                    n.read ? "bg-black/10" : "bg-[#7B5EA7]"
                   }`}
                 />
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center justify-between gap-2">
-                    <span className="text-[12px] font-medium text-white/50">
+                    <span className={`text-[11px] font-semibold font-cloud-body ${n.read ? "text-[#999990]" : "text-[#7B5EA7]"}`}>
                       {TYPE_LABEL[n.type] ?? n.type}
                     </span>
-                    <span className="flex-shrink-0 text-[11px] text-white/25">{timeAgo(n.created_at)}</span>
+                    <span className={`flex-shrink-0 text-[11px] font-cloud-body ${n.read ? "text-[#CCCCBB]" : "text-[#7B5EA7]/70"}`}>{timeAgo(n.created_at)}</span>
                   </div>
-                  <p className={`mt-0.5 text-[13px] leading-snug ${n.read ? "text-white/50" : "text-white"}`}>
+                  <p className={`mt-0.5 text-[13px] leading-snug font-cloud-body ${n.read ? "text-[#666660]" : "text-[#2D1B6B]"}`}>
                     {n.message}
                   </p>
                 </div>

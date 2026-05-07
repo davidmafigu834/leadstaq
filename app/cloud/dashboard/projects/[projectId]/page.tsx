@@ -10,6 +10,7 @@ import {
   MapPin, Calendar,
 } from "lucide-react";
 import Link from "next/link";
+import { getProjectCardStyles } from "@/app/cloud/components/ProjectCard";
 
 type MediaItem = {
   id: string;
@@ -279,14 +280,16 @@ export default function ProjectDetailPage() {
 
   const currentMedia = lightboxIdx !== null ? media[lightboxIdx] : null;
 
+  const catStyles = project ? getProjectCardStyles(project.category) : null;
+
   return (
-    <div className="px-6 py-6 lg:px-8">
+    <div className="min-h-screen bg-[#F5F5F0] font-cloud-body px-5 py-4 lg:px-8">
       {/* Header */}
-      <div className="mb-6 flex items-start justify-between gap-4">
+      <div className="mb-5 flex items-start justify-between gap-4">
         <div className="flex-1 min-w-0">
           <Link
             href="/cloud/dashboard/projects"
-            className="mb-3 flex items-center gap-1.5 text-xs text-white/40 hover:text-white transition-colors"
+            className="mb-3 flex items-center gap-1.5 text-[12px] text-[#999990] hover:text-[#0a0a0a] transition-colors font-cloud-body"
           >
             <ArrowLeft className="h-3.5 w-3.5" />
             Projects
@@ -300,31 +303,31 @@ export default function ProjectDetailPage() {
               onBlur={() => void saveTitle()}
               onKeyDown={(e) => { if (e.key === "Enter") void saveTitle(); }}
               autoFocus
-              className="w-full rounded-lg border border-[#D4FF4F] bg-white/5 px-3 py-1.5 text-xl font-semibold text-white outline-none"
+              className="w-full rounded-xl border border-[#D4FF4F] bg-white px-3 py-1.5 font-cloud-display text-[20px] text-[#0a0a0a] outline-none"
             />
           ) : (
             <button
               onClick={() => setEditingTitle(true)}
               className="group flex items-center gap-2 text-left"
             >
-              <h1 className="text-xl font-semibold text-white">{project.title}</h1>
-              <Pencil className="h-3.5 w-3.5 text-white/20 opacity-0 transition-opacity group-hover:opacity-100" />
+              <h1 className="font-cloud-display text-[20px] text-[#0a0a0a]">{project.title}</h1>
+              <Pencil className="h-3.5 w-3.5 text-[#999990] opacity-0 transition-opacity group-hover:opacity-100" />
             </button>
           )}
 
-          <div className="mt-1.5 flex flex-wrap items-center gap-3 text-xs text-white/40">
-            {project.category && (
-              <span className="rounded-full border border-white/10 px-2.5 py-0.5 text-[10px]">
+          <div className="mt-2 flex flex-wrap items-center gap-2">
+            {project.category && catStyles && (
+              <span className={`rounded-full px-2.5 py-0.5 text-[11px] font-semibold font-cloud-body ${catStyles.badge}`}>
                 {project.category}
               </span>
             )}
             {project.location && (
-              <span className="flex items-center gap-1">
+              <span className="flex items-center gap-1 text-[12px] text-[#999990] font-cloud-body">
                 <MapPin className="h-3 w-3" />{project.location}
               </span>
             )}
             {project.completion_date && (
-              <span className="flex items-center gap-1">
+              <span className="flex items-center gap-1 text-[12px] text-[#999990] font-cloud-body">
                 <Calendar className="h-3 w-3" />
                 {new Date(project.completion_date).toLocaleDateString("en-US", { month: "long", year: "numeric" })}
               </span>
@@ -335,33 +338,33 @@ export default function ProjectDetailPage() {
         <div className="flex items-center gap-2">
           <button
             onClick={copyShareLink}
-            className="flex items-center gap-1.5 rounded-lg border border-white/10 bg-white/5 px-3 py-2 text-xs font-medium text-white hover:bg-white/10 transition-colors"
+            className="flex items-center gap-1.5 rounded-xl bg-[#D4FF4F] px-3 py-2 text-[12px] font-bold text-[#0a0a0a] hover:bg-[#C8F244] transition-colors font-cloud-body"
           >
             <Copy className="h-3.5 w-3.5" />
-            Share link
+            Share
           </button>
 
           <div className="relative">
             <button
               onClick={() => setMenuOpen((v) => !v)}
-              className="rounded-lg border border-white/10 bg-white/5 p-2 text-white/60 hover:bg-white/10 hover:text-white transition-colors"
+              className="rounded-xl border border-black/[0.08] bg-white p-2 text-[#666660] hover:border-black/[0.15] hover:text-[#0a0a0a] transition-colors"
             >
               <MoreVertical className="h-4 w-4" />
             </button>
             {menuOpen && (
               <>
                 <div className="fixed inset-0 z-10" onClick={() => setMenuOpen(false)} />
-                <div className="absolute right-0 top-10 z-20 w-44 rounded-xl border border-white/10 bg-[#1a1a1a] py-1.5 shadow-xl">
+                <div className="absolute right-0 top-10 z-20 w-44 rounded-xl border border-black/[0.08] bg-white py-1.5 shadow-xl">
                   <Link
                     href={`/cloud/dashboard/projects/${projectId}/analytics`}
-                    className="flex w-full items-center gap-2.5 px-4 py-2 text-sm text-white/70 hover:bg-white/10 hover:text-white"
+                    className="flex w-full items-center gap-2.5 px-4 py-2 text-[13px] text-[#666660] hover:bg-[#F5F5F0] hover:text-[#0a0a0a]"
                   >
                     <BarChart2 className="h-3.5 w-3.5" />
                     View analytics
                   </Link>
                   <button
                     onClick={() => void handleDeleteProject()}
-                    className="flex w-full items-center gap-2.5 px-4 py-2 text-sm text-red-400 hover:bg-red-500/10"
+                    className="flex w-full items-center gap-2.5 px-4 py-2 text-[13px] text-red-500 hover:bg-red-50"
                   >
                     <Trash2 className="h-3.5 w-3.5" />
                     Delete project
@@ -373,7 +376,7 @@ export default function ProjectDetailPage() {
         </div>
       </div>
 
-      {/* Upload zone */}
+      {/* Upload zone — mint SectionCard */}
       <div
         onDragOver={(e) => { e.preventDefault(); setDraggingOver(true); }}
         onDragLeave={() => setDraggingOver(false)}
@@ -383,10 +386,10 @@ export default function ProjectDetailPage() {
           addFiles(Array.from(e.dataTransfer.files));
         }}
         onClick={() => fileInputRef.current?.click()}
-        className={`mb-6 flex min-h-[120px] cursor-pointer flex-col items-center justify-center rounded-2xl border-2 border-dashed p-6 transition-colors ${
+        className={`mb-5 cursor-pointer rounded-[20px] border transition-all ${
           draggingOver
-            ? "border-[#D4FF4F] bg-[#D4FF4F]/5"
-            : "border-white/15 hover:border-white/30 hover:bg-white/5"
+            ? "border-[#60E8A0]/60 bg-gradient-to-br from-[#E0FFF0] to-[#A8FFD0]"
+            : "border-[#60E8A0]/30 bg-gradient-to-br from-[#F0FFF8] via-[#E0FFF0] to-[#C8FFE0]"
         }`}
       >
         <input
@@ -397,35 +400,49 @@ export default function ProjectDetailPage() {
           className="hidden"
           onChange={(e) => { addFiles(Array.from(e.target.files ?? [])); e.target.value = ""; }}
         />
-        <Camera className={`mb-2 h-7 w-7 ${draggingOver ? "text-[#D4FF4F]" : "text-white/30"}`} strokeWidth={1.5} />
-        <p className="text-sm font-medium text-white/70">Add photos</p>
-        <p className="mt-0.5 text-xs text-white/30">Tap to select from your gallery, or drag and drop here</p>
+        <div className="flex flex-col items-center justify-center py-7 px-5">
+          <div className="mb-2 flex h-12 w-12 items-center justify-center rounded-full bg-white/70" style={{ boxShadow: 'var(--cloud-shadow-card)' }}>
+            <Camera className={`h-6 w-6 ${draggingOver ? "text-[#00875A]" : "text-[#00875A]"}`} strokeWidth={1.8} />
+          </div>
+          <p className="font-cloud-display text-[16px] text-[#004D30]">Add photos</p>
+          <p className="mt-0.5 text-[12px] text-[#00875A] font-cloud-body">
+            {draggingOver ? "Drop to add" : "Tap to select · or drag & drop"}
+          </p>
+        </div>
       </div>
 
       {/* Upload queue */}
       {uploadFiles.length > 0 && (
-        <div className="mb-6 grid grid-cols-4 gap-2 sm:grid-cols-6 lg:grid-cols-8">
+        <div className="mb-5 grid grid-cols-4 gap-2 sm:grid-cols-6 lg:grid-cols-8">
           {uploadFiles.map((f) => (
-            <div key={f.id} className="relative aspect-square overflow-hidden rounded-lg bg-white/5">
+            <div key={f.id} className="relative aspect-square overflow-hidden rounded-xl bg-black/5">
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img src={f.previewUrl} alt="" className="h-full w-full object-cover" />
               {f.status === "uploading" && (
-                <div className="absolute inset-x-0 bottom-0 h-1 bg-white/10">
+                <div className="absolute inset-x-0 bottom-0 h-1 bg-black/10">
                   <div className="h-full bg-[#D4FF4F] transition-all" style={{ width: `${f.progress}%` }} />
                 </div>
               )}
               {f.status === "done" && (
-                <div className="absolute inset-0 flex items-center justify-center bg-black/40">
-                  <Check className="h-5 w-5 text-[#D4FF4F]" />
+                <div className="absolute inset-0 flex items-center justify-center bg-black/30">
+                  <Check className="h-5 w-5 text-white" />
                 </div>
               )}
               {f.status === "error" && (
                 <div className="absolute inset-0 flex items-center justify-center bg-red-500/20">
-                  <X className="h-5 w-5 text-red-400" />
+                  <X className="h-5 w-5 text-red-500" />
                 </div>
               )}
             </div>
           ))}
+        </div>
+      )}
+
+      {/* Photo count bar */}
+      {media.length > 0 && (
+        <div className="mb-3 flex items-center justify-between">
+          <p className="text-[10px] font-bold tracking-[0.08em] text-[#999990] uppercase font-cloud-body">{media.length} photos</p>
+          <p className="text-[11px] text-[#999990] font-cloud-body">drag to reorder</p>
         </div>
       )}
 
@@ -437,7 +454,7 @@ export default function ProjectDetailPage() {
               <div
                 ref={provided.innerRef}
                 {...provided.droppableProps}
-                className="mb-8 grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-4"
+                className="mb-5 grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-4"
               >
                 {media.map((m, idx) => (
                   <Draggable key={m.id} draggableId={m.id} index={idx}>
@@ -452,7 +469,7 @@ export default function ProjectDetailPage() {
                             setCaptionDraft(m.caption ?? "");
                           }
                         }}
-                        className={`group relative aspect-square cursor-grab overflow-hidden rounded-xl bg-white/5 active:cursor-grabbing ${snap.isDragging ? "z-10 ring-2 ring-[#D4FF4F]" : ""}`}
+                        className={`group relative aspect-square cursor-grab overflow-hidden rounded-xl bg-black/5 active:cursor-grabbing ${snap.isDragging ? "z-10 ring-2 ring-[#D4FF4F]" : ""}`}
                       >
                         {/* eslint-disable-next-line @next/next/no-img-element */}
                         <img
@@ -460,16 +477,15 @@ export default function ProjectDetailPage() {
                           alt={m.caption ?? `Photo ${idx + 1}`}
                           className="h-full w-full object-cover"
                         />
-                        {/* Hover overlay — desktop only */}
-                        <div className="pointer-events-none absolute inset-0 bg-black/60 opacity-0 transition-opacity group-hover:opacity-100" />
+                        <div className="pointer-events-none absolute inset-0 bg-black/50 opacity-0 transition-opacity group-hover:opacity-100" />
                         {m.caption && (
-                          <p className="pointer-events-none absolute bottom-2 left-2 right-2 text-[10px] text-white/80 opacity-0 transition-opacity group-hover:opacity-100">
+                          <p className="pointer-events-none absolute bottom-2 left-2 right-2 text-[10px] text-white/90 opacity-0 transition-opacity group-hover:opacity-100 font-cloud-body">
                             {m.caption}
                           </p>
                         )}
                         <button
                           onClick={(e) => { e.stopPropagation(); void deleteMedia(m.id); }}
-                          className="absolute right-1.5 top-1.5 rounded-full bg-black/60 p-1 text-white/60 transition-opacity hover:text-red-400 opacity-100 lg:opacity-0 lg:group-hover:opacity-100"
+                          className="absolute right-1.5 top-1.5 rounded-full bg-white/80 p-1 text-[#666660] transition-opacity hover:text-red-500 opacity-100 lg:opacity-0 lg:group-hover:opacity-100"
                         >
                           <X className="h-3 w-3" />
                         </button>
@@ -484,14 +500,14 @@ export default function ProjectDetailPage() {
         </DragDropContext>
       )}
 
-      {/* Description */}
-      <div className="rounded-2xl border border-white/10 bg-[#111111] p-5">
+      {/* Description — stats SectionCard */}
+      <div className="rounded-[20px] border border-[#D0D0C0]/40 bg-gradient-to-br from-[#F8F8F4] via-[#F0F0EA] to-[#E8E8E0] p-5 mb-4">
         <div className="mb-3 flex items-center gap-2">
-          <h3 className="text-sm font-semibold text-white">About this project</h3>
+          <h3 className="font-cloud-body text-[10px] font-bold tracking-[0.08em] text-[#666660] uppercase">About this project</h3>
           {!editingDesc && (
             <button
               onClick={() => setEditingDesc(true)}
-              className="rounded p-0.5 text-white/30 hover:text-white transition-colors"
+              className="rounded p-0.5 text-[#999990] hover:text-[#0a0a0a] transition-colors"
             >
               <Pencil className="h-3 w-3" />
             </button>
@@ -505,18 +521,37 @@ export default function ProjectDetailPage() {
             autoFocus
             rows={4}
             placeholder="Describe this project — materials used, scope of work, etc."
-            className="w-full resize-none rounded-xl border border-[#D4FF4F] bg-white/5 px-4 py-3 text-sm text-white placeholder-white/30 outline-none"
+            className="w-full resize-none rounded-xl border border-black/[0.1] bg-white/70 px-4 py-3 text-[13px] text-[#0a0a0a] placeholder-[#999990] outline-none focus:border-black/[0.2] font-cloud-body"
           />
         ) : (
           <p
-            className="cursor-text text-sm text-white/50"
+            className="cursor-text text-[13px] text-[#666660] font-cloud-body"
             onClick={() => setEditingDesc(true)}
           >
             {project.description || (
-              <span className="italic text-white/25">Add a description…</span>
+              <span className="italic text-[#999990]">Add a description…</span>
             )}
           </p>
         )}
+      </div>
+
+      {/* Analytics teaser — activity SectionCard */}
+      <div className="rounded-[20px] border border-[#C4A8FF]/30 bg-gradient-to-br from-[#F5F0FF] via-[#EDE5FF] to-[#DDD0FF] p-4 flex items-center justify-between mb-4">
+        <div className="flex items-center gap-3">
+          <div className="flex h-9 w-9 items-center justify-center rounded-full bg-white/50">
+            <BarChart2 className="h-4 w-4 text-[#2D1B6B]" strokeWidth={1.8} />
+          </div>
+          <div>
+            <p className="font-cloud-display text-[14px] text-[#2D1B6B]">Analytics</p>
+            <p className="text-[11px] text-[#7B5EA7] font-cloud-body">Track views and engagement</p>
+          </div>
+        </div>
+        <Link
+          href={`/cloud/dashboard/projects/${projectId}/analytics`}
+          className="text-[12px] font-semibold text-[#2D1B6B] font-cloud-body hover:underline"
+        >
+          View →
+        </Link>
       </div>
 
       {/* Lightbox */}
@@ -584,11 +619,11 @@ export default function ProjectDetailPage() {
               onChange={(e) => setCaptionDraft(e.target.value)}
               onBlur={() => void saveCaption(currentMedia.id, captionDraft)}
               placeholder="Add a caption…"
-              className="w-full rounded-xl border border-white/10 bg-white/10 px-4 py-2.5 text-center text-sm text-white placeholder-white/30 outline-none focus:border-[#D4FF4F] backdrop-blur-sm"
+              className="w-full rounded-xl border border-white/10 bg-white/10 px-4 py-2.5 text-center text-[13px] text-white placeholder-white/30 outline-none focus:border-[#D4FF4F] backdrop-blur-sm font-cloud-body"
             />
           </div>
 
-          <div className="absolute bottom-20 left-1/2 -translate-x-1/2 text-xs text-white/30">
+          <div className="absolute bottom-20 left-1/2 -translate-x-1/2 text-[12px] text-white/30 font-cloud-body">
             {lightboxIdx + 1} / {media.length}
           </div>
         </div>
@@ -596,7 +631,7 @@ export default function ProjectDetailPage() {
 
       {/* Toast */}
       {toastMsg && (
-        <div className="fixed bottom-24 left-1/2 z-50 -translate-x-1/2 rounded-full bg-white/10 px-5 py-2.5 text-sm text-white backdrop-blur-md lg:bottom-8">
+        <div className="fixed bottom-24 left-1/2 z-50 -translate-x-1/2 rounded-full bg-[#0a0a0a]/90 px-5 py-2.5 text-[13px] text-white backdrop-blur-md font-cloud-body lg:bottom-8">
           {toastMsg}
         </div>
       )}

@@ -37,16 +37,11 @@ function isActive(href: string, pathname: string) {
   return pathname.startsWith(href);
 }
 
-function pageTitleFor(pathname: string): string {
-  if (pathname === "/cloud/dashboard") return "Home";
-  if (pathname.startsWith("/cloud/dashboard/projects")) return "Projects";
-  if (pathname.startsWith("/cloud/dashboard/upload")) return "Upload";
-  if (pathname.startsWith("/cloud/dashboard/team")) return "Team";
-  if (pathname.startsWith("/cloud/dashboard/settings")) return "Settings";
-  if (pathname.startsWith("/cloud/dashboard/notifications")) return "Notifications";
-  if (pathname.startsWith("/cloud/dashboard/billing")) return "Billing";
-  if (pathname.startsWith("/cloud/help")) return "Help";
-  return "Cloud";
+function getGreeting(): string {
+  const h = new Date().getHours();
+  if (h < 12) return "Good morning";
+  if (h < 17) return "Good afternoon";
+  return "Good evening";
 }
 
 function WelcomeToast() {
@@ -65,7 +60,7 @@ function WelcomeToast() {
 
   if (!show) return null;
   return (
-    <div className="fixed bottom-28 left-1/2 z-[300] -translate-x-1/2 rounded-xl border border-[#D4FF4F]/20 bg-[#111] px-5 py-3 text-[13px] font-medium text-white shadow-xl lg:bottom-6">
+    <div className="fixed bottom-28 left-1/2 z-[300] -translate-x-1/2 rounded-xl border border-[#D4FF4F]/20 bg-[#111] px-5 py-3 text-[13px] font-medium text-white shadow-xl lg:bottom-6 font-cloud-body">
       Welcome to Leadstaq Cloud. Your account is ready. 🎉
     </div>
   );
@@ -122,48 +117,49 @@ export default function CloudDashboardLayout({ children }: { children: React.Rea
   }, [session?.userId, pathname]);
 
   const displayName = businessName || session?.user?.name || "Leadstaq Cloud";
-  const initials = (session?.user?.name ?? "U").slice(0, 1).toUpperCase();
-  const pageTitle = pageTitleFor(pathname);
+  const initials = (session?.user?.name ?? "U").slice(0, 2).toUpperCase();
 
   return (
-    <div className="flex min-h-screen bg-black">
-      {/* Sidebar — desktop */}
-      <aside className="fixed inset-y-0 left-0 hidden w-[240px] flex-col border-r border-white/[0.08] bg-black lg:flex">
-        <div className="flex h-12 shrink-0 items-center gap-2.5 border-b border-white/[0.08] px-4">
-          <div className="flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-md bg-[#D4FF4F]">
-            <CloudUpload className="h-3.5 w-3.5 text-black" strokeWidth={2.5} />
+    <div className="flex min-h-screen bg-[#F5F5F0] font-cloud-body">
+      {/* Sidebar — desktop only */}
+      <aside className="fixed inset-y-0 left-0 hidden w-[240px] flex-col border-r border-black/[0.07] bg-white lg:flex" style={{ boxShadow: '1px 0 0 rgba(0,0,0,0.04)' }}>
+        <div className="flex h-[60px] shrink-0 items-center gap-2.5 border-b border-black/[0.06] px-5">
+          <div className="flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-lg bg-[#D4FF4F]">
+            <CloudUpload className="h-4 w-4 text-black" strokeWidth={2.5} />
           </div>
-          <span className="max-w-[180px] truncate text-[14px] font-medium text-white">{displayName}</span>
+          <div className="min-w-0 flex-1">
+            <p className="truncate font-cloud-display text-[15px] text-[#0a0a0a] leading-tight">{displayName}</p>
+          </div>
         </div>
 
-        <nav className="flex-1 overflow-y-auto py-2">
+        <nav className="flex-1 overflow-y-auto py-3 px-2">
           {PRIMARY_NAV.map(({ href, icon: Icon, label }) => (
             <Link
               key={href}
               href={href}
-              className={`flex h-8 items-center gap-2.5 rounded-md px-3 mx-1 text-[14px] transition-colors ${
+              className={`flex h-9 items-center gap-2.5 rounded-xl px-3 mb-0.5 text-[13px] font-medium transition-colors ${
                 isActive(href, pathname)
-                  ? "bg-[#111] text-white font-medium"
-                  : "text-[#888] hover:text-white hover:bg-[#111]"
+                  ? "bg-[#F5F5F0] text-[#0a0a0a]"
+                  : "text-[#666660] hover:text-[#0a0a0a] hover:bg-[#F5F5F0]"
               }`}
             >
-              <Icon className="h-4 w-4 shrink-0" />
+              <Icon className="h-4 w-4 shrink-0" strokeWidth={isActive(href, pathname) ? 2.2 : 1.8} />
               {label}
             </Link>
           ))}
-          <div className="my-2 mx-3 border-t border-white/[0.06]" />
+          <div className="my-3 mx-1 border-t border-black/[0.06]" />
           {SECONDARY_NAV.map(({ href, icon: Icon, label }) => (
             <Link
               key={href}
               href={href}
-              className={`flex h-8 items-center gap-2.5 rounded-md px-3 mx-1 text-[13px] transition-colors ${
+              className={`flex h-9 items-center gap-2.5 rounded-xl px-3 mb-0.5 text-[13px] transition-colors ${
                 isActive(href, pathname)
-                  ? "bg-[#111] text-white font-medium"
-                  : "text-[#666] hover:text-white hover:bg-[#111]"
+                  ? "bg-[#F5F5F0] text-[#0a0a0a] font-medium"
+                  : "text-[#999990] hover:text-[#0a0a0a] hover:bg-[#F5F5F0]"
               }`}
             >
               <div className="relative shrink-0">
-                <Icon className="h-4 w-4" />
+                <Icon className="h-4 w-4" strokeWidth={1.8} />
                 {label === "Notifications" && unreadCount > 0 && (
                   <span className="absolute -right-0.5 -top-0.5 h-1.5 w-1.5 rounded-full bg-[#D4FF4F]" />
                 )}
@@ -173,89 +169,124 @@ export default function CloudDashboardLayout({ children }: { children: React.Rea
           ))}
         </nav>
 
-        <div className="p-3 border-t border-white/[0.08]">
-          <div className="flex items-center gap-2.5 px-2 py-1.5">
-            <div className="flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-md bg-[#D4FF4F] text-[11px] font-bold text-black">
+        <div className="p-3 border-t border-black/[0.06]">
+          <div className="flex items-center gap-2.5 px-2 py-1.5 rounded-xl">
+            <div className="flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-full bg-[#0a0a0a] text-[10px] font-bold text-[#D4FF4F]">
               {initials}
             </div>
             <div className="min-w-0 flex-1">
-              <p className="truncate text-[14px] font-medium text-white">{session?.user?.name ?? "—"}</p>
-              <p className="text-[12px] text-[#555] uppercase tracking-wide">{session?.role}</p>
+              <p className="truncate text-[13px] font-medium text-[#0a0a0a]">{session?.user?.name ?? "—"}</p>
+              <p className="text-[11px] text-[#999990] uppercase tracking-wide">{session?.role === "CLIENT_MANAGER" ? "Manager" : session?.role}</p>
             </div>
           </div>
           <button
             onClick={() => void signOut({ callbackUrl: "/cloud/login" })}
-            className="flex w-full items-center gap-2 mt-2 px-2 py-1.5 text-[14px] text-[#555] hover:text-[#888] rounded-md hover:bg-[#111] transition-colors cursor-pointer"
+            className="flex w-full items-center gap-2 mt-1 px-3 py-2 text-[13px] text-[#999990] hover:text-[#0a0a0a] rounded-xl hover:bg-[#F5F5F0] transition-colors cursor-pointer"
           >
-            <LogOut className="h-4 w-4" />
+            <LogOut className="h-3.5 w-3.5" />
             Sign out
           </button>
         </div>
       </aside>
 
       <div className="flex min-h-screen flex-1 flex-col lg:ml-[240px]">
-        <header className="sticky top-0 z-10 hidden h-12 shrink-0 items-center justify-between border-b border-white/[0.08] bg-black px-4 lg:flex">
-          <span className="text-[14px] font-medium text-white">{pageTitle}</span>
+        {/* Desktop topbar */}
+        <header className="sticky top-0 z-10 hidden h-[60px] shrink-0 items-center justify-between border-b border-black/[0.06] bg-[#F5F5F0] px-5 lg:flex">
+          <div>
+            <p className="font-cloud-body text-[10px] font-bold uppercase tracking-[0.08em] text-[#999990]">{getGreeting()}</p>
+            <p className="font-cloud-display text-[18px] text-[#0a0a0a] leading-tight">{displayName}</p>
+          </div>
           <div className="flex items-center gap-2">
             <Link
               href="/cloud/dashboard/notifications"
-              className="relative flex h-8 w-8 items-center justify-center rounded-md text-[#555] transition-colors hover:bg-[#111] hover:text-white"
+              className="relative flex h-[34px] w-[34px] items-center justify-center rounded-full bg-white border border-black/[0.08] text-[#666660] transition-colors hover:border-black/[0.15] hover:text-[#0a0a0a]"
             >
-              <Bell className="h-4 w-4" />
+              <Bell className="h-4 w-4" strokeWidth={1.8} />
               {unreadCount > 0 && (
-                <span className="absolute right-1.5 top-1.5 h-1.5 w-1.5 rounded-full bg-[#D4FF4F]" />
+                <span className="absolute right-1 top-1 h-2 w-2 rounded-full bg-[#D4FF4F] border-2 border-[#F5F5F0]" />
               )}
             </Link>
             <Link
               href="/cloud/dashboard/upload"
-              className="flex items-center gap-1.5 h-8 px-3 bg-[#D4FF4F] text-black text-[13px] font-semibold rounded-md hover:bg-[#c8f244] transition-colors"
+              className="flex items-center gap-1.5 h-[34px] px-4 bg-[#D4FF4F] text-black text-[12px] font-bold rounded-xl hover:bg-[#C8F244] transition-colors font-cloud-body"
             >
               <Camera className="w-3.5 h-3.5" />
-              Upload photos
+              Upload
             </Link>
           </div>
         </header>
 
-        <main className="flex-1 pb-24 lg:pb-6">{children}</main>
+        {/* Mobile topbar */}
+        <header className="sticky top-0 z-10 flex h-[60px] shrink-0 items-center justify-between border-b border-black/[0.06] bg-[#F5F5F0] px-5 lg:hidden">
+          <div>
+            <p className="font-cloud-body text-[10px] font-bold uppercase tracking-[0.08em] text-[#999990]">{getGreeting()}</p>
+            <p className="font-cloud-display text-[20px] text-[#0a0a0a] leading-tight">{displayName}</p>
+          </div>
+          <div className="flex items-center gap-2">
+            <Link
+              href="/cloud/dashboard/notifications"
+              className="relative flex h-[34px] w-[34px] items-center justify-center rounded-full bg-white border border-black/[0.08] text-[#666660]"
+            >
+              <Bell className="h-4 w-4" strokeWidth={1.8} />
+              {unreadCount > 0 && (
+                <span className="absolute right-1 top-1 h-2 w-2 rounded-full bg-[#D4FF4F] border-2 border-[#F5F5F0]" />
+              )}
+            </Link>
+            <div className="flex h-[34px] w-[34px] items-center justify-center rounded-full bg-[#0a0a0a] text-[11px] font-bold text-[#D4FF4F]">
+              {initials}
+            </div>
+          </div>
+        </header>
+
+        <main className="flex-1 pb-[calc(var(--cloud-nav-height)+20px)] lg:pb-8">{children}</main>
       </div>
 
       {/* Bottom tab bar — mobile */}
-      <nav className="fixed inset-x-0 bottom-0 z-50 border-t border-white/[0.08] bg-black safe-bottom lg:hidden">
-        <div className="flex items-end">
-          {MOBILE_NAV.map(({ href, icon: Icon, label }, idx) => {
-            const active = isActive(href, pathname);
-            const isCenter = idx === 2;
-            return (
-              <Link
-                key={href}
-                href={href}
-                className={`flex flex-1 flex-col items-center gap-1 py-2 text-[11px] transition-colors ${
-                  isCenter ? "relative -mt-4" : active ? "text-white" : "text-[#555]"
-                }`}
-              >
-                {isCenter ? (
-                  <div
-                    className={`flex h-14 w-14 items-center justify-center rounded-full transition-colors ${
-                      active ? "bg-[#c4ef3f]" : "bg-[#D4FF4F]"
-                    }`}
-                  >
-                    <Icon className="h-6 w-6 text-black" />
+      <nav
+        className="fixed inset-x-0 bottom-0 z-50 bg-white border-t border-black/[0.06] flex items-center justify-around px-2 lg:hidden font-cloud-body"
+        style={{ height: 'var(--cloud-nav-height)', paddingBottom: 'max(env(safe-area-inset-bottom), 16px)' }}
+      >
+        {MOBILE_NAV.map(({ href, icon: Icon, label }, idx) => {
+          const active = isActive(href, pathname);
+          const isCenter = idx === 2;
+          return (
+            <Link
+              key={href}
+              href={href}
+              className="flex flex-1 flex-col items-center gap-[3px]"
+            >
+              {isCenter ? (
+                <div
+                  className="flex items-center justify-center rounded-full bg-[#D4FF4F] -mt-5"
+                  style={{ width: 50, height: 50, boxShadow: '0 6px 20px rgba(212,255,79,0.45)' }}
+                >
+                  <Icon className="h-[22px] w-[22px] text-[#0a0a0a]" strokeWidth={2} />
+                </div>
+              ) : (
+                <>
+                  <div className="relative flex items-center justify-center h-[22px] w-[22px]">
+                    <Icon
+                      className="h-[22px] w-[22px]"
+                      style={{ color: active ? '#0a0a0a' : '#bbbbbb' }}
+                      strokeWidth={active ? 2.2 : 1.8}
+                    />
+                    {href === "/cloud/dashboard/notifications" && unreadCount > 0 && (
+                      <span className="absolute right-0 top-0 h-1.5 w-1.5 rounded-full bg-[#D4FF4F]" />
+                    )}
                   </div>
-                ) : (
-                  <>
-                    <div className="relative">
-                      <Icon className="h-5 w-5" />
-                      {href === "/cloud/dashboard/notifications" && unreadCount > 0 && (
-                        <span className="absolute -right-0.5 -top-0.5 h-1.5 w-1.5 rounded-full bg-[#D4FF4F]" />
-                      )}
-                    </div>
-                    {label && <span>{label}</span>}
-                  </>
-                )}
-              </Link>
-            );
-          })}
-        </div>
+                  {label && (
+                    <span
+                      className="text-[9px] font-semibold"
+                      style={{ color: active ? '#0a0a0a' : '#bbbbbb' }}
+                    >
+                      {label}
+                    </span>
+                  )}
+                </>
+              )}
+            </Link>
+          );
+        })}
       </nav>
 
       <Suspense>

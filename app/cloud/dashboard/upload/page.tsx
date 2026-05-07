@@ -6,8 +6,10 @@ import { useRouter } from "next/navigation";
 import {
   Camera, Check, ChevronRight, Loader2, Plus, X, ArrowRight, Folder,
 } from "lucide-react";
+import Link from "next/link";
 import { InstallPrompt } from "@/app/cloud/components/InstallPrompt";
 import { IOSInstallBanner } from "@/app/cloud/components/IOSInstallBanner";
+import { getProjectCardStyles } from "@/app/cloud/components/ProjectCard";
 
 type Project = {
   id: string;
@@ -197,248 +199,243 @@ export default function CloudUploadPage() {
   const doneFiles = queue.filter((q) => q.status === "done");
 
   return (
-    <div className="flex min-h-screen flex-col bg-[#0a0a0a]">
-      {/* Mobile-only top bar */}
-      <div className="border-b border-white/10 px-6 py-4 lg:hidden">
-        <p className="text-[13px] text-white/30">
-          {session?.user?.name ?? "Leadstaq Cloud"}
-        </p>
-        <h1 className="text-[20px] font-semibold text-white">Upload</h1>
-      </div>
-
-      <div className="flex-1 px-6 py-6 lg:px-8">
+    <div className="flex min-h-screen flex-col bg-[#F5F5F0] font-cloud-body">
+      <div className="flex-1 px-5 py-5 lg:px-8">
         {allDone ? (
           /* ── All done state ── */
           <div className="flex min-h-[50vh] flex-col items-center justify-center text-center">
-            <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-[#D4FF4F]">
-              <Check className="h-8 w-8 text-black" strokeWidth={2.5} />
+            <div className="mb-5 flex h-16 w-16 items-center justify-center rounded-full bg-[#D4FF4F]" style={{ boxShadow: '0 8px 24px rgba(212,255,79,0.5)' }}>
+              <Check className="h-8 w-8 text-black" />
             </div>
-            <h2 className="mb-1 text-[20px] font-semibold text-white">
-              {doneFiles.length} photo{doneFiles.length !== 1 ? "s" : ""} added
-            </h2>
-            <p className="mb-8 text-[14px] text-white/50">
-              to <span className="text-white">{selectedProject?.title}</span>
+            <h2 className="mb-2 font-cloud-display text-[26px] text-[#0a0a0a]">Upload complete!</h2>
+            <p className="mb-8 text-[14px] text-[#666660] font-cloud-body">
+              {doneFiles.length} photo{doneFiles.length !== 1 ? "s" : ""} added to{" "}
+              <span className="font-semibold text-[#0a0a0a]">{selectedProject?.title}</span>.
             </p>
             <div className="flex w-full max-w-xs flex-col gap-3">
               <button
                 onClick={resetUpload}
-                className="w-full rounded-xl border border-white/10 py-3 text-[14px] font-medium text-white hover:bg-white/5"
+                className="w-full rounded-xl border border-black/[0.1] bg-white py-3 text-[14px] font-semibold text-[#0a0a0a] hover:bg-[#F5F5F0] transition-colors font-cloud-body"
               >
-                Upload more
+                Upload more photos
               </button>
               <button
                 onClick={() => router.push(`/cloud/dashboard/projects/${selectedProject!.id}`)}
-                className="flex w-full items-center justify-center gap-2 rounded-xl bg-[#D4FF4F] py-3 text-[14px] font-semibold text-black"
+                className="flex w-full items-center justify-center gap-2 rounded-xl bg-[#D4FF4F] py-3 text-[14px] font-bold text-black hover:bg-[#C8F244] transition-colors font-cloud-body"
               >
-                View project
-                <ArrowRight className="h-4 w-4" />
+                View project <ArrowRight className="h-4 w-4" />
               </button>
             </div>
           </div>
         ) : !selectedProject ? (
           /* ── State A: no project selected ── */
           <>
-            <div className="mb-4">
-              <h2 className="text-[14px] font-semibold text-white">Recent projects</h2>
-            </div>
+            <p className="font-cloud-display text-[22px] text-[#0a0a0a] mb-1">Upload photos</p>
+            <p className="text-[13px] text-[#999990] font-cloud-body mb-5">Choose a project to add photos to.</p>
 
-            <div className="mb-4 space-y-2">
+            <div className="mb-3 space-y-2">
               {recent5.map((p) => {
-                const cover = [...(p.project_media ?? [])]
+                const s = getProjectCardStyles(p.category);
+                const coverUrl = [...(p.project_media ?? [])]
                   .sort((a, b) => a.display_order - b.display_order)[0]?.public_url;
                 return (
                   <button
                     key={p.id}
                     onClick={() => setSelectedProject(p)}
-                    className="flex w-full items-center gap-4 rounded-2xl border border-white/10 bg-[#111111] px-4 py-4 text-left transition-colors hover:border-[#D4FF4F]/30 hover:bg-white/5"
-                    style={{ minHeight: 72 }}
+                    className={`flex w-full items-center gap-4 rounded-[20px] border px-4 py-3.5 text-left transition-all active:scale-[0.99] ${s.gradient} ${s.border}`}
                   >
-                    <div className="h-12 w-12 flex-shrink-0 overflow-hidden rounded-lg bg-white/5">
-                      {cover ? (
+                    <div className="h-11 w-11 flex-shrink-0 overflow-hidden rounded-xl bg-white/40">
+                      {coverUrl ? (
                         // eslint-disable-next-line @next/next/no-img-element
-                        <img src={cover} alt="" className="h-full w-full object-cover" />
+                        <img src={coverUrl} alt="" className="h-full w-full object-cover" />
                       ) : (
-                        <div className="flex h-full items-center justify-center">
-                          <Folder className="h-5 w-5 text-white/20" />
+                        <div className="flex h-full w-full items-center justify-center">
+                          <Folder className={`h-5 w-5 opacity-40 ${s.text}`} />
                         </div>
                       )}
                     </div>
                     <div className="flex-1 min-w-0">
-                      <p className="truncate text-[14px] font-medium text-white">{p.title}</p>
-                      <p className="text-[13px] text-white/40">
-                        {p.project_media?.length ?? 0} photos
+                      <p className={`truncate text-[14px] font-semibold font-cloud-body ${s.text}`}>{p.title}</p>
+                      <p className={`text-[12px] font-cloud-body ${s.subtext}`}>
+                        {p.project_media?.length ?? 0} photos{p.category ? ` · ${p.category}` : ""}
                       </p>
                     </div>
-                    <ChevronRight className="h-4 w-4 flex-shrink-0 text-white/20" />
+                    <ChevronRight className={`h-4 w-4 flex-shrink-0 opacity-40 ${s.text}`} />
                   </button>
                 );
               })}
             </div>
 
-            {projects.length > 5 && (
+            {/* New project inline form toggle */}
+            {!showNewSheet ? (
               <button
-                onClick={() => router.push("/cloud/dashboard/projects")}
-                className="mb-4 w-full text-center text-[14px] text-white/40 hover:text-white transition-colors"
+                onClick={() => setShowNewSheet(true)}
+                className="flex w-full items-center gap-3 rounded-[20px] border-2 border-dashed border-[#D8D8D0] bg-[#EEEEE8] px-4 py-3.5 text-left transition-colors hover:border-[#C0C0B8] active:scale-[0.99]"
               >
-                All projects →
-              </button>
-            )}
-
-            <button
-              onClick={() => setShowNewSheet(true)}
-              className="flex w-full items-center justify-center gap-2 rounded-2xl border-2 border-dashed border-white/15 py-5 text-[14px] font-medium text-white/40 transition-colors hover:border-[#D4FF4F]/40 hover:text-[#D4FF4F]"
-              style={{ minHeight: 72 }}
-            >
-              <Plus className="h-5 w-5" />
-              Create new project +
-            </button>
-          </>
-        ) : (
-          /* ── State B: project selected ── */
-          <>
-            <div className="mb-6 flex items-center gap-2">
-              <span className="flex items-center gap-1.5 rounded-full bg-white/10 px-3 py-1.5 text-sm font-medium text-white">
-                {selectedProject.title}
-                <button
-                  onClick={() => { setSelectedProject(null); setQueue([]); }}
-                  className="ml-1 text-white/40 hover:text-white"
-                >
-                  <X className="h-3.5 w-3.5" />
-                </button>
-              </span>
-            </div>
-
-            {/* Big upload button */}
-            <input
-              ref={fileInputRef}
-              type="file"
-              accept="image/*"
-              multiple
-              className="hidden"
-              onChange={handleFileSelect}
-            />
-
-            {queue.length === 0 ? (
-              <button
-                onClick={() => fileInputRef.current?.click()}
-                className="flex w-full flex-col items-center justify-center gap-3 rounded-2xl border-2 border-dashed border-white/15 bg-transparent py-16 transition-colors hover:border-[#D4FF4F]/50 hover:bg-[#D4FF4F]/5"
-              >
-                <div className="flex h-16 w-16 items-center justify-center rounded-full bg-[#D4FF4F]">
-                  <Camera className="h-8 w-8 text-black" strokeWidth={1.5} />
+                <div className="flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-xl bg-white">
+                  <Plus className="h-4 w-4 text-[#999990]" />
                 </div>
-                <div className="text-center">
-                  <p className="text-[15px] font-semibold text-white">Add photos</p>
-                  <p className="mt-1 text-[13px] text-white/40">Tap to open gallery</p>
-                </div>
+                <span className="text-[14px] text-[#999990] font-cloud-body">Create new project</span>
               </button>
             ) : (
-              <div className="space-y-2">
-                {queue.map((item) => (
-                  <div key={item.id} className="flex items-center gap-3 rounded-xl border border-white/10 bg-[#111111] px-4 py-3">
-                    <div className="h-12 w-12 flex-shrink-0 overflow-hidden rounded-lg bg-white/5">
-                      {/* eslint-disable-next-line @next/next/no-img-element */}
-                      <img src={item.previewUrl} alt="" className="h-full w-full object-cover" />
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <p className="truncate text-[14px] text-white">{item.file.name}</p>
-                      {item.status === "uploading" && (
-                        <div className="mt-1.5 h-1 w-full overflow-hidden rounded-full bg-white/10">
-                          <div
-                            className="h-full rounded-full bg-[#D4FF4F] transition-all"
-                            style={{ width: `${item.progress}%` }}
-                          />
-                        </div>
-                      )}
-                    </div>
-                    <div className="flex-shrink-0">
-                      {item.status === "pending" && <div className="h-2 w-2 rounded-full bg-white/20" />}
-                      {item.status === "uploading" && <Loader2 className="h-4 w-4 animate-spin text-[#D4FF4F]" />}
-                      {item.status === "done" && <Check className="h-4 w-4 text-[#D4FF4F]" />}
-                      {item.status === "error" && <X className="h-4 w-4 text-red-400" />}
-                    </div>
-                  </div>
-                ))}
+              <div className="rounded-[20px] border border-[#D0D0C0]/40 bg-gradient-to-br from-[#F8F8F4] via-[#F0F0EA] to-[#E8E8E0] p-5 space-y-3">
+                <p className="text-[10px] font-bold tracking-[0.08em] text-[#666660] uppercase font-cloud-body">New project</p>
+                <input
+                  type="text"
+                  value={newTitle}
+                  onChange={(e) => setNewTitle(e.target.value)}
+                  autoFocus
+                  placeholder="Project name"
+                  className="w-full rounded-xl border border-black/[0.1] bg-white/70 px-4 py-3 text-[13px] text-[#0a0a0a] placeholder-[#999990] outline-none focus:border-black/[0.2] font-cloud-body"
+                />
+                <select
+                  value={newCategory}
+                  onChange={(e) => setNewCategory(e.target.value)}
+                  className="w-full rounded-xl border border-black/[0.1] bg-white/70 px-4 py-3 text-[13px] text-[#666660] outline-none focus:border-black/[0.2] font-cloud-body"
+                >
+                  <option value="">Category (optional)</option>
+                  {CATEGORIES.map((c) => <option key={c} value={c}>{c}</option>)}
+                </select>
+                <input
+                  type="text"
+                  value={newLocation}
+                  onChange={(e) => setNewLocation(e.target.value)}
+                  placeholder="Location (optional)"
+                  className="w-full rounded-xl border border-black/[0.1] bg-white/70 px-4 py-3 text-[13px] text-[#0a0a0a] placeholder-[#999990] outline-none focus:border-black/[0.2] font-cloud-body"
+                />
+                <button
+                  onClick={() => void handleCreateProject()}
+                  disabled={!newTitle.trim() || creatingProject}
+                  className="flex w-full items-center justify-center gap-2 rounded-xl bg-[#D4FF4F] py-3 text-[13px] font-bold text-black disabled:opacity-60 hover:bg-[#C8F244] transition-colors font-cloud-body"
+                >
+                  {creatingProject ? <Loader2 className="h-4 w-4 animate-spin" /> : null}
+                  {creatingProject ? "Creating…" : "Create & continue →"}
+                </button>
+                {createError && (
+                  <p className="text-center text-[13px] text-red-500 font-cloud-body">{createError}</p>
+                )}
+                <button
+                  onClick={() => setShowNewSheet(false)}
+                  className="w-full text-[12px] text-[#999990] font-cloud-body py-1"
+                >
+                  Cancel
+                </button>
               </div>
             )}
+          </>
+        ) : queue.length === 0 ? (
+          /* ── State B: project selected, no photos yet ── */
+          <div className="flex flex-col">
+            {/* Selected project header */}
+            <button
+              onClick={() => setSelectedProject(null)}
+              className="mb-5 flex items-center gap-1.5 text-[12px] text-[#999990] hover:text-[#0a0a0a] transition-colors font-cloud-body"
+            >
+              ← Back to projects
+            </button>
 
-            {queue.length > 0 && !uploading && !allDone && (
+            <div className={`mb-5 flex items-center gap-3 rounded-[20px] border px-4 py-3.5 ${getProjectCardStyles(selectedProject.category).gradient} ${getProjectCardStyles(selectedProject.category).border}`}>
+              <div>
+                <p className={`text-[15px] font-semibold font-cloud-body ${getProjectCardStyles(selectedProject.category).text}`}>{selectedProject.title}</p>
+                <p className={`text-[12px] font-cloud-body ${getProjectCardStyles(selectedProject.category).subtext}`}>{selectedProject.project_media?.length ?? 0} photos</p>
+              </div>
+            </div>
+
+            {/* Big upload zone */}
+            <label className="flex flex-col items-center justify-center gap-4 rounded-[20px] border-2 border-dashed border-[#60E8A0]/40 bg-gradient-to-br from-[#F0FFF8] via-[#E0FFF0] to-[#C8FFE0] py-16 cursor-pointer hover:border-[#60E8A0]/70 transition-colors">
+              <div className="flex h-16 w-16 items-center justify-center rounded-full bg-white" style={{ boxShadow: 'var(--cloud-shadow-elevated)' }}>
+                <Camera className="h-8 w-8 text-[#00875A]" strokeWidth={1.5} />
+              </div>
+              <div className="text-center">
+                <p className="font-cloud-display text-[20px] text-[#004D30]">Select photos</p>
+                <p className="mt-1 text-[13px] text-[#00875A] font-cloud-body">Tap to choose from your gallery</p>
+              </div>
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept="image/*"
+                multiple
+                capture="environment"
+                className="hidden"
+                onChange={handleFileSelect}
+              />
+            </label>
+          </div>
+        ) : (
+          /* ── State C: queue loaded ── */
+          <div className="flex flex-col">
+            <button
+              onClick={() => { setSelectedProject(null); setQueue([]); }}
+              className="mb-5 flex items-center gap-1.5 text-[12px] text-[#999990] hover:text-[#0a0a0a] transition-colors font-cloud-body"
+            >
+              ← Back
+            </button>
+
+            {/* Progress / queue summary */}
+            <div className="mb-4 rounded-[20px] border border-[#D0D0C0]/40 bg-gradient-to-br from-[#F8F8F4] via-[#F0F0EA] to-[#E8E8E0] p-4">
+              <div className="flex items-center gap-3 mb-3">
+                {uploading ? (
+                  <Loader2 className="h-5 w-5 animate-spin text-[#666660]" />
+                ) : (
+                  <Camera className="h-5 w-5 text-[#666660]" strokeWidth={1.8} />
+                )}
+                <div>
+                  <p className="text-[14px] font-semibold text-[#0a0a0a] font-cloud-body">
+                    {uploading ? "Uploading…" : `${queue.length} photo${queue.length !== 1 ? "s" : ""} ready`}
+                  </p>
+                  <p className="text-[12px] text-[#666660] font-cloud-body">
+                    {uploading
+                      ? `${doneFiles.length} of ${queue.length} done`
+                      : `To: ${selectedProject.title}`}
+                  </p>
+                </div>
+              </div>
+              {uploading && (
+                <div className="h-1.5 w-full rounded-full bg-black/10 overflow-hidden">
+                  <div
+                    className="h-full rounded-full bg-[#D4FF4F] transition-all"
+                    style={{ width: `${queue.length ? (doneFiles.length / queue.length) * 100 : 0}%` }}
+                  />
+                </div>
+              )}
+            </div>
+
+            {/* Thumbnail grid */}
+            <div className="mb-5 grid grid-cols-4 gap-2 sm:grid-cols-5">
+              {queue.map((f) => (
+                <div key={f.id} className="relative aspect-square overflow-hidden rounded-xl bg-black/5">
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img src={f.previewUrl} alt="" className="h-full w-full object-cover" />
+                  {f.status === "uploading" && (
+                    <div className="absolute inset-x-0 bottom-0 h-1 bg-black/10">
+                      <div className="h-full bg-[#D4FF4F] transition-all duration-200" style={{ width: `${f.progress}%` }} />
+                    </div>
+                  )}
+                  {f.status === "done" && (
+                    <div className="absolute inset-0 flex items-center justify-center bg-black/30">
+                      <Check className="h-5 w-5 text-white" />
+                    </div>
+                  )}
+                  {f.status === "error" && (
+                    <div className="absolute inset-0 flex items-center justify-center bg-red-500/20">
+                      <X className="h-4 w-4 text-red-500" />
+                    </div>
+                  )}
+                </div>
+              ))}
+            </div>
+
+            {!uploading && !allDone && (
               <button
                 onClick={() => void uploadAll()}
-                className="mt-5 flex w-full items-center justify-center gap-2 rounded-xl bg-[#D4FF4F] py-4 text-[14px] font-semibold text-black hover:bg-[#c4ef3f]"
+                disabled={pendingCount === 0}
+                className="flex w-full items-center justify-center gap-2 rounded-xl bg-[#D4FF4F] py-4 text-[14px] font-bold text-black disabled:opacity-50 hover:bg-[#C8F244] transition-colors font-cloud-body"
               >
-                <Camera className="h-4 w-4" />
                 Upload {queue.length} photo{queue.length !== 1 ? "s" : ""}
               </button>
             )}
-
-            {uploading && (
-              <div className="mt-5 flex items-center justify-center gap-2 text-[14px] text-white/50">
-                <Loader2 className="h-4 w-4 animate-spin text-[#D4FF4F]" />
-                Uploading {pendingCount} remaining…
-              </div>
-            )}
-
-            <p className="mt-4 text-center text-[12px] text-white/25">
-              Or{" "}
-              <button
-                onClick={() => { const i = document.createElement("input"); i.type="file"; i.accept="image/*"; i.capture="environment"; i.onchange=(e)=>{const f=(e.target as HTMLInputElement).files; if(f) handleFileSelect({target:{files:f,value:""}} as React.ChangeEvent<HTMLInputElement>);}; i.click(); }}
-                className="text-white/40 hover:text-white"
-              >
-                take a new photo
-              </button>
-            </p>
-          </>
-        )}
-      </div>
-
-      {/* New project bottom sheet */}
-      <div className={`fixed inset-0 z-[60] flex flex-col justify-end transition-opacity duration-300 ${showNewSheet ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none"}`}>
-          <div className="absolute inset-0 bg-black/60" onClick={() => setShowNewSheet(false)} />
-          <div className={`relative rounded-t-3xl bg-[#111111] p-6 transform transition-transform duration-300 ease-out ${showNewSheet ? "translate-y-0" : "translate-y-full"}`} style={{ paddingBottom: "max(3rem, calc(3rem + env(safe-area-inset-bottom)))" }}>
-            <div className="mb-4 flex items-center justify-between">
-              <h3 className="text-[15px] font-semibold text-white">New project</h3>
-              <button onClick={() => setShowNewSheet(false)} className="text-white/40 hover:text-white">
-                <X className="h-5 w-5" />
-              </button>
-            </div>
-
-            <div className="space-y-4">
-              <input
-                type="text"
-                value={newTitle}
-                onChange={(e) => setNewTitle(e.target.value)}
-                autoFocus
-                placeholder="Project name"
-                className="w-full rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-white placeholder-white/30 outline-none focus:border-[#D4FF4F]"
-              />
-              <select
-                value={newCategory}
-                onChange={(e) => setNewCategory(e.target.value)}
-                className="w-full rounded-xl border border-white/10 bg-[#1a1a1a] px-4 py-3 text-sm text-white outline-none focus:border-[#D4FF4F]"
-              >
-                <option value="">Category (optional)</option>
-                {CATEGORIES.map((c) => <option key={c} value={c}>{c}</option>)}
-              </select>
-              <input
-                type="text"
-                value={newLocation}
-                onChange={(e) => setNewLocation(e.target.value)}
-                placeholder="Location (optional)"
-                className="w-full rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-white placeholder-white/30 outline-none focus:border-[#D4FF4F]"
-              />
-              <button
-                onClick={() => void handleCreateProject()}
-                disabled={!newTitle.trim() || creatingProject}
-                className="flex w-full items-center justify-center gap-2 rounded-xl bg-[#D4FF4F] py-3.5 text-[14px] font-semibold text-black disabled:opacity-60"
-              >
-                {creatingProject ? <Loader2 className="h-4 w-4 animate-spin" /> : null}
-                {creatingProject ? "Creating…" : "Create & upload →"}
-              </button>
-              {createError && (
-                <p className="text-center text-[14px] text-red-400">{createError}</p>
-              )}
-            </div>
           </div>
+        )}
       </div>
       <InstallPrompt />
       <IOSInstallBanner />
