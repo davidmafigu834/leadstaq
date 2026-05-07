@@ -6,7 +6,6 @@ import { useRouter } from "next/navigation";
 import {
   Camera, Check, ChevronRight, Loader2, Plus, X, ArrowRight, Folder,
 } from "lucide-react";
-import Link from "next/link";
 import { InstallPrompt } from "@/app/cloud/components/InstallPrompt";
 import { IOSInstallBanner } from "@/app/cloud/components/IOSInstallBanner";
 import { getProjectCardStyles } from "@/app/cloud/components/ProjectCard";
