@@ -225,7 +225,7 @@ export default function CloudDashboardLayout({ children }: { children: React.Rea
         </header>
 
         {/* Mobile topbar */}
-        <header className="sticky top-0 z-10 flex h-[56px] shrink-0 items-center justify-between border-b border-black/[0.06] bg-[#F7F7F8] px-5 lg:hidden">
+        <header className="sticky top-0 z-10 flex h-[72px] shrink-0 items-center justify-between border-b border-black/[0.06] bg-[#F7F7F8] px-5 lg:hidden">
           <div>
             <p className="font-cloud-body text-[12px] font-bold uppercase tracking-[0.08em] text-[#9CA3AF]">{getGreeting()}</p>
             <p className="font-cloud-display text-[22px] text-[#111111] leading-tight">{displayName}</p>
