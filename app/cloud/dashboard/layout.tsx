@@ -6,7 +6,7 @@ import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { signOut, useSession } from "next-auth/react";
 import {
   Grid, Folder, Camera, Users, Settings, LogOut, CloudUpload,
-  Bell, CreditCard, HelpCircle,
+  Bell, CreditCard, HelpCircle, BarChart2,
 } from "lucide-react";
 import { Suspense } from "react";
 
@@ -19,6 +19,7 @@ const PRIMARY_NAV = [
 
 const SECONDARY_NAV = [
   { href: "/cloud/dashboard/notifications", icon: Bell, label: "Notifications" },
+  { href: "/cloud/dashboard/analytics", icon: BarChart2, label: "Analytics" },
   { href: "/cloud/dashboard/billing", icon: CreditCard, label: "Billing" },
   { href: "/cloud/dashboard/settings", icon: Settings, label: "Settings" },
   { href: "/cloud/help", icon: HelpCircle, label: "Help" },
@@ -44,6 +45,7 @@ function getPageTitle(pathname: string): string {
   if (pathname.startsWith("/cloud/dashboard/team")) return "Team";
   if (pathname.startsWith("/cloud/dashboard/settings")) return "Settings";
   if (pathname.startsWith("/cloud/dashboard/notifications")) return "Notifications";
+  if (pathname.startsWith("/cloud/dashboard/analytics")) return "Analytics";
   if (pathname.startsWith("/cloud/dashboard/billing")) return "Billing";
   return "Dashboard";
 }

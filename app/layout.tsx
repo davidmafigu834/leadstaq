@@ -1,9 +1,23 @@
 import type { Metadata, Viewport } from "next";
-import { Instrument_Serif } from "next/font/google";
+import { Instrument_Serif, DM_Sans, DM_Serif_Display } from "next/font/google";
 import { GeistSans } from "geist/font/sans";
 import { GeistMono } from "geist/font/mono";
 import "./globals.css";
 import { Providers } from "./providers";
+
+const dmSans = DM_Sans({
+  subsets: ["latin"],
+  weight: ["400", "500", "600", "700"],
+  variable: "--font-dm-sans",
+  display: "swap",
+});
+
+const dmSerif = DM_Serif_Display({
+  subsets: ["latin"],
+  weight: ["400"],
+  variable: "--font-dm-serif",
+  display: "swap",
+});
 
 const instrumentSerif = Instrument_Serif({
   subsets: ["latin"],
@@ -41,7 +55,7 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`${instrumentSerif.variable} ${GeistSans.variable} ${GeistMono.variable}`}
+      className={`${instrumentSerif.variable} ${GeistSans.variable} ${GeistMono.variable} ${dmSans.variable} ${dmSerif.variable}`}
     >
       <head>
         <link rel="apple-touch-icon" href="/icons/icon-192.png" />

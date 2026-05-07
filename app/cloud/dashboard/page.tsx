@@ -296,7 +296,7 @@ export default function CloudDashboardHome() {
                 <p style={{ fontSize: 14, fontWeight: 600, color: "#FFFFFF", margin: 0, fontFamily: F }}>Your overview</p>
               </div>
             </div>
-            <button onClick={() => router.push("/cloud/dashboard/projects")} style={{ height: 34, padding: "0 16px", background: "#D4FF4F", color: "#111111", fontSize: 13, fontWeight: 700, borderRadius: 10, border: "none", cursor: "pointer", flexShrink: 0, fontFamily: F, display: "flex", alignItems: "center", gap: 4 }}>
+            <button onClick={() => router.push("/cloud/dashboard/analytics")} style={{ height: 34, padding: "0 16px", background: "#D4FF4F", color: "#111111", fontSize: 13, fontWeight: 700, borderRadius: 10, border: "none", cursor: "pointer", flexShrink: 0, fontFamily: F, display: "flex", alignItems: "center", gap: 4 }}>
               View stats
               <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#111111" strokeWidth="2.5" strokeLinecap="round"><polyline points="9 18 15 12 9 6"/></svg>
             </button>
