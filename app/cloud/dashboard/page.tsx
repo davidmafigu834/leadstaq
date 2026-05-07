@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
 import { NewProjectSlideOver } from "./projects/NewProjectSlideOver";
 import { getProjectStyle } from "@/app/cloud/components/ui/projectCardStyles";
+import { Plus, FolderOpen, Camera, Users, UserPlus, Activity, ArrowRight, Globe, ExternalLink } from "lucide-react";
 
 type MediaItem = { public_url: string; display_order: number };
 type Project = {
@@ -31,6 +32,18 @@ function getInitials(name: string): string {
   return "LC";
 }
 
+
+function formatRelativeTime(dateStr: string): string {
+  if (!dateStr) return "recently";
+  const diff = Date.now() - new Date(dateStr).getTime();
+  const mins = Math.floor(diff / 60000);
+  if (mins < 2) return "just now";
+  if (mins < 60) return `${mins}m ago`;
+  const hours = Math.floor(mins / 60);
+  if (hours < 24) return `${hours}h ago`;
+  const days = Math.floor(hours / 24);
+  return `${days}d ago`;
+}
 
 export default function CloudDashboardHome() {
   const { data: session, status } = useSession();
@@ -73,8 +86,10 @@ export default function CloudDashboardHome() {
   const percentUsed = Math.round((storageUsed / storageLimit) * 100 * 10) / 10;
   const projectCount = stats?.total_projects ?? 0;
   const photoCount = stats?.total_photos ?? 0;
-  const recentActivity = projects.slice(0, 2).map((p) => ({
-    message: `${p.project_media?.length ?? 0} photos · ${p.title}`,
+  const recentActivity = projects.slice(0, 3).map((p) => ({
+    message: `Added ${p.project_media?.length ?? 0} photos to ${p.title}`,
+    userInitials: getInitials(session?.user?.name ?? "Me"),
+    time: formatRelativeTime(p.updated_at),
   }));
 
   if (status === "loading" || loading) {
@@ -89,47 +104,73 @@ export default function CloudDashboardHome() {
   const S = "var(--font-dm-serif), Georgia, serif";
 
   return (
-    <div style={{ minHeight: "100vh", background: "#F7F7F8", fontFamily: F, paddingBottom: 100 }}>
+    <div style={{ minHeight: "100vh", background: "#F5F5F0", fontFamily: F, paddingBottom: 100 }}>
+
+      {/* ── QUICK ACTION PILLS ── */}
+      <div style={{ padding: "12px 20px 16px", display: "flex", gap: 10, overflowX: "auto", scrollbarWidth: "none" } as React.CSSProperties}>
+        {([
+          { label: "New project",   Icon: Plus,      bg: "#D4FF4F", color: "#0a0a0a", action: () => setShowNew(true) },
+          { label: "All projects",  Icon: FolderOpen, bg: "#FFE8A0", color: "#7A3800", href: "/cloud/dashboard/projects" },
+          { label: "Upload photos", Icon: Camera,     bg: "#C8FFE0", color: "#004D30", href: "/cloud/dashboard/upload" },
+          { label: "Invite team",   Icon: UserPlus,   bg: "#DDD0FF", color: "#2D1B6B", href: "/cloud/dashboard/team" },
+        ] as { label: string; Icon: React.ElementType; bg: string; color: string; href?: string; action?: () => void }[]).map((a) => (
+          <button
+            key={a.label}
+            onClick={a.action ? a.action : () => router.push(a.href!)}
+            style={{ display: "flex", alignItems: "center", gap: 8, height: 40, padding: "0 16px", background: a.bg, color: a.color, borderRadius: 20, border: "none", cursor: "pointer", flexShrink: 0, fontFamily: F, fontSize: 12, fontWeight: 700, whiteSpace: "nowrap" }}
+          >
+            <a.Icon size={15} strokeWidth={2.2} aria-hidden="true" />
+            {a.label}
+          </button>
+        ))}
+      </div>
 
       {/* ── STORAGE CARD (dark anchor) ── */}
-      <div style={{ padding: "16px 20px 0" }}>
-        <div style={{
-          background: "#111111", borderRadius: 24,
-          padding: "20px 20px 18px", position: "relative", overflow: "hidden",
-          border: "0.5px solid rgba(255,255,255,0.07)",
-        }}>
-          <div style={{ position: "absolute", top: -40, right: -40, width: 120, height: 120, borderRadius: "50%", background: "rgba(212,255,79,0.06)", pointerEvents: "none" }} />
-          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 16 }}>
-            <div>
-              <p style={{ fontSize: 12, textTransform: "uppercase", letterSpacing: "0.09em", color: "rgba(255,255,255,0.38)", margin: "0 0 6px", fontFamily: F }}>Cloud storage</p>
-              <p style={{ fontFamily: S, fontSize: 34, color: "#FFFFFF", margin: 0, lineHeight: 1 }}>{formatBytes(storageUsed)}</p>
-              <p style={{ fontSize: 14, color: "rgba(255,255,255,0.32)", margin: "5px 0 0", fontFamily: F }}>used of {formatBytes(storageLimit)}</p>
+      <div style={{ margin: "0 20px 20px", borderRadius: 24, background: "#0a0a0a", padding: 20, position: "relative", overflow: "hidden", border: "0.5px solid rgba(255,255,255,0.07)" }}>
+        <div style={{ position: "absolute", top: -40, right: -40, width: 120, height: 120, borderRadius: "50%", background: "rgba(212,255,79,0.05)", pointerEvents: "none" }} />
+        <div style={{ position: "absolute", bottom: -20, right: 20, width: 80, height: 80, borderRadius: "50%", background: "rgba(212,255,79,0.03)", pointerEvents: "none" }} />
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 16 }}>
+          <div>
+            <p style={{ fontSize: 9, color: "rgba(255,255,255,0.4)", textTransform: "uppercase", letterSpacing: "0.1em", margin: "0 0 8px", fontFamily: F }}>Cloud storage</p>
+            <p style={{ fontFamily: S, fontSize: 36, color: "#FFFFFF", margin: 0, lineHeight: 1 }}>{formatBytes(storageUsed)}</p>
+            <p style={{ fontSize: 11, color: "rgba(255,255,255,0.35)", margin: "6px 0 0", fontFamily: F }}>used of {formatBytes(storageLimit)}</p>
+          </div>
+          <div style={{ position: "relative", width: 64, height: 64, flexShrink: 0 }}>
+            <svg width="64" height="64" viewBox="0 0 64 64">
+              <circle cx="32" cy="32" r="26" fill="none" stroke="rgba(255,255,255,0.08)" strokeWidth="6" />
+              <circle cx="32" cy="32" r="26" fill="none" stroke="#D4FF4F" strokeWidth="6" strokeLinecap="round"
+                strokeDasharray={`${2 * Math.PI * 26}`}
+                strokeDashoffset={`${2 * Math.PI * 26 * (1 - Math.min(percentUsed / 100, 1))}`}
+                transform="rotate(-90 32 32)"
+              />
+            </svg>
+            <div style={{ position: "absolute", inset: 0, display: "flex", alignItems: "center", justifyContent: "center" }}>
+              <span style={{ fontSize: 11, fontWeight: 700, color: "#D4FF4F", fontFamily: F }}>{percentUsed < 1 ? "<1" : Math.round(percentUsed)}%</span>
             </div>
-            <span style={{ fontSize: 12, fontWeight: 700, letterSpacing: "0.06em", textTransform: "uppercase", background: "rgba(255,255,255,0.10)", color: "rgba(255,255,255,0.65)", padding: "5px 12px", borderRadius: 20, fontFamily: F, flexShrink: 0 }}>FREE</span>
           </div>
-          <div style={{ height: 4, background: "rgba(255,255,255,0.10)", borderRadius: 2, marginBottom: 18 }}>
-            <div style={{ height: 4, background: "#D4FF4F", borderRadius: 2, width: `${Math.min(percentUsed, 100)}%`, transition: "width 0.6s ease" }} />
-          </div>
-          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr" }}>
-            {([
-              { label: "Projects", value: String(projectCount) },
-              { label: "Photos", value: String(photoCount) },
-              { label: "Storage", value: formatBytes(storageUsed), lime: true },
-            ] as { label: string; value: string; lime?: boolean }[]).map((stat, i) => (
-              <div key={stat.label} style={{ borderRight: i < 2 ? "0.5px solid rgba(255,255,255,0.08)" : "none", paddingRight: i < 2 ? 12 : 0, paddingLeft: i > 0 ? 12 : 0 }}>
-                <p style={{ fontSize: 12, color: "rgba(255,255,255,0.35)", margin: "0 0 4px", fontFamily: F }}>{stat.label}</p>
-                <p style={{ fontFamily: S, fontSize: 20, margin: 0, lineHeight: 1, color: stat.lime ? "#D4FF4F" : "#FFFFFF" }}>{stat.value}</p>
-              </div>
-            ))}
-          </div>
+        </div>
+        <div style={{ height: 4, background: "rgba(255,255,255,0.08)", borderRadius: 2, marginBottom: 16 }}>
+          <div style={{ height: 4, background: "#D4FF4F", borderRadius: 2, width: `${Math.max(Math.min(percentUsed, 100), 0.5)}%` }} />
+        </div>
+        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr" }}>
+          {([
+            { label: "Projects", value: String(projectCount), serif: true },
+            { label: "Photos",   value: String(photoCount),   serif: true },
+            { label: "Plan",     value: "Free",               serif: false },
+          ] as { label: string; value: string; serif: boolean }[]).map((stat, i) => (
+            <div key={stat.label} style={{ borderRight: i < 2 ? "1px solid rgba(255,255,255,0.08)" : "none", paddingRight: i < 2 ? 12 : 0, paddingLeft: i > 0 ? 12 : 0 }}>
+              <p style={{ fontSize: 9, color: "rgba(255,255,255,0.35)", margin: "0 0 4px", textTransform: "uppercase", letterSpacing: "0.06em", fontFamily: F }}>{stat.label}</p>
+              <p style={{ fontFamily: stat.serif ? S : F, fontSize: stat.serif ? 22 : 13, margin: 0, lineHeight: 1, color: "#FFFFFF", fontWeight: stat.serif ? 400 : 600 }}>{stat.value}</p>
+            </div>
+          ))}
         </div>
       </div>
 
       {/* ── RECENT PROJECTS ── */}
-      <div style={{ padding: "20px 20px 8px", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-        <p style={{ fontSize: 12, fontWeight: 700, letterSpacing: "0.09em", textTransform: "uppercase", color: "#4B5563", margin: 0, fontFamily: F }}>Recent projects</p>
+      <div style={{ padding: "0 20px 8px", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+        <p style={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.09em", textTransform: "uppercase", color: "#4B5563", margin: 0, fontFamily: F }}>Recent projects</p>
         {projects.length > 0 && (
-          <button onClick={() => router.push("/cloud/dashboard/projects")} style={{ fontSize: 14, color: "#374151", background: "none", border: "none", cursor: "pointer", padding: 0, fontFamily: F }}>View all →</button>
+          <button onClick={() => router.push("/cloud/dashboard/projects")} style={{ fontSize: 13, color: "#374151", background: "none", border: "none", cursor: "pointer", padding: 0, fontFamily: F, fontWeight: 600 }}>View all →</button>
         )}
       </div>
 
@@ -137,14 +178,12 @@ export default function CloudDashboardHome() {
         <div style={{ padding: "0 20px" }}>
           <div style={{ background: "linear-gradient(145deg, #EDFFF6 0%, #D0FFE8 100%)", border: "0.5px solid rgba(0,180,100,0.22)", borderRadius: 20, padding: "32px 24px", display: "flex", flexDirection: "column", alignItems: "center", textAlign: "center" }}>
             <div style={{ width: 56, height: 56, borderRadius: 16, background: "rgba(255,255,255,0.65)", border: "0.5px solid rgba(0,180,100,0.25)", display: "flex", alignItems: "center", justifyContent: "center", marginBottom: 16 }}>
-              <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#00613A" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/>
-              </svg>
+              <Camera size={26} color="#00613A" strokeWidth={1.5} />
             </div>
             <p style={{ fontFamily: S, fontSize: 24, color: "#004D30", margin: "0 0 8px", lineHeight: 1.25 }}>Add your first project</p>
             <p style={{ fontSize: 16, color: "#007A4A", lineHeight: 1.6, margin: "0 0 24px", maxWidth: 260, fontFamily: F }}>Create a project for a job you are working on, then upload photos straight from your phone.</p>
             <button onClick={() => setShowNew(true)} style={{ display: "flex", alignItems: "center", gap: 8, height: 48, padding: "0 24px", background: "#D4FF4F", color: "#111111", fontSize: 16, fontWeight: 700, borderRadius: 12, border: "none", cursor: "pointer", fontFamily: F }}>
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+              <Plus size={16} strokeWidth={2.5} />
               Create a project
             </button>
           </div>
@@ -157,12 +196,11 @@ export default function CloudDashboardHome() {
             const pCount = p.project_media?.length ?? 0;
             return (
               <div key={p.id} onClick={() => router.push(`/cloud/dashboard/projects/${p.id}`)}
-                   style={{ background: ps.gradient, border: `0.5px solid ${ps.border}`, borderRadius: 20, padding: 10, overflow: "hidden", minWidth: 160, width: 160, flexShrink: 0, cursor: "pointer", display: "flex", flexDirection: "column" }}>
-                {/* Folder body */}
-                <div style={{ background: "#FFFFFF", borderRadius: 14, border: "0.5px solid rgba(0,0,0,0.06)", boxShadow: "0 1px 4px rgba(0,0,0,0.06)", padding: 7, height: 130, position: "relative", overflow: "hidden" }}>
-                  <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gridTemplateRows: "1fr 1fr", gap: 4, height: "100%" }}>
+                   style={{ background: ps.gradient, border: `0.5px solid ${ps.border}`, borderRadius: 20, overflow: "hidden", minWidth: 160, width: 160, flexShrink: 0, cursor: "pointer" }}>
+                <div style={{ margin: "10px 10px 0", borderRadius: 14, overflow: "hidden", position: "relative" }}>
+                  <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gridTemplateRows: "1fr 1fr", gap: 3, height: 130 }}>
                     {([0, 1, 2, 3] as const).map((idx) => (
-                      <div key={idx} style={{ borderRadius: 8, overflow: "hidden", background: ps.photoFallbackBg, opacity: mediaItems[idx] ? 1 : 0.35 }}>
+                      <div key={idx} style={{ overflow: "hidden", background: ps.photoFallbackBg, opacity: mediaItems[idx] ? 1 : 0.35 }}>
                         {mediaItems[idx] ? (
                           // eslint-disable-next-line @next/next/no-img-element
                           <img src={mediaItems[idx]!.public_url} alt="" style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }} />
@@ -177,138 +215,103 @@ export default function CloudDashboardHome() {
                     ))}
                   </div>
                   {pCount > 0 && (
-                    <div style={{ position: "absolute", bottom: 8, right: 8, background: "#D4FF4F", color: "#111111", fontSize: 10, fontWeight: 700, padding: "2px 6px", borderRadius: 20, fontFamily: F, lineHeight: 1.4 }}>{pCount}</div>
+                    <div style={{ position: "absolute", bottom: 7, right: 7, background: "#D4FF4F", color: "#0a0a0a", fontSize: 10, fontWeight: 700, padding: "3px 8px", borderRadius: 20, fontFamily: F, lineHeight: 1.4 }}>{pCount} photos</div>
                   )}
                 </div>
-                {/* Details below folder */}
-                <div style={{ paddingTop: 8 }}>
-                  <p style={{ fontFamily: S, fontSize: 14, color: ps.titleColor, margin: "0 0 2px", lineHeight: 1.25, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{p.title}</p>
-                  <p style={{ fontSize: 11, color: ps.subtextColor, margin: 0, fontFamily: F }}>{p.category || "Project"} · {pCount} photo{pCount !== 1 ? "s" : ""}</p>
+                <div style={{ padding: "10px 12px 14px" }}>
+                  <p style={{ fontFamily: S, fontSize: 14, color: ps.titleColor, margin: "0 0 4px", lineHeight: 1.2, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{p.title}</p>
+                  <span style={{ fontSize: 9, fontWeight: 700, letterSpacing: "0.05em", textTransform: "uppercase", color: ps.subtextColor, background: "rgba(255,255,255,0.6)", padding: "2px 7px", borderRadius: 20, fontFamily: F }}>{p.category || "Project"}</span>
                 </div>
               </div>
             );
           })}
           <div onClick={() => setShowNew(true)} style={{ minWidth: 110, width: 110, border: "1.5px dashed rgba(0,0,0,0.15)", borderRadius: 20, background: "#EEEEEA", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 8, flexShrink: 0, cursor: "pointer", padding: "24px 0" }}>
             <div style={{ width: 38, height: 38, borderRadius: "50%", background: "#FFFFFF", border: "0.5px solid rgba(0,0,0,0.10)", display: "flex", alignItems: "center", justifyContent: "center" }}>
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#6B7280" strokeWidth="2.5" strokeLinecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+              <Plus size={18} color="#6B7280" strokeWidth={2.5} />
             </div>
             <p style={{ fontSize: 13, color: "#9CA3AF", fontWeight: 500, textAlign: "center", margin: 0, lineHeight: 1.4, fontFamily: F }}>New<br/>project</p>
           </div>
         </div>
       )}
 
-      {/* ── UPLOAD SHORTCUT ── */}
-      <div style={{ padding: "20px 20px 0" }}>
-        <div style={{ background: "linear-gradient(160deg, #F0FFF8 0%, #E0FFF0 60%, #C8FFE0 100%)", border: "0.5px solid rgba(96,232,160,0.3)", borderRadius: 20, padding: "14px 16px", display: "flex", alignItems: "center", gap: 12 }}>
-          <div style={{ width: 44, height: 44, borderRadius: 12, flexShrink: 0, background: "rgba(0,135,90,0.10)", border: "0.5px solid rgba(0,135,90,0.18)", display: "flex", alignItems: "center", justifyContent: "center" }}>
-            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#00875A" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/>
-            </svg>
-          </div>
-          <div style={{ flex: 1, minWidth: 0 }}>
-            <p style={{ fontSize: 16, fontWeight: 600, color: "#004D30", margin: "0 0 2px", fontFamily: F }}>Upload site photos</p>
-            <p style={{ fontSize: 14, color: "#00875A", margin: 0, fontFamily: F }}>Add to an existing project</p>
-          </div>
-          <button onClick={() => router.push("/cloud/dashboard/upload")} style={{ height: 36, padding: "0 18px", background: "#D4FF4F", color: "#0a0a0a", fontSize: 14, fontWeight: 700, borderRadius: 10, border: "none", cursor: "pointer", flexShrink: 0, fontFamily: F }}>Upload</button>
-        </div>
-      </div>
-
       {/* ── TEAM + ACTIVITY ROW ── */}
-      <div style={{ padding: "16px 20px 0", display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
+      <div style={{ padding: "20px 20px 0", display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
+
         {/* Team card */}
-        <div onClick={() => router.push("/cloud/dashboard/team")} style={{ background: "linear-gradient(160deg, #FFFBF0 0%, #FFF3D0 60%, #FFE8A0 100%)", border: "0.5px solid rgba(255,208,112,0.35)", borderRadius: 20, padding: 16, cursor: "pointer", display: "flex", flexDirection: "column" }}>
-          <p style={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.10em", textTransform: "uppercase", color: "#BF7020", margin: "0 0 14px", fontFamily: F }}>Team</p>
-          {/* Large icon */}
-          <div style={{ width: 50, height: 50, borderRadius: 15, background: "rgba(191,112,32,0.10)", border: "0.5px solid rgba(191,112,32,0.18)", display: "flex", alignItems: "center", justifyContent: "center", marginBottom: 14 }}>
-            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#BF7020" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/>
-              <path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/>
-            </svg>
+        <div style={{ borderRadius: 20, background: "linear-gradient(160deg, #FFFBF0 0%, #FFF3D0 60%, #FFE8A0 100%)", border: "0.5px solid rgba(255,208,112,0.4)", padding: 20, display: "flex", flexDirection: "column" }}>
+          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 16 }}>
+            <p style={{ fontSize: 9, fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase", color: "#BF7020", margin: 0, fontFamily: F }}>Team</p>
+            <div style={{ width: 28, height: 28, borderRadius: 8, background: "rgba(255,255,255,0.6)", display: "flex", alignItems: "center", justifyContent: "center", border: "0.5px solid rgba(255,180,50,0.3)" }}>
+              <Users size={14} color="#BF7020" strokeWidth={1.8} />
+            </div>
           </div>
-          <p style={{ fontFamily: S, fontSize: 30, color: "#7A3800", margin: "0 0 2px", lineHeight: 1 }}>{teamMembers.length}</p>
-          <p style={{ fontSize: 13, color: "#BF7020", margin: "0 0 14px", fontFamily: F }}>{teamMembers.length === 1 ? "member" : "members"}</p>
+          <p style={{ fontFamily: S, fontSize: 48, color: "#7A3800", margin: "0 0 4px", lineHeight: 1 }}>{teamMembers.length}</p>
+          <p style={{ fontSize: 12, color: "#BF7020", margin: "0 0 16px", fontFamily: F }}>{teamMembers.length === 1 ? "team member" : "team members"}</p>
           {teamMembers.length > 0 && (
-            <div style={{ display: "flex", marginBottom: 14 }}>
-              {teamMembers.slice(0, 3).map((m, i) => (
-                <div key={m.id} style={{ width: 26, height: 26, borderRadius: "50%", border: "2px solid #FFE8A0", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 9, fontWeight: 700, marginLeft: i === 0 ? 0 : -7, background: i === 0 ? "#7A3800" : i === 1 ? "#BF7020" : "#FFD580", color: "#FFFFFF", fontFamily: F, position: "relative", zIndex: 3 - i, flexShrink: 0 }}>
+            <div style={{ display: "flex", marginBottom: 16 }}>
+              {teamMembers.slice(0, 4).map((m, i) => (
+                <div key={m.id} title={m.name} style={{ width: 32, height: 32, borderRadius: "50%", border: "2px solid #FFFBF0", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 10, fontWeight: 700, marginLeft: i === 0 ? 0 : -8, background: (["#0a0a0a", "#D4FF4F", "#FFD080", "#E8C0A0"])[i % 4], color: i === 1 ? "#7A3800" : i === 0 ? "#D4FF4F" : "#7A3800", fontFamily: F, zIndex: 4 - i, position: "relative", flexShrink: 0 }}>
                   {getInitials(m.name)}
                 </div>
               ))}
+              {teamMembers.length > 4 && (
+                <div style={{ width: 32, height: 32, borderRadius: "50%", border: "2px solid #FFFBF0", background: "#FFE0A0", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 9, fontWeight: 700, color: "#7A3800", marginLeft: -8, zIndex: 0, position: "relative", fontFamily: F, flexShrink: 0 }}>
+                  +{teamMembers.length - 4}
+                </div>
+              )}
             </div>
           )}
-          <div style={{ flex: 1 }} />
-          <button style={{ height: 36, background: "rgba(255,255,255,0.6)", border: "0.5px solid rgba(255,180,50,0.3)", borderRadius: 10, padding: "0 16px", fontSize: 12, fontWeight: 600, color: "#7A3800", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", gap: 6, fontFamily: F }}>
+          <button onClick={() => router.push("/cloud/dashboard/team")} style={{ marginTop: "auto", height: 38, background: "rgba(255,255,255,0.7)", border: "0.5px solid rgba(255,180,50,0.4)", borderRadius: 12, color: "#7A3800", fontSize: 12, fontWeight: 700, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", gap: 6, fontFamily: F }}>
             Manage team
-            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#7A3800" strokeWidth="2.5" strokeLinecap="round"><polyline points="9 18 15 12 9 6"/></svg>
+            <ArrowRight size={13} strokeWidth={2.5} />
           </button>
         </div>
 
         {/* Activity card */}
-        <div onClick={() => router.push("/cloud/dashboard/notifications")} style={{ background: "linear-gradient(160deg, #F5F0FF 0%, #EDE5FF 60%, #DDD0FF 100%)", border: "0.5px solid rgba(196,168,255,0.35)", borderRadius: 20, padding: 16, cursor: "pointer", display: "flex", flexDirection: "column" }}>
-          <p style={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.10em", textTransform: "uppercase", color: "#7B5EA7", margin: "0 0 14px", fontFamily: F }}>Activity</p>
-          {/* Large violet-tinted icon */}
-          <div style={{ width: 50, height: 50, borderRadius: 15, background: "rgba(123,94,167,0.10)", border: "0.5px solid rgba(123,94,167,0.18)", display: "flex", alignItems: "center", justifyContent: "center", marginBottom: 14 }}>
-            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#7B5EA7" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-              <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
-            </svg>
-          </div>
-          <p style={{ fontFamily: S, fontSize: 30, color: "#2D1B6B", margin: "0 0 2px", lineHeight: 1 }}>{photoCount}</p>
-          <p style={{ fontSize: 13, color: "#7B5EA7", margin: "0 0 12px", fontFamily: F }}>photos uploaded</p>
-          {recentActivity.slice(0, 2).map((item, i) => (
-            <div key={i} style={{ display: "flex", alignItems: "flex-start", gap: 6, marginBottom: 5 }}>
-              <div style={{ width: 4, height: 4, borderRadius: "50%", background: "rgba(123,94,167,0.55)", marginTop: 5, flexShrink: 0 }} />
-              <p style={{ fontSize: 12, color: "#4B3680", margin: 0, lineHeight: 1.4, fontFamily: F, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{item.message}</p>
+        <div style={{ borderRadius: 20, background: "linear-gradient(160deg, #F5F0FF 0%, #EDE5FF 60%, #DDD0FF 100%)", border: "0.5px solid rgba(196,168,255,0.4)", padding: 20, display: "flex", flexDirection: "column" }}>
+          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 16 }}>
+            <p style={{ fontSize: 9, fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase", color: "#7B5EA7", margin: 0, fontFamily: F }}>Activity</p>
+            <div style={{ width: 28, height: 28, borderRadius: 8, background: "rgba(255,255,255,0.5)", display: "flex", alignItems: "center", justifyContent: "center", border: "0.5px solid rgba(180,140,255,0.3)" }}>
+              <Activity size={14} color="#7B5EA7" strokeWidth={1.8} />
             </div>
-          ))}
-          {recentActivity.length === 0 && (
-            <p style={{ fontSize: 12, color: "#9B85C8", margin: 0, fontFamily: F }}>No recent activity</p>
-          )}
-          <div style={{ flex: 1 }} />
-          <button style={{ marginTop: 14, height: 36, background: "rgba(255,255,255,0.6)", border: "0.5px solid rgba(180,140,255,0.3)", borderRadius: 10, padding: "0 16px", fontSize: 12, fontWeight: 600, color: "#2D1B6B", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", gap: 6, fontFamily: F }}>
-            View activity
-            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#2D1B6B" strokeWidth="2.5" strokeLinecap="round"><polyline points="9 18 15 12 9 6"/></svg>
+          </div>
+          <p style={{ fontFamily: S, fontSize: 48, color: "#2D1B6B", margin: "0 0 4px", lineHeight: 1 }}>{photoCount}</p>
+          <p style={{ fontSize: 12, color: "#7B5EA7", margin: "0 0 16px", fontFamily: F }}>photos uploaded</p>
+          <div style={{ display: "flex", flexDirection: "column", gap: 10, marginBottom: 16 }}>
+            {recentActivity.length > 0 ? recentActivity.slice(0, 3).map((item, i) => (
+              <div key={i} style={{ display: "flex", alignItems: "flex-start", gap: 10 }}>
+                <div style={{ width: 28, height: 28, borderRadius: "50%", flexShrink: 0, background: (["rgba(255,255,255,0.7)", "rgba(212,255,79,0.3)", "rgba(255,220,100,0.4)"])[i % 3], border: "0.5px solid rgba(180,140,255,0.3)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 9, fontWeight: 700, color: "#2D1B6B", fontFamily: F }}>
+                  {item.userInitials}
+                </div>
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  <p style={{ fontSize: 11, color: "#2D1B6B", fontWeight: 600, margin: "0 0 1px", lineHeight: 1.3, fontFamily: F, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{item.message}</p>
+                  <p style={{ fontSize: 10, color: "#9B7FCC", margin: 0, fontFamily: F }}>{item.time}</p>
+                </div>
+              </div>
+            )) : (
+              <p style={{ fontSize: 12, color: "#9B7FCC", margin: 0, fontFamily: F }}>No activity yet. Upload your first photos to get started.</p>
+            )}
+          </div>
+          <button onClick={() => router.push("/cloud/dashboard/notifications")} style={{ marginTop: "auto", height: 38, background: "rgba(255,255,255,0.6)", border: "0.5px solid rgba(180,140,255,0.4)", borderRadius: 12, color: "#2D1B6B", fontSize: 12, fontWeight: 700, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", gap: 6, fontFamily: F }}>
+            View all activity
+            <ArrowRight size={13} strokeWidth={2.5} />
           </button>
         </div>
       </div>
 
-      {/* ── STATS CARD ── */}
-      <div style={{ padding: "16px 20px 0" }}>
-        <div style={{ background: "linear-gradient(160deg, #F0F8FF 0%, #E0F0FF 60%, #C8E4FF 100%)", border: "0.5px solid rgba(128,200,255,0.3)", borderRadius: 20, padding: 18 }}>
-          {/* Header row */}
-          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 18 }}>
-            <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-              <div style={{ width: 40, height: 40, borderRadius: 12, background: "rgba(21,101,192,0.10)", border: "0.5px solid rgba(21,101,192,0.18)", display: "flex", alignItems: "center", justifyContent: "center" }}>
-                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#1565C0" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
-                  <line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/>
-                </svg>
-              </div>
-              <div>
-                <p style={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.10em", textTransform: "uppercase", color: "#1565C0", margin: 0, fontFamily: F }}>Analytics</p>
-                <p style={{ fontSize: 14, fontWeight: 600, color: "#0D3070", margin: 0, fontFamily: F }}>Your overview</p>
-              </div>
-            </div>
-            <button onClick={() => router.push("/cloud/dashboard/analytics")} style={{ height: 34, padding: "0 16px", background: "#D4FF4F", color: "#0a0a0a", fontSize: 13, fontWeight: 700, borderRadius: 10, border: "none", cursor: "pointer", flexShrink: 0, fontFamily: F, display: "flex", alignItems: "center", gap: 4 }}>
-              View stats
-              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#0a0a0a" strokeWidth="2.5" strokeLinecap="round"><polyline points="9 18 15 12 9 6"/></svg>
-            </button>
-          </div>
-          {/* Stats row */}
-          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 10 }}>
-            {([
-              { label: "Projects", value: String(projectCount), bar: Math.min((projectCount / 20) * 100, 100), color: "#1565C0" },
-              { label: "Photos", value: String(photoCount), bar: Math.min((photoCount / 500) * 100, 100), color: "#1565C0" },
-              { label: "Storage", value: `${percentUsed.toFixed(1)}%`, bar: Math.min(percentUsed, 100), color: "#1565C0" },
-            ] as { label: string; value: string; bar: number; color: string }[]).map((s) => (
-              <div key={s.label}>
-                <p style={{ fontSize: 11, color: "#1565C0", margin: "0 0 4px", fontFamily: F }}>{s.label}</p>
-                <p style={{ fontFamily: S, fontSize: 22, color: "#0D3070", margin: "0 0 8px", lineHeight: 1 }}>{s.value}</p>
-                <div style={{ height: 4, background: "rgba(21,101,192,0.12)", borderRadius: 2 }}>
-                  <div style={{ height: 4, background: s.color, borderRadius: 2, width: `${Math.max(s.bar, 3)}%`, transition: "width 0.6s ease" }} />
-                </div>
-              </div>
-            ))}
-          </div>
+      {/* ── PUBLIC PROFILE CARD ── */}
+      <div style={{ margin: "16px 20px 0", borderRadius: 20, background: "linear-gradient(160deg, #FFF8F0 0%, #FFEEDD 60%, #FFE0C0 100%)", border: "0.5px solid rgba(255,180,100,0.3)", padding: "18px 20px", display: "flex", alignItems: "center", gap: 16 }}>
+        <div style={{ width: 44, height: 44, borderRadius: 14, background: "rgba(255,255,255,0.6)", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0, border: "0.5px solid rgba(255,160,60,0.3)" }}>
+          <Globe size={22} color="#BF5000" strokeWidth={1.6} />
         </div>
+        <div style={{ flex: 1, minWidth: 0 }}>
+          <p style={{ fontFamily: S, fontSize: 16, color: "#7A3000", margin: "0 0 3px", lineHeight: 1.2 }}>Your public profile</p>
+          <p style={{ fontSize: 11, color: "#BF7020", margin: 0, fontFamily: F, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>Share your projects with clients</p>
+        </div>
+        <button onClick={() => router.push("/cloud/dashboard/settings")} style={{ height: 34, padding: "0 14px", background: "rgba(255,255,255,0.7)", border: "0.5px solid rgba(255,160,60,0.3)", borderRadius: 10, color: "#7A3000", fontSize: 11, fontWeight: 700, cursor: "pointer", flexShrink: 0, fontFamily: F, display: "flex", alignItems: "center", gap: 5 }}>
+          Manage
+          <ExternalLink size={11} strokeWidth={2} />
+        </button>
       </div>
 
       {session?.clientId && (
