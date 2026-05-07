@@ -44,6 +44,13 @@ function getGreeting(): string {
   return "Good evening";
 }
 
+function getInitials(name: string): string {
+  const parts = name.trim().split(" ").filter(Boolean);
+  if (parts.length >= 2) return (parts[0][0]! + parts[parts.length - 1][0]!).toUpperCase();
+  if (parts.length === 1) return parts[0]!.slice(0, 2).toUpperCase();
+  return "ME";
+}
+
 function WelcomeToast() {
   const searchParams = useSearchParams();
   const router = useRouter();
@@ -117,7 +124,7 @@ export default function CloudDashboardLayout({ children }: { children: React.Rea
   }, [session?.userId, pathname]);
 
   const displayName = businessName || session?.user?.name || "Leadstaq Cloud";
-  const initials = (session?.user?.name ?? "U").slice(0, 2).toUpperCase();
+  const initials = getInitials(session?.user?.name ?? "");
 
   return (
     <div className="flex min-h-screen bg-[#F5F5F0] font-cloud-body">
@@ -197,15 +204,16 @@ export default function CloudDashboardLayout({ children }: { children: React.Rea
             <p className="font-cloud-display text-[18px] text-[#0a0a0a] leading-tight">{displayName}</p>
           </div>
           <div className="flex items-center gap-2">
-            <Link
-              href="/cloud/dashboard/notifications"
-              className="relative flex h-[34px] w-[34px] items-center justify-center rounded-full bg-white border border-black/[0.08] text-[#666660] transition-colors hover:border-black/[0.15] hover:text-[#0a0a0a]"
+            <button
+              onClick={() => router.push("/cloud/dashboard/notifications")}
+              className="relative flex h-[34px] w-[34px] items-center justify-center rounded-full bg-white border border-black/[0.08] text-[#666660] transition-colors hover:border-black/[0.15] hover:text-[#0a0a0a] active:scale-95 cursor-pointer"
+              aria-label="Notifications"
             >
               <Bell className="h-4 w-4" strokeWidth={1.8} />
               {unreadCount > 0 && (
                 <span className="absolute right-1 top-1 h-2 w-2 rounded-full bg-[#D4FF4F] border-2 border-[#F5F5F0]" />
               )}
-            </Link>
+            </button>
             <Link
               href="/cloud/dashboard/upload"
               className="flex items-center gap-1.5 h-[34px] px-4 bg-[#D4FF4F] text-black text-[12px] font-bold rounded-xl hover:bg-[#C8F244] transition-colors font-cloud-body"
@@ -223,18 +231,24 @@ export default function CloudDashboardLayout({ children }: { children: React.Rea
             <p className="font-cloud-display text-[20px] text-[#0a0a0a] leading-tight">{displayName}</p>
           </div>
           <div className="flex items-center gap-2">
-            <Link
-              href="/cloud/dashboard/notifications"
-              className="relative flex h-[34px] w-[34px] items-center justify-center rounded-full bg-white border border-black/[0.08] text-[#666660]"
+            <button
+              onClick={() => router.push("/cloud/dashboard/notifications")}
+              className="relative flex h-[34px] w-[34px] items-center justify-center rounded-full bg-white border border-black/[0.08] text-[#666660] active:scale-95 transition-transform cursor-pointer"
+              aria-label="Notifications"
             >
               <Bell className="h-4 w-4" strokeWidth={1.8} />
               {unreadCount > 0 && (
                 <span className="absolute right-1 top-1 h-2 w-2 rounded-full bg-[#D4FF4F] border-2 border-[#F5F5F0]" />
               )}
-            </Link>
-            <div className="flex h-[34px] w-[34px] items-center justify-center rounded-full bg-[#0a0a0a] text-[11px] font-bold text-[#D4FF4F]">
+            </button>
+            <button
+              onClick={() => router.push("/cloud/dashboard/settings")}
+              className="flex h-[34px] w-[34px] items-center justify-center rounded-full bg-[#0a0a0a] text-[11px] font-bold text-[#D4FF4F] active:scale-95 transition-transform cursor-pointer"
+              aria-label="Account settings"
+              style={{ fontFamily: "'DM Sans', sans-serif" }}
+            >
               {initials}
-            </div>
+            </button>
           </div>
         </header>
 

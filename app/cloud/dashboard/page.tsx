@@ -114,17 +114,17 @@ export default function CloudDashboardHome() {
 
         {projects.length === 0 ? (
           /* ── Empty state ── */
-          <div className="flex min-h-[50vh] flex-col items-center justify-center text-center py-10">
-            <div className="mb-5 flex h-14 w-14 items-center justify-center rounded-2xl bg-white border border-black/[0.07]" style={{ boxShadow: 'var(--cloud-shadow-card)' }}>
-              <Camera className="h-6 w-6 text-[#999990]" strokeWidth={1.5} />
+          <div className="mt-4 rounded-[20px] bg-gradient-to-br from-[#F0FFF8] via-[#E0FFF0] to-[#C8FFE0] border border-[#60E8A0]/30 p-8 flex flex-col items-center text-center">
+            <div className="w-14 h-14 rounded-2xl bg-white/70 flex items-center justify-center mb-4 border border-[#60E8A0]/30">
+              <Camera className="h-7 w-7 text-[#00875A]" strokeWidth={1.5} />
             </div>
-            <h2 className="mb-2 font-cloud-display text-[22px] text-[#0a0a0a]">Add your first project</h2>
-            <p className="mb-6 max-w-xs text-[14px] text-[#999990] font-cloud-body">
+            <h2 className="font-cloud-display text-[22px] text-[#004D30] mb-2 leading-tight">Add your first project</h2>
+            <p className="text-[13px] text-[#00875A] font-cloud-body leading-relaxed mb-6 max-w-[260px]">
               Create a project for a job you&apos;re working on, then upload photos straight from your phone.
             </p>
             <button
               onClick={() => setShowNew(true)}
-              className="flex items-center gap-2 rounded-xl bg-[#D4FF4F] px-5 py-3 text-[14px] font-bold text-black hover:bg-[#C8F244] transition-colors font-cloud-body"
+              className="flex items-center gap-2 h-12 px-6 bg-[#D4FF4F] text-[#0a0a0a] text-[14px] font-bold rounded-[12px] active:scale-95 transition-transform font-cloud-body"
             >
               <Plus className="h-4 w-4" />
               Create a project
