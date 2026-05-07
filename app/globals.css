@@ -279,10 +279,16 @@
 
   /* ── Cloud dashboard fonts ── */
   .font-cloud-display {
-    font-family: 'DM Serif Display', Georgia, serif;
+    font-family: var(--font-dm-serif), 'DM Serif Display', Georgia, serif;
   }
   .font-cloud-body {
-    font-family: 'DM Sans', system-ui, sans-serif;
+    font-family: var(--font-dm-sans), 'DM Sans', system-ui, sans-serif;
+  }
+  .font-serif-display {
+    font-family: var(--font-dm-serif), 'DM Serif Display', Georgia, serif;
+  }
+  .font-sans-body {
+    font-family: var(--font-dm-sans), 'DM Sans', system-ui, sans-serif;
   }
 }
 

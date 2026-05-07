@@ -1,5 +1,20 @@
 import type { Metadata, Viewport } from "next";
+import { DM_Sans, DM_Serif_Display } from "next/font/google";
 import { ServiceWorkerRegistration } from "./components/ServiceWorkerRegistration";
+
+const dmSans = DM_Sans({
+  subsets: ["latin"],
+  weight: ["400", "500", "600", "700"],
+  variable: "--font-dm-sans",
+  display: "swap",
+});
+
+const dmSerif = DM_Serif_Display({
+  subsets: ["latin"],
+  weight: ["400"],
+  variable: "--font-dm-serif",
+  display: "swap",
+});
 
 export const viewport: Viewport = {
   themeColor: "#D4FF4F",
@@ -44,9 +59,9 @@ export const metadata: Metadata = {
 
 export default function CloudLayout({ children }: { children: React.ReactNode }) {
   return (
-    <>
+    <div className={`${dmSans.variable} ${dmSerif.variable}`}>
       <ServiceWorkerRegistration />
       {children}
-    </>
+    </div>
   );
 }

@@ -4,6 +4,13 @@ export type ProjectCardStyles = {
   badge: string;
   text: string;
   subtext: string;
+  gradientCss: string;
+  borderColor: string;
+  badgeText: string;
+  titleColor: string;
+  subtextColor: string;
+  photoFallback: string;
+  photoIcon: string;
 };
 
 const categoryStyles: Record<string, ProjectCardStyles> = {
@@ -13,6 +20,13 @@ const categoryStyles: Record<string, ProjectCardStyles> = {
     badge: 'bg-white/60 text-[#BF6000]',
     text: 'text-[#7A3800]',
     subtext: 'text-[#BF7020]',
+    gradientCss: 'linear-gradient(160deg, #FFF4E6 0%, #FFE0B2 60%, #FFCC80 100%)',
+    borderColor: 'rgba(255,183,77,0.3)',
+    badgeText: '#BF6000',
+    titleColor: '#7A3800',
+    subtextColor: '#BF7020',
+    photoFallback: '#E8C090',
+    photoIcon: '#BF7020',
   },
   'Solar Installation': {
     gradient: 'bg-gradient-to-br from-[#E3F2FD] via-[#BBDEFB] to-[#90CAF9]',
@@ -20,6 +34,13 @@ const categoryStyles: Record<string, ProjectCardStyles> = {
     badge: 'bg-white/60 text-[#0D47A1]',
     text: 'text-[#0D3070]',
     subtext: 'text-[#1565C0]',
+    gradientCss: 'linear-gradient(160deg, #E3F2FD 0%, #BBDEFB 60%, #90CAF9 100%)',
+    borderColor: 'rgba(100,181,246,0.3)',
+    badgeText: '#0D47A1',
+    titleColor: '#0D3070',
+    subtextColor: '#1565C0',
+    photoFallback: '#90C4E8',
+    photoIcon: '#1565C0',
   },
   Solar: {
     gradient: 'bg-gradient-to-br from-[#E3F2FD] via-[#BBDEFB] to-[#90CAF9]',
@@ -27,6 +48,13 @@ const categoryStyles: Record<string, ProjectCardStyles> = {
     badge: 'bg-white/60 text-[#0D47A1]',
     text: 'text-[#0D3070]',
     subtext: 'text-[#1565C0]',
+    gradientCss: 'linear-gradient(160deg, #E3F2FD 0%, #BBDEFB 60%, #90CAF9 100%)',
+    borderColor: 'rgba(100,181,246,0.3)',
+    badgeText: '#0D47A1',
+    titleColor: '#0D3070',
+    subtextColor: '#1565C0',
+    photoFallback: '#90C4E8',
+    photoIcon: '#1565C0',
   },
   Landscaping: {
     gradient: 'bg-gradient-to-br from-[#E8F5E9] via-[#C8E6C9] to-[#A5D6A7]',
@@ -34,6 +62,13 @@ const categoryStyles: Record<string, ProjectCardStyles> = {
     badge: 'bg-white/60 text-[#1B5E20]',
     text: 'text-[#1B4020]',
     subtext: 'text-[#2E7D32]',
+    gradientCss: 'linear-gradient(160deg, #E8F5E9 0%, #C8E6C9 60%, #A5D6A7 100%)',
+    borderColor: 'rgba(129,199,132,0.3)',
+    badgeText: '#1B5E20',
+    titleColor: '#1B4020',
+    subtextColor: '#2E7D32',
+    photoFallback: '#90C890',
+    photoIcon: '#2E7D32',
   },
   Electrical: {
     gradient: 'bg-gradient-to-br from-[#FFFDE7] via-[#FFF9C4] to-[#FFF176]',
@@ -41,6 +76,13 @@ const categoryStyles: Record<string, ProjectCardStyles> = {
     badge: 'bg-white/60 text-[#795800]',
     text: 'text-[#5A4000]',
     subtext: 'text-[#8C6A00]',
+    gradientCss: 'linear-gradient(160deg, #FFFDE7 0%, #FFF9C4 60%, #FFF176 100%)',
+    borderColor: 'rgba(255,213,79,0.3)',
+    badgeText: '#795800',
+    titleColor: '#5A4000',
+    subtextColor: '#8C6A00',
+    photoFallback: '#F0D870',
+    photoIcon: '#8C6A00',
   },
   Roofing: {
     gradient: 'bg-gradient-to-br from-[#EFEBE9] via-[#D7CCC8] to-[#BCAAA4]',
@@ -48,6 +90,13 @@ const categoryStyles: Record<string, ProjectCardStyles> = {
     badge: 'bg-white/60 text-[#4E342E]',
     text: 'text-[#3E2723]',
     subtext: 'text-[#5D4037]',
+    gradientCss: 'linear-gradient(160deg, #EFEBE9 0%, #D7CCC8 60%, #BCAAA4 100%)',
+    borderColor: 'rgba(161,136,127,0.3)',
+    badgeText: '#4E342E',
+    titleColor: '#3E2723',
+    subtextColor: '#5D4037',
+    photoFallback: '#C8A898',
+    photoIcon: '#5D4037',
   },
   'Interior Design': {
     gradient: 'bg-gradient-to-br from-[#FCE4EC] via-[#F8BBD9] to-[#F48FB1]',
@@ -55,6 +104,13 @@ const categoryStyles: Record<string, ProjectCardStyles> = {
     badge: 'bg-white/60 text-[#880E4F]',
     text: 'text-[#6A0636]',
     subtext: 'text-[#AD1457]',
+    gradientCss: 'linear-gradient(160deg, #FCE4EC 0%, #F8BBD9 60%, #F48FB1 100%)',
+    borderColor: 'rgba(240,98,146,0.3)',
+    badgeText: '#880E4F',
+    titleColor: '#6A0636',
+    subtextColor: '#AD1457',
+    photoFallback: '#E890B0',
+    photoIcon: '#AD1457',
   },
   Fencing: {
     gradient: 'bg-gradient-to-br from-[#EFEBE9] via-[#D7CCC8] to-[#BCAAA4]',
@@ -62,6 +118,13 @@ const categoryStyles: Record<string, ProjectCardStyles> = {
     badge: 'bg-white/60 text-[#4E342E]',
     text: 'text-[#3E2723]',
     subtext: 'text-[#5D4037]',
+    gradientCss: 'linear-gradient(160deg, #EFEBE9 0%, #D7CCC8 60%, #BCAAA4 100%)',
+    borderColor: 'rgba(161,136,127,0.3)',
+    badgeText: '#4E342E',
+    titleColor: '#3E2723',
+    subtextColor: '#5D4037',
+    photoFallback: '#C8A898',
+    photoIcon: '#5D4037',
   },
   Plumbing: {
     gradient: 'bg-gradient-to-br from-[#E0F7FA] via-[#B2EBF2] to-[#80DEEA]',
@@ -69,6 +132,13 @@ const categoryStyles: Record<string, ProjectCardStyles> = {
     badge: 'bg-white/60 text-[#006064]',
     text: 'text-[#004D54]',
     subtext: 'text-[#00838F]',
+    gradientCss: 'linear-gradient(160deg, #E0F7FA 0%, #B2EBF2 60%, #80DEEA 100%)',
+    borderColor: 'rgba(77,208,225,0.3)',
+    badgeText: '#006064',
+    titleColor: '#004D54',
+    subtextColor: '#00838F',
+    photoFallback: '#70C8D0',
+    photoIcon: '#00838F',
   },
   Architecture: {
     gradient: 'bg-gradient-to-br from-[#F3E5F5] via-[#E1BEE7] to-[#CE93D8]',
@@ -76,6 +146,13 @@ const categoryStyles: Record<string, ProjectCardStyles> = {
     badge: 'bg-white/60 text-[#4A148C]',
     text: 'text-[#38006b]',
     subtext: 'text-[#6A1B9A]',
+    gradientCss: 'linear-gradient(160deg, #F3E5F5 0%, #E1BEE7 60%, #CE93D8 100%)',
+    borderColor: 'rgba(186,104,200,0.3)',
+    badgeText: '#4A148C',
+    titleColor: '#38006b',
+    subtextColor: '#6A1B9A',
+    photoFallback: '#C890D0',
+    photoIcon: '#6A1B9A',
   },
   Events: {
     gradient: 'bg-gradient-to-br from-[#FCE4EC] via-[#F8BBD9] to-[#F48FB1]',
@@ -83,6 +160,13 @@ const categoryStyles: Record<string, ProjectCardStyles> = {
     badge: 'bg-white/60 text-[#880E4F]',
     text: 'text-[#6A0636]',
     subtext: 'text-[#AD1457]',
+    gradientCss: 'linear-gradient(160deg, #FCE4EC 0%, #F8BBD9 60%, #F48FB1 100%)',
+    borderColor: 'rgba(240,98,146,0.3)',
+    badgeText: '#880E4F',
+    titleColor: '#6A0636',
+    subtextColor: '#AD1457',
+    photoFallback: '#E890B0',
+    photoIcon: '#AD1457',
   },
   Other: {
     gradient: 'bg-gradient-to-br from-[#F3E5F5] via-[#E1BEE7] to-[#CE93D8]',
@@ -90,10 +174,17 @@ const categoryStyles: Record<string, ProjectCardStyles> = {
     badge: 'bg-white/60 text-[#4A148C]',
     text: 'text-[#38006b]',
     subtext: 'text-[#6A1B9A]',
+    gradientCss: 'linear-gradient(160deg, #F3E5F5 0%, #E1BEE7 60%, #CE93D8 100%)',
+    borderColor: 'rgba(186,104,200,0.3)',
+    badgeText: '#4A148C',
+    titleColor: '#38006b',
+    subtextColor: '#6A1B9A',
+    photoFallback: '#C890D0',
+    photoIcon: '#6A1B9A',
   },
 };
 
 export function getProjectCardStyles(category: string | null | undefined): ProjectCardStyles {
-  if (!category) return categoryStyles['Other'];
-  return categoryStyles[category] ?? categoryStyles['Other'];
+  if (!category) return categoryStyles['Other']!;
+  return categoryStyles[category] ?? categoryStyles['Other']!;
 }
