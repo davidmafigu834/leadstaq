@@ -202,25 +202,23 @@ export default function CloudProjectsPage() {
           )}
         </div>
       ) : (
-        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10, padding: "0 20px" }}>
+        <div style={{ display: "grid", gridTemplateColumns: "minmax(0,1fr) minmax(0,1fr)", gap: 10, padding: "0 20px" }}>
           {filtered.map((p) => {
             return (
               <div key={p.id} style={{ minWidth: 0 }}>
                 <div style={{ borderRadius: 18, background: "var(--fw-card)", border: "0.5px solid var(--fw-border)", overflow: "hidden", cursor: "pointer", position: "relative" }}>
-                  {/* Top row: category badge + three-dot menu */}
-                  <div className="flex items-center justify-between px-3.5 pt-3.5 pb-1">
+                  {/* Top row: category badge left | [star + menu] right */}
+                  <div className="flex items-center justify-between px-3.5 pt-3.5 pb-1 gap-1">
                     {p.category ? (
-                      <span className="rounded-full px-2.5 py-0.5 text-[11px] font-semibold font-cloud-body" style={{ background: "var(--fw-sunken)", color: "var(--fw-text-secondary)" }}>
+                      <span className="truncate rounded-full px-2 py-0.5 text-[10px] font-semibold font-cloud-body" style={{ background: "var(--fw-sunken)", color: "var(--fw-text-secondary)", maxWidth: "60%" }}>
                         {p.category}
                       </span>
-                    ) : <span />}
-                    {p.is_featured && (
-                      <span className="flex items-center gap-1 rounded-full bg-white/60 px-2 py-0.5 text-[11px] font-semibold text-[#5C7A00] font-cloud-body">
-                        <Star className="h-2.5 w-2.5" />
-                        Featured
-                      </span>
-                    )}
-                    <div className="relative ml-auto">
+                    ) : <span className="flex-1" />}
+                    <div className="flex flex-shrink-0 items-center gap-1">
+                      {p.is_featured && (
+                        <Star className="h-3.5 w-3.5 flex-shrink-0" style={{ color: "#B8860B", fill: "#B8860B" }} />
+                      )}
+                    <div className="relative">
                       <button
                         onClick={() => setMenuOpen(menuOpen === p.id ? null : p.id)}
                         className="rounded-lg p-1.5 transition-colors"
@@ -262,6 +260,7 @@ export default function CloudProjectsPage() {
                           </button>
                         </div>
                       )}
+                    </div>
                     </div>
                   </div>
 

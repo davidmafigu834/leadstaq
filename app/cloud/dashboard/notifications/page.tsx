@@ -81,14 +81,9 @@ export default function NotificationsPage() {
   return (
     <div className="min-h-screen bg-[#F5F5F0] font-cloud-body px-5 py-4 lg:px-8">
       <div className="mx-auto max-w-xl">
-        <div className="mb-5 flex items-center justify-between">
-          <div>
-            <p className="font-cloud-display text-[22px] text-[#0a0a0a]">Notifications</p>
-            {unread > 0 && (
-              <p className="text-[12px] text-[#999990] font-cloud-body">{unread} unread</p>
-            )}
-          </div>
-          {unread > 0 && (
+        {unread > 0 && (
+          <div className="mb-4 flex items-center justify-between">
+            <p className="text-[12px] text-[#999990] font-cloud-body">{unread} unread</p>
             <button
               onClick={() => void markAllRead()}
               disabled={markingAll}
@@ -97,8 +92,8 @@ export default function NotificationsPage() {
               {markingAll ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <CheckCheck className="h-3.5 w-3.5" />}
               Mark all read
             </button>
-          )}
-        </div>
+          </div>
+        )}
 
         {loading ? (
           <div className="flex justify-center py-20">

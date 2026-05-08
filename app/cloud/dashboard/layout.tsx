@@ -29,7 +29,7 @@ const MOBILE_NAV = [
   { href: "/cloud/dashboard", icon: Grid, label: "Home" },
   { href: "/cloud/dashboard/projects", icon: Folder, label: "Projects" },
   { href: "/cloud/dashboard/upload", icon: Camera, label: "Upload" },
-  { href: "/cloud/dashboard/notifications", icon: Bell, label: "" },
+  { href: "/cloud/dashboard/notifications", icon: Bell, label: "Alerts" },
   { href: "/cloud/dashboard/settings", icon: Settings, label: "Settings" },
 ];
 
