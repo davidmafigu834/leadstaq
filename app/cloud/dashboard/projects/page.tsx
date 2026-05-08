@@ -6,6 +6,7 @@ import { useSession } from "next-auth/react";
 import { Plus, Folder, Star, MoreVertical, Search, Copy, Trash2, Edit2, ArrowRight } from "lucide-react";
 import { NewProjectSlideOver } from "./NewProjectSlideOver";
 import { getProjectCardStyles } from "@/app/cloud/components/ProjectCard";
+import ProjectSceneIllustration from "@/app/cloud/components/ProjectSceneIllustration";
 
 type MediaItem = { public_url: string; display_order: number };
 type Project = {
@@ -176,22 +177,28 @@ export default function CloudProjectsPage() {
 
       {filtered.length === 0 && !loading ? (
         <div className="flex min-h-[40vh] flex-col items-center justify-center text-center">
-          <div className="mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-white border border-black/[0.07]">
-            <Folder className="h-6 w-6 text-[#999990]" strokeWidth={1.5} />
-          </div>
-          <p className="font-cloud-display text-[18px] text-[#0a0a0a] mb-1">
-            {search ? "No results" : "No projects yet"}
-          </p>
-          <p className="text-[13px] text-[#999990] font-cloud-body mb-5">
-            {search ? "No projects match your search." : "Create your first project to get started."}
-          </p>
-          {!search && (
-            <button
-              onClick={() => setShowNew(true)}
-              className="rounded-xl bg-[#D4FF4F] px-5 py-3 text-[14px] font-bold text-black font-cloud-body hover:bg-[#C8F244] transition-colors"
-            >
-              Create your first project
-            </button>
+          {search || activeCategory ? (
+            <>
+              <div className="mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-white border border-black/[0.07]">
+                <Search className="h-6 w-6 text-[#999990]" strokeWidth={1.5} />
+              </div>
+              <p className="font-cloud-display text-[18px] text-[#0a0a0a] mb-1">No results</p>
+              <p className="text-[13px] text-[#999990] font-cloud-body">No projects match your search.</p>
+            </>
+          ) : (
+            <>
+              <ProjectSceneIllustration className="mb-4 opacity-80" width={200} height={148} />
+              <p className="font-cloud-display text-[20px] text-[#0a0a0a] mb-2">No projects yet</p>
+              <p className="text-[13px] text-[#999990] font-cloud-body mb-6 max-w-[220px]">
+                Create your first project, then upload photos straight from your phone.
+              </p>
+              <button
+                onClick={() => setShowNew(true)}
+                className="rounded-xl bg-[#D4FF4F] px-5 py-3 text-[14px] font-bold text-black font-cloud-body hover:bg-[#C8F244] transition-colors"
+              >
+                Create your first project
+              </button>
+            </>
           )}
         </div>
       ) : (

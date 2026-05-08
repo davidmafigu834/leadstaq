@@ -125,6 +125,20 @@ export default function CloudDashboardHome() {
         ))}
       </div>
 
+      {/* ── STATS BAR ── */}
+      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 10, margin: "0 20px 16px" }}>
+        {([
+          { label: "Projects", value: String(projectCount) },
+          { label: "Photos",   value: String(photoCount) },
+          { label: "Storage",  value: formatBytes(storageUsed) },
+        ] as { label: string; value: string }[]).map((stat) => (
+          <div key={stat.label} style={{ background: "#FFFFFF", borderRadius: 16, border: "0.5px solid rgba(0,0,0,0.07)", padding: "14px 14px 12px", boxShadow: "0 1px 3px rgba(0,0,0,0.04)" }}>
+            <p style={{ fontFamily: S, fontSize: 26, color: "#111111", margin: "0 0 5px", lineHeight: 1 }}>{stat.value}</p>
+            <p style={{ fontSize: 10, color: "#9CA3AF", margin: 0, fontFamily: F, fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.07em" }}>{stat.label}</p>
+          </div>
+        ))}
+      </div>
+
       {/* ── STORAGE CARD (dark anchor) ── */}
       <div style={{ margin: "0 20px 20px", borderRadius: 24, background: "#0a0a0a", padding: 20, position: "relative", overflow: "hidden", border: "0.5px solid rgba(255,255,255,0.07)" }}>
         <div style={{ position: "absolute", top: -40, right: -40, width: 120, height: 120, borderRadius: "50%", background: "rgba(212,255,79,0.05)", pointerEvents: "none" }} />
