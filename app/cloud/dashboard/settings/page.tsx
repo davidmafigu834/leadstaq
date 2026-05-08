@@ -32,11 +32,13 @@ export default function CloudSettingsPage() {
   const [bizIndustry, setBizIndustry] = useState("");
   const [savingBiz, setSavingBiz] = useState(false);
   const [bizSaved, setBizSaved] = useState(false);
+  const [bizError, setBizError] = useState("");
 
   const [userName, setUserName] = useState("");
   const [userPhone, setUserPhone] = useState("");
   const [savingUser, setSavingUser] = useState(false);
   const [userSaved, setUserSaved] = useState(false);
+  const [userError, setUserError] = useState("");
 
   const [currentPw, setCurrentPw] = useState("");
   const [newPw, setNewPw] = useState("");
@@ -66,11 +68,12 @@ export default function CloudSettingsPage() {
 
   const fetchData = useCallback(async () => {
     if (!session?.clientId) return;
-    const [clientListRes, profileRes, statsRes, watermarkRes] = await Promise.all([
+    const [clientListRes, profileRes, statsRes, watermarkRes, userRes] = await Promise.all([
       fetch(`/api/clients`),
       fetch(`/api/clients/${session.clientId}/profile`),
       fetch(`/api/cloud/storage/usage`),
       fetch(`/api/cloud/watermark`),
+      fetch(`/api/users/me`),
     ]);
     if (clientListRes.ok) {
       const list = (await clientListRes.json()) as ClientData[];
@@ -93,7 +96,13 @@ export default function CloudSettingsPage() {
       const w = (await watermarkRes.json()) as WatermarkSettings;
       setWatermark(w);
     }
-    setUserName(session.user?.name ?? "");
+    if (userRes.ok) {
+      const ud = (await userRes.json()) as { user?: { phone?: string | null; name?: string } };
+      if (ud.user?.name) setUserName(ud.user.name);
+      if (ud.user?.phone) setUserPhone(ud.user.phone);
+    } else {
+      setUserName(session.user?.name ?? "");
+    }
   }, [session?.clientId, session?.user?.name]);
 
   useEffect(() => { void fetchData(); }, [fetchData]);
@@ -101,12 +110,20 @@ export default function CloudSettingsPage() {
   async function saveBusiness() {
     if (!session?.clientId || !bizName.trim()) return;
     setSavingBiz(true);
-    await fetch(`/api/cloud/settings/client`, {
+    setBizError("");
+    const body: Record<string, string> = { name: bizName.trim() };
+    if (bizIndustry) body.industry = bizIndustry;
+    const res = await fetch(`/api/cloud/settings/client`, {
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ name: bizName.trim(), industry: bizIndustry }),
+      body: JSON.stringify(body),
     });
     setSavingBiz(false);
+    if (!res.ok) {
+      const d = (await res.json()) as { error?: string };
+      setBizError(d.error ?? "Failed to save. Please try again.");
+      return;
+    }
     setBizSaved(true);
     setTimeout(() => setBizSaved(false), 2000);
   }
@@ -114,12 +131,18 @@ export default function CloudSettingsPage() {
   async function saveUser() {
     if (!session?.userId || !userName.trim()) return;
     setSavingUser(true);
-    await fetch(`/api/users/me`, {
+    setUserError("");
+    const res = await fetch(`/api/users/me`, {
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ name: userName.trim(), phone: userPhone.trim() || null }),
     });
     setSavingUser(false);
+    if (!res.ok) {
+      const d = (await res.json()) as { error?: string };
+      setUserError(d.error ?? "Failed to save. Please try again.");
+      return;
+    }
     setUserSaved(true);
     setTimeout(() => setUserSaved(false), 2000);
   }
@@ -205,6 +228,7 @@ export default function CloudSettingsPage() {
               {savingBiz ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Save className="h-3.5 w-3.5" />}
               {bizSaved ? "Saved!" : "Save"}
             </button>
+            {bizError && <p className="text-[12px] text-red-500 font-cloud-body">{bizError}</p>}
           </div>
         </section>
 
@@ -230,6 +254,7 @@ export default function CloudSettingsPage() {
               {savingUser ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Save className="h-3.5 w-3.5" />}
               {userSaved ? "Saved!" : "Save"}
             </button>
+            {userError && <p className="text-[12px] text-red-500 font-cloud-body">{userError}</p>}
           </div>
         </section>
 
@@ -321,12 +346,12 @@ export default function CloudSettingsPage() {
                     <span className="text-white/40">{usedStr} of {limitGB} GB used</span>
                     <span className="text-white/30">{stats.total_photos.toLocaleString()} photos</span>
                   </div>
-                  {stats.plan === "free" && (
+                  {stats.plan === "starter" && (
                     <div className="rounded-xl border border-[#D4FF4F]/20 bg-[#D4FF4F]/5 p-4">
-                      <p className="mb-1 text-[13px] font-semibold text-[#D4FF4F] font-cloud-body">Upgrade to Pro</p>
-                      <p className="mb-3 text-[12px] text-white/40 font-cloud-body">Get 50 GB storage, priority support, and advanced watermarking.</p>
+                      <p className="mb-1 text-[13px] font-semibold text-[#D4FF4F] font-cloud-body">Upgrade to Professional</p>
+                      <p className="mb-3 text-[12px] text-white/40 font-cloud-body">Get 100 GB storage, custom logo watermark, project analytics, and priority support.</p>
                       <button className="rounded-xl bg-[#D4FF4F] px-4 py-2 text-[13px] font-bold text-black hover:bg-[#C8F244] transition-colors font-cloud-body">
-                        Upgrade — $29 / mo
+                        Upgrade — $49 / mo
                       </button>
                     </div>
                   )}
