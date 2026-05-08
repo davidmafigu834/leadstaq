@@ -104,26 +104,7 @@ export default function CloudDashboardHome() {
   const S = "var(--font-dm-serif), Georgia, serif";
 
   return (
-    <div style={{ minHeight: "100vh", background: "#F5F5F0", fontFamily: F, paddingBottom: 100, overflowX: "hidden" }}>
-
-      {/* ── QUICK ACTION PILLS ── */}
-      <div style={{ padding: "12px 20px 16px", display: "flex", gap: 10, overflowX: "auto", scrollbarWidth: "none", width: "100%" } as React.CSSProperties}>
-        {([
-          { label: "New project", Icon: Plus,      bg: "var(--fw-soil)", color: "var(--fw-lime)",         border: "none",                             action: () => setShowNew(true) },
-          { label: "Projects",     Icon: FolderOpen, bg: "var(--fw-card)", color: "var(--fw-text-primary)", border: "0.5px solid var(--fw-border-strong)", href: "/cloud/dashboard/projects" },
-          { label: "Upload",       Icon: Camera,     bg: "var(--fw-lime)", color: "var(--fw-soil)",         border: "none",                             href: "/cloud/dashboard/upload" },
-          { label: "Invite",       Icon: UserPlus,   bg: "var(--fw-card)", color: "var(--fw-text-primary)", border: "0.5px solid var(--fw-border-strong)", href: "/cloud/dashboard/team" },
-        ] as { label: string; Icon: React.ElementType; bg: string; color: string; border: string; href?: string; action?: () => void }[]).map((a) => (
-          <button
-            key={a.label}
-            onClick={a.action ? a.action : () => router.push(a.href!)}
-            style={{ display: "flex", alignItems: "center", gap: 8, height: 40, padding: "0 16px", background: a.bg, color: a.color, borderRadius: 20, border: a.border, cursor: "pointer", flexShrink: 0, fontFamily: F, fontSize: 12, fontWeight: 700, whiteSpace: "nowrap" }}
-          >
-            <a.Icon size={15} strokeWidth={2.2} aria-hidden="true" />
-            {a.label}
-          </button>
-        ))}
-      </div>
+    <div style={{ minHeight: "100vh", background: "#F5F5F0", fontFamily: F, paddingBottom: 100 }}>
 
       {/* ── STORAGE CARD (dark anchor) ── */}
       <div style={{ margin: "0 20px 20px", borderRadius: 24, background: "#0a0a0a", padding: 20, position: "relative", overflow: "hidden", border: "0.5px solid rgba(255,255,255,0.07)" }}>
@@ -162,6 +143,27 @@ export default function CloudDashboardHome() {
               <p style={{ fontSize: 9, color: "rgba(255,255,255,0.35)", margin: "0 0 4px", textTransform: "uppercase", letterSpacing: "0.06em", fontFamily: F }}>{stat.label}</p>
               <p style={{ fontFamily: stat.serif ? S : F, fontSize: stat.serif ? 22 : 13, margin: 0, lineHeight: 1, color: "#FFFFFF", fontWeight: stat.serif ? 400 : 600 }}>{stat.value}</p>
             </div>
+          ))}
+        </div>
+      </div>
+
+      {/* ── QUICK ACTION PILLS ── */}
+      <div className="fw-pills-scroll" style={{ overflowX: "auto", overflowY: "visible", WebkitOverflowScrolling: "touch", scrollbarWidth: "none", padding: "12px 20px 16px" } as React.CSSProperties}>
+        <div style={{ display: "flex", gap: 10, width: "max-content" }}>
+          {([
+            { label: "New project", Icon: Plus,      bg: "var(--fw-soil)", color: "var(--fw-lime)",         border: "none",                             action: () => setShowNew(true) },
+            { label: "Projects",    Icon: FolderOpen, bg: "var(--fw-card)", color: "var(--fw-text-primary)", border: "0.5px solid var(--fw-border-strong)", href: "/cloud/dashboard/projects" },
+            { label: "Upload",      Icon: Camera,     bg: "var(--fw-lime)", color: "var(--fw-soil)",         border: "none",                             href: "/cloud/dashboard/upload" },
+            { label: "Invite",      Icon: UserPlus,   bg: "var(--fw-card)", color: "var(--fw-text-primary)", border: "0.5px solid var(--fw-border-strong)", href: "/cloud/dashboard/team" },
+          ] as { label: string; Icon: React.ElementType; bg: string; color: string; border: string; href?: string; action?: () => void }[]).map((a) => (
+            <button
+              key={a.label}
+              onClick={a.action ? a.action : () => router.push(a.href!)}
+              style={{ display: "flex", alignItems: "center", gap: 8, height: 40, padding: "0 16px", background: a.bg, color: a.color, borderRadius: 20, border: a.border, cursor: "pointer", flexShrink: 0, fontFamily: F, fontSize: 12, fontWeight: 700, whiteSpace: "nowrap" }}
+            >
+              <a.Icon size={15} strokeWidth={2.2} aria-hidden="true" />
+              {a.label}
+            </button>
           ))}
         </div>
       </div>

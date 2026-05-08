@@ -298,6 +298,9 @@
   }
 }
 
+/* ── Hide scrollbars on swipeable pill rows ── */
+.fw-pills-scroll::-webkit-scrollbar { display: none; }
+
 /* ── Fieldwork (fw) design tokens ── */
 :root {
   --fw-soil: #1C1410;
