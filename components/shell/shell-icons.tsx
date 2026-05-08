@@ -5,6 +5,7 @@ import {
   Building2,
   Camera,
   Clock,
+  Cloud,
   Globe,
   Home,
   Inbox,
@@ -31,6 +32,7 @@ export const SHELL_ICONS: Record<string, LucideIcon> = {
   user: User,
   camera: Camera,
   globe: Globe,
+  cloud: Cloud,
 };
 
 export function ShellIcon({
