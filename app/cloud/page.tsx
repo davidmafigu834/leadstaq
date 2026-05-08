@@ -69,6 +69,7 @@ const STEPS = [
 
 export default function CloudLandingPage() {
   const [menuOpen, setMenuOpen] = useState(false);
+  const [annual, setAnnual] = useState(false);
 
   return (
     <div className="min-h-screen bg-[#0a0a0a] text-white">
@@ -321,73 +322,100 @@ export default function CloudLandingPage() {
           {(() => {
             const pricingPlans = [
               {
-                name: "Starter", price: "$20", period: "per month", storage: "20 GB",
-                team: "Up to 3 members",
+                name: "Starter", monthlyPrice: 20, annualPrice: 200, annualMonthly: 16.67, saving: 40,
+                storage: "20 GB", team: "Up to 3 members",
                 features: ["Unlimited projects", "Public share links", "Basic watermarking", "Public profile page", "Mobile PWA app"],
                 cta: "Get started", highlight: false, note: null,
               },
               {
-                name: "Professional", price: "$49", period: "per month", storage: "100 GB",
-                team: "Up to 10 members",
+                name: "Professional", monthlyPrice: 49, annualPrice: 490, annualMonthly: 40.83, saving: 98,
+                storage: "100 GB", team: "Up to 10 members",
                 features: ["Everything in Starter", "Custom logo watermark", "Project analytics", "AI photo enhancement", "Priority support"],
                 cta: "Get started", highlight: true, note: "Most popular",
               },
               {
-                name: "Business", price: "$99", period: "per month", storage: "500 GB",
-                team: "Unlimited members",
+                name: "Business", monthlyPrice: 99, annualPrice: 990, annualMonthly: 82.50, saving: 198,
+                storage: "500 GB", team: "Unlimited members",
                 features: ["Everything in Professional", "Custom domain", "Video URL embeds", "Testimonials manager", "CSV data export", "Dedicated onboarding"],
                 cta: "Get started", highlight: false, note: null,
               },
             ];
             return (
-              <div style={{ display: "flex", gap: 16, flexWrap: "wrap", justifyContent: "center", alignItems: "flex-start", maxWidth: 1100, margin: "0 auto" }}>
-                {pricingPlans.map((plan) => (
-                  <div
-                    key={plan.name}
-                    style={{
-                      background: plan.highlight ? "#1C1410" : "#FFFFFF",
-                      border: plan.highlight ? "0.5px solid rgba(212,255,79,0.2)" : "0.5px solid rgba(28,20,16,0.08)",
-                      borderRadius: 20, padding: "28px 24px", position: "relative",
-                      flex: "1 1 280px", maxWidth: 340,
-                    }}
+              <>
+                {/* Monthly / Annual toggle */}
+                <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 0, marginBottom: 40 }}>
+                  <button
+                    onClick={() => setAnnual(false)}
+                    style={{ height: 40, padding: "0 20px", background: !annual ? "#1C1410" : "#FFFFFF", color: !annual ? "#D4FF4F" : "#8C7B6B", border: "0.5px solid rgba(28,20,16,0.12)", borderRight: "none", borderRadius: "10px 0 0 10px", fontSize: 13, fontWeight: 700, fontFamily: "var(--fw-font-body), system-ui, sans-serif", cursor: "pointer" }}
                   >
-                    {plan.note && (
-                      <span style={{ position: "absolute", top: -12, left: "50%", transform: "translateX(-50%)", background: "#D4FF4F", color: "#1C1410", fontSize: 10, fontWeight: 700, padding: "4px 14px", borderRadius: 20, letterSpacing: "0.06em", textTransform: "uppercase", whiteSpace: "nowrap", fontFamily: "var(--fw-font-body), system-ui, sans-serif" }}>
-                        {plan.note}
-                      </span>
-                    )}
-                    <p style={{ fontFamily: "var(--fw-font-body), system-ui, sans-serif", fontSize: 11, fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase", color: plan.highlight ? "rgba(255,255,255,0.5)" : "#8C7B6B", margin: "0 0 8px" }}>
-                      {plan.name}
-                    </p>
-                    <div style={{ display: "flex", alignItems: "baseline", gap: 4, margin: "0 0 4px" }}>
-                      <span style={{ fontFamily: "var(--fw-font-display), Georgia, serif", fontSize: 44, color: plan.highlight ? "#FFFFFF" : "#1C1410", lineHeight: 1 }}>
-                        {plan.price}
-                      </span>
-                      <span style={{ fontFamily: "var(--fw-font-body), system-ui, sans-serif", fontSize: 13, color: plan.highlight ? "rgba(255,255,255,0.4)" : "#8C7B6B" }}>
-                        {plan.period}
-                      </span>
-                    </div>
-                    <p style={{ fontFamily: "var(--fw-font-body), system-ui, sans-serif", fontSize: 13, color: plan.highlight ? "rgba(255,255,255,0.5)" : "#8C7B6B", margin: "0 0 20px" }}>
-                      {plan.storage} storage · {plan.team}
-                    </p>
-                    <div style={{ height: "0.5px", background: plan.highlight ? "rgba(255,255,255,0.08)" : "rgba(28,20,16,0.07)", margin: "0 0 20px" }} />
-                    <ul style={{ listStyle: "none", padding: 0, margin: "0 0 24px" }}>
-                      {plan.features.map((feature) => (
-                        <li key={feature} style={{ display: "flex", alignItems: "flex-start", gap: 10, marginBottom: 10, fontFamily: "var(--fw-font-body), system-ui, sans-serif", fontSize: 13, color: plan.highlight ? "rgba(255,255,255,0.75)" : "#4A3828" }}>
-                          <Check style={{ width: 14, height: 14, flexShrink: 0, marginTop: 1, color: plan.highlight ? "#D4FF4F" : "#2E7D5E" }} />
-                          {feature}
-                        </li>
-                      ))}
-                    </ul>
-                    <Link
-                      href="/cloud/signup"
-                      style={{ display: "flex", alignItems: "center", justifyContent: "center", height: 48, borderRadius: 14, background: plan.highlight ? "#D4FF4F" : "#1C1410", color: plan.highlight ? "#1C1410" : "#D4FF4F", fontSize: 13, fontWeight: 700, fontFamily: "var(--fw-font-body), system-ui, sans-serif", textDecoration: "none" }}
+                    Monthly
+                  </button>
+                  <button
+                    onClick={() => setAnnual(true)}
+                    style={{ height: 40, padding: "0 20px", background: annual ? "#1C1410" : "#FFFFFF", color: annual ? "#D4FF4F" : "#8C7B6B", border: "0.5px solid rgba(28,20,16,0.12)", borderRadius: "0 10px 10px 0", fontSize: 13, fontWeight: 700, fontFamily: "var(--fw-font-body), system-ui, sans-serif", cursor: "pointer", display: "flex", alignItems: "center", gap: 8 }}
+                  >
+                    Annual
+                    <span style={{ background: "#D4FF4F", color: "#1C1410", fontSize: 10, fontWeight: 700, padding: "2px 8px", borderRadius: 20, letterSpacing: "0.04em", fontFamily: "var(--fw-font-body), system-ui, sans-serif" }}>
+                      2 months free
+                    </span>
+                  </button>
+                </div>
+
+                {/* Plan cards */}
+                <div style={{ display: "flex", gap: 16, flexWrap: "wrap", justifyContent: "center", alignItems: "flex-start", maxWidth: 1100, margin: "0 auto" }}>
+                  {pricingPlans.map((plan) => (
+                    <div
+                      key={plan.name}
+                      style={{ background: plan.highlight ? "#1C1410" : "#FFFFFF", border: plan.highlight ? "0.5px solid rgba(212,255,79,0.2)" : "0.5px solid rgba(28,20,16,0.08)", borderRadius: 20, padding: "28px 24px", position: "relative", flex: "1 1 280px", maxWidth: 340 }}
                     >
-                      {plan.cta}
-                    </Link>
-                  </div>
-                ))}
-              </div>
+                      {plan.note && (
+                        <span style={{ position: "absolute", top: -12, left: "50%", transform: "translateX(-50%)", background: "#D4FF4F", color: "#1C1410", fontSize: 10, fontWeight: 700, padding: "4px 14px", borderRadius: 20, letterSpacing: "0.06em", textTransform: "uppercase", whiteSpace: "nowrap", fontFamily: "var(--fw-font-body), system-ui, sans-serif" }}>
+                          {plan.note}
+                        </span>
+                      )}
+                      <p style={{ fontFamily: "var(--fw-font-body), system-ui, sans-serif", fontSize: 11, fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase", color: plan.highlight ? "rgba(255,255,255,0.5)" : "#8C7B6B", margin: "0 0 8px" }}>
+                        {plan.name}
+                      </p>
+                      <div style={{ display: "flex", alignItems: "baseline", gap: 4, margin: "0 0 4px" }}>
+                        <span style={{ fontFamily: "var(--fw-font-display), Georgia, serif", fontSize: 44, color: plan.highlight ? "#FFFFFF" : "#1C1410", lineHeight: 1 }}>
+                          ${annual ? Math.floor(plan.annualMonthly) : plan.monthlyPrice}
+                        </span>
+                        <span style={{ fontFamily: "var(--fw-font-body), system-ui, sans-serif", fontSize: 13, color: plan.highlight ? "rgba(255,255,255,0.4)" : "#8C7B6B" }}>
+                          /mo
+                        </span>
+                      </div>
+                      <p style={{ fontFamily: "var(--fw-font-body), system-ui, sans-serif", fontSize: 12, color: plan.highlight ? "rgba(255,255,255,0.4)" : "#8C7B6B", margin: "0 0 4px" }}>
+                        {annual ? `$${plan.annualPrice}/yr · billed annually` : "billed monthly"}
+                      </p>
+                      {annual ? (
+                        <p style={{ fontFamily: "var(--fw-font-body), system-ui, sans-serif", fontSize: 12, fontWeight: 700, color: plan.highlight ? "#D4FF4F" : "#2E7D5E", margin: "0 0 16px" }}>
+                          You save ${plan.saving}/yr
+                        </p>
+                      ) : (
+                        <div style={{ marginBottom: 16 }} />
+                      )}
+                      <p style={{ fontFamily: "var(--fw-font-body), system-ui, sans-serif", fontSize: 13, color: plan.highlight ? "rgba(255,255,255,0.5)" : "#8C7B6B", margin: "0 0 20px" }}>
+                        {plan.storage} storage · {plan.team}
+                      </p>
+                      <div style={{ height: "0.5px", background: plan.highlight ? "rgba(255,255,255,0.08)" : "rgba(28,20,16,0.07)", margin: "0 0 20px" }} />
+                      <ul style={{ listStyle: "none", padding: 0, margin: "0 0 24px" }}>
+                        {plan.features.map((feature) => (
+                          <li key={feature} style={{ display: "flex", alignItems: "flex-start", gap: 10, marginBottom: 10, fontFamily: "var(--fw-font-body), system-ui, sans-serif", fontSize: 13, color: plan.highlight ? "rgba(255,255,255,0.75)" : "#4A3828" }}>
+                            <Check style={{ width: 14, height: 14, flexShrink: 0, marginTop: 1, color: plan.highlight ? "#D4FF4F" : "#2E7D5E" }} />
+                            {feature}
+                          </li>
+                        ))}
+                      </ul>
+                      <Link
+                        href="/cloud/signup"
+                        style={{ display: "flex", alignItems: "center", justifyContent: "center", height: 48, borderRadius: 14, background: plan.highlight ? "#D4FF4F" : "#1C1410", color: plan.highlight ? "#1C1410" : "#D4FF4F", fontSize: 13, fontWeight: 700, fontFamily: "var(--fw-font-body), system-ui, sans-serif", textDecoration: "none" }}
+                      >
+                        {plan.cta}
+                      </Link>
+                    </div>
+                  ))}
+                </div>
+              </>
             );
           })()}
         </div>
