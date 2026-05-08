@@ -212,15 +212,10 @@ export default function CloudDashboardLayout({ children }: { children: React.Rea
       <div className="flex min-h-screen flex-1 flex-col lg:ml-[240px] overflow-x-hidden">
         {/* Desktop topbar */}
         <header className="sticky top-0 z-10 hidden h-[56px] shrink-0 items-center justify-between border-b border-black/[0.06] bg-[#F7F7F8] px-5 lg:flex">
-          {pathname === "/cloud/dashboard" ? (
-            <div>
-              <p className="font-cloud-body text-[12px] font-bold uppercase tracking-[0.08em] text-[#9CA3AF]">{getGreeting()}</p>
-              <p className="font-cloud-display text-[20px] text-[#111111] leading-tight">{displayName}</p>
-            </div>
-          ) : (
+          {pathname !== "/cloud/dashboard" && (
             <p className="font-cloud-display text-[22px] text-[#111111] leading-tight">{getPageTitle(pathname)}</p>
           )}
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 ml-auto">
             <button
               onClick={() => router.push("/cloud/dashboard/notifications")}
               className="relative flex h-[34px] w-[34px] items-center justify-center rounded-full bg-white border border-black/[0.08] text-[#6B7280] transition-colors hover:border-black/[0.15] hover:text-[#111111] active:scale-95 cursor-pointer"
@@ -238,16 +233,23 @@ export default function CloudDashboardLayout({ children }: { children: React.Rea
               <Camera className="w-3.5 h-3.5" />
               Upload
             </Link>
+            <button
+              onClick={() => router.push("/cloud/dashboard/settings")}
+              className="flex h-[34px] w-[34px] items-center justify-center rounded-full bg-[#111111] text-[11px] font-bold text-[#D4FF4F] cursor-pointer active:scale-95 transition-transform"
+              style={{ fontFamily: "'DM Sans', sans-serif" }}
+              aria-label="Account settings"
+            >
+              {initials}
+            </button>
           </div>
         </header>
 
         {/* Mobile topbar */}
         <header className="sticky top-0 z-10 flex h-[72px] shrink-0 items-center justify-between border-b border-black/[0.06] bg-[#F7F7F8] px-5 lg:hidden">
           {pathname === "/cloud/dashboard" ? (
-            <div>
-              <p className="font-cloud-body text-[12px] font-bold uppercase tracking-[0.08em] text-[#9CA3AF]">{getGreeting()}</p>
-              <p className="font-cloud-display text-[22px] text-[#111111] leading-tight">{displayName}</p>
-            </div>
+            <p style={{ fontFamily: "var(--fw-font-display), Georgia, serif", fontSize: 16, color: "#1C1410", margin: 0, lineHeight: 1 }}>
+              {displayName.split(" ")[0]}
+            </p>
           ) : (
             <p className="font-cloud-display text-[22px] text-[#111111] leading-tight">{getPageTitle(pathname)}</p>
           )}

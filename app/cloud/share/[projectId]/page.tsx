@@ -1,9 +1,21 @@
 import type { Metadata } from "next";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { notFound } from "next/navigation";
-import { ArrowLeft, MapPin, Calendar, CloudUpload } from "lucide-react";
+import { MapPin, Calendar, ArrowRight } from "lucide-react";
 import Link from "next/link";
 import { ViewRecorder } from "./ViewRecorder";
+import { getCategoryStyle } from "@/app/cloud/lib/category-styles";
+import { ShareGallery } from "./ShareGallery";
+
+function getInitials(name: string): string {
+  const parts = name.trim().split(" ").filter(Boolean);
+  if (parts.length >= 2) return (parts[0]![0]! + parts[parts.length - 1]![0]!).toUpperCase();
+  return name.slice(0, 2).toUpperCase();
+}
+
+function formatDate(d: string): string {
+  return new Date(d).toLocaleDateString("en-US", { month: "long", year: "numeric" });
+}
 
 export const dynamic = "force-dynamic";
 
@@ -49,7 +61,6 @@ export default async function CloudSharePage({ params }: { params: { projectId: 
     .order("display_order", { ascending: true });
 
   const client = project.clients as { name: string; primary_color: string | null; slug: string } | null;
-  const accentColor = client?.primary_color ?? "#D4FF4F";
   const media = (rawMedia ?? []) as MediaItem[];
   const cover = media[0]?.public_url;
 
@@ -64,159 +75,310 @@ export default async function CloudSharePage({ params }: { params: { projectId: 
       })()
     : null;
 
-  // Gallery photos = everything after the hero cover to avoid duplication
-  const galleryMedia = cover ? media.slice(1) : media;
+  const cat = getCategoryStyle(project.category as string | null);
+  const clientName = client?.name ?? "";
+  const descriptionText = project.description as string | null;
+  const showDescription =
+    descriptionText &&
+    descriptionText.trim() !== "" &&
+    descriptionText.trim() !== "Everything";
+  const ctaProfileSlug = profileSlug ?? client?.slug ?? null;
 
   return (
-    <div className="min-h-screen bg-white">
+    <div
+      style={{
+        minHeight: "100vh",
+        background: "#F7F4EF",
+        fontFamily: "var(--fw-font-body), system-ui, sans-serif",
+      }}
+    >
       <ViewRecorder projectId={project.id as string} />
-      {/* Nav */}
-      <nav className="sticky top-0 z-10 border-b border-gray-100 bg-white/95 backdrop-blur-sm">
-        <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-3 sm:px-6 lg:px-10">
-          <div className="flex items-center gap-3 min-w-0">
-            {profileSlug && (
-              <Link
-                href={`/p/${profileSlug}`}
-                className="flex items-center gap-1.5 text-sm text-gray-500 hover:text-gray-900 whitespace-nowrap"
-              >
-                <ArrowLeft className="h-4 w-4 flex-shrink-0" />
-                <span className="truncate max-w-[140px] sm:max-w-none">{client?.name ?? "Back"}</span>
-              </Link>
-            )}
+
+      {/* ── Section 1: Navbar ── */}
+      <nav
+        style={{
+          height: 60,
+          background: "#FFFFFF",
+          borderBottom: "0.5px solid rgba(28,20,16,0.08)",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "space-between",
+          padding: "0 24px",
+          position: "sticky",
+          top: 0,
+          zIndex: 50,
+        }}
+      >
+        {/* Left — logo + name */}
+        <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+          <div
+            style={{
+              width: 32, height: 32, borderRadius: "50%",
+              background: "#1C1410", color: "#D4FF4F",
+              display: "flex", alignItems: "center", justifyContent: "center",
+              fontSize: 11, fontWeight: 700,
+              fontFamily: "var(--fw-font-body), system-ui, sans-serif",
+              flexShrink: 0,
+            }}
+          >
+            {getInitials(clientName || "L")}
           </div>
-          <div className="flex items-center gap-2 flex-shrink-0">
-            <Link
-              href="/cloud"
-              className="hidden sm:flex items-center gap-1.5 text-xs text-gray-400 hover:text-gray-700"
+          {clientName && (
+            <span
+              style={{
+                fontFamily: "var(--fw-font-body), system-ui, sans-serif",
+                fontSize: 13, fontWeight: 600, color: "#1C1410",
+              }}
             >
-              <CloudUpload className="h-3.5 w-3.5" />
-              Leadstaq Cloud
-            </Link>
-            {profileSlug && (
-              <a
-                href={`/p/${profileSlug}#contact`}
-                className="rounded-lg px-3 py-2 text-xs font-semibold transition-opacity hover:opacity-90 sm:px-4 sm:text-sm"
-                style={{ backgroundColor: accentColor, color: "#0a0a0a" }}
-              >
-                Get a Quote
-              </a>
-            )}
-          </div>
+              {clientName}
+            </span>
+          )}
+        </div>
+
+        {/* Right — brand link + CTA */}
+        <div style={{ display: "flex", alignItems: "center", gap: 14 }}>
+          <Link
+            href="/cloud"
+            style={{
+              fontFamily: "var(--fw-font-body), system-ui, sans-serif",
+              fontSize: 11, color: "#8C7B6B", textDecoration: "none",
+            }}
+          >
+            Leadstaq Cloud
+          </Link>
+          <a
+            href="#cta"
+            style={{
+              height: 36, padding: "0 18px",
+              background: "#1C1410", color: "#D4FF4F",
+              border: "none", borderRadius: 10,
+              fontSize: 12, fontWeight: 700,
+              fontFamily: "var(--fw-font-body), system-ui, sans-serif",
+              cursor: "pointer", textDecoration: "none",
+              display: "inline-flex", alignItems: "center",
+            }}
+          >
+            Get a Quote
+          </a>
         </div>
       </nav>
 
-      {/* Hero */}
-      {cover && (
-        <div className="relative h-[45vw] min-h-[220px] max-h-[520px] overflow-hidden bg-gray-100">
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src={cover} alt={project.title as string} className="h-full w-full object-cover" />
-          <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent" />
-          <div className="absolute bottom-0 left-0 right-0 px-5 pb-5 sm:px-8 sm:pb-8 lg:px-14 lg:pb-10">
-            <h1 className="text-2xl font-semibold text-white sm:text-3xl lg:text-5xl lg:font-light leading-tight">
-              {project.title as string}
-            </h1>
+      {/* ── Section 2: Hero ── */}
+      <div
+        style={{
+          width: "100%",
+          height: "clamp(260px, 45vw, 420px)",
+          position: "relative",
+          overflow: "hidden",
+          background: cover ? "#1C1410" : "linear-gradient(135deg, #1C1410 0%, #2E2218 100%)",
+        }}
+      >
+        {cover && (
+          /* eslint-disable-next-line @next/next/no-img-element */
+          <img
+            src={cover}
+            alt={project.title as string}
+            style={{ width: "100%", height: "100%", objectFit: "cover", objectPosition: "center", display: "block" }}
+          />
+        )}
+        <div
+          style={{
+            position: "absolute", inset: 0,
+            background: "linear-gradient(to top, rgba(28,20,16,0.85) 0%, rgba(28,20,16,0.2) 50%, transparent 100%)",
+          }}
+        />
+        <div style={{ position: "absolute", bottom: 28, left: 28, right: 28 }}>
+          <h1
+            style={{
+              fontFamily: "var(--fw-font-display), Georgia, serif",
+              fontSize: "clamp(28px, 5vw, 44px)",
+              color: "#FFFFFF", margin: 0, lineHeight: 1.1, letterSpacing: "-0.01em",
+            }}
+          >
+            {project.title as string}
+          </h1>
+        </div>
+      </div>
+
+      {/* ── Section 3: Metadata row ── */}
+      <div
+        style={{
+          background: "#FFFFFF",
+          padding: "18px 28px",
+          borderBottom: "0.5px solid rgba(28,20,16,0.06)",
+          display: "flex", alignItems: "center", gap: 12, flexWrap: "wrap",
+        }}
+      >
+        {project.category && (
+          <span
+            style={{
+              height: 26, padding: "0 12px",
+              background: cat.sceneBg, color: cat.labelColor,
+              borderRadius: 20, fontSize: 11, fontWeight: 700,
+              fontFamily: "var(--fw-font-body), system-ui, sans-serif",
+              letterSpacing: "0.04em", textTransform: "uppercase",
+              display: "inline-flex", alignItems: "center",
+            }}
+          >
+            {project.category as string}
+          </span>
+        )}
+        {project.location && (
+          <span
+            style={{
+              display: "flex", alignItems: "center", gap: 5,
+              fontSize: 13, color: "#4A3828",
+              fontFamily: "var(--fw-font-body), system-ui, sans-serif",
+            }}
+          >
+            <MapPin size={13} color="#8C7B6B" />
+            {project.location as string}
+          </span>
+        )}
+        {project.completion_date && (
+          <span
+            style={{
+              display: "flex", alignItems: "center", gap: 5,
+              fontSize: 13, color: "#4A3828",
+              fontFamily: "var(--fw-font-body), system-ui, sans-serif",
+            }}
+          >
+            <Calendar size={13} color="#8C7B6B" />
+            {formatDate(project.completion_date as string)}
+          </span>
+        )}
+        <span
+          style={{
+            marginLeft: "auto", fontSize: 11, fontWeight: 700,
+            letterSpacing: "0.08em", textTransform: "uppercase",
+            color: "#8C7B6B",
+            fontFamily: "var(--fw-font-body), system-ui, sans-serif",
+          }}
+        >
+          {media.length} {media.length === 1 ? "Photo" : "Photos"}
+        </span>
+      </div>
+
+      {/* ── Section 4: Description (conditional) ── */}
+      {showDescription && (
+        <div style={{ background: "#FFFFFF", paddingBottom: 32 }}>
+          <div style={{ maxWidth: 720, margin: "0 auto", padding: "32px 28px 0" }}>
+            <p
+              style={{
+                fontFamily: "var(--fw-font-body), system-ui, sans-serif",
+                fontSize: 16, color: "#1C1410", lineHeight: 1.75, margin: 0,
+              }}
+            >
+              {descriptionText}
+            </p>
           </div>
         </div>
       )}
 
-      <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 sm:py-12 lg:px-10">
-        {/* Project meta */}
-        <div className="mb-8 border-b border-gray-100 pb-6 sm:mb-10 sm:pb-8">
-          {!cover && (
-            <h1 className="mb-4 text-2xl font-light text-gray-900 sm:text-3xl">{project.title as string}</h1>
-          )}
-          <div className="flex flex-wrap items-center gap-2 text-sm text-gray-500 sm:gap-4">
-            {project.category && (
-              <span className="rounded-full border border-gray-200 px-3 py-1 text-xs font-medium text-gray-700">
-                {project.category as string}
-              </span>
-            )}
-            {project.location && (
-              <span className="flex items-center gap-1.5">
-                <MapPin className="h-3.5 w-3.5" />{project.location as string}
-              </span>
-            )}
-            {project.completion_date && (
-              <span className="flex items-center gap-1.5">
-                <Calendar className="h-3.5 w-3.5" />
-                {new Date(project.completion_date as string).toLocaleDateString("en-US", {
-                  month: "long",
-                  year: "numeric",
-                })}
-              </span>
-            )}
+      {/* ── Section 5: Photo gallery ── */}
+      {media.length > 0 && (
+        <div style={{ background: "#F7F4EF", padding: "32px 24px" }}>
+          <p
+            style={{
+              fontFamily: "var(--fw-font-body), system-ui, sans-serif",
+              fontSize: 10, fontWeight: 700, letterSpacing: "0.1em",
+              textTransform: "uppercase", color: "#8C7B6B", margin: "0 0 16px",
+            }}
+          >
+            Photos · {media.length}
+          </p>
+          <div style={{ maxWidth: 960, margin: "0 auto" }}>
+            <ShareGallery media={media} />
           </div>
-          {project.description && (
-            <p className="mt-4 max-w-2xl text-sm text-gray-600 leading-relaxed sm:text-base sm:mt-5">
-              {project.description as string}
-            </p>
-          )}
+        </div>
+      )}
+
+      {/* ── Section 6: CTA ── */}
+      <div
+        id="cta"
+        style={{ background: "#1C1410", padding: "56px 28px", textAlign: "center" }}
+      >
+        <div
+          style={{
+            width: 56, height: 56, borderRadius: "50%",
+            background: "rgba(212,255,79,0.1)",
+            border: "0.5px solid rgba(212,255,79,0.25)",
+            display: "flex", alignItems: "center", justifyContent: "center",
+            margin: "0 auto 20px", overflow: "hidden",
+          }}
+        >
+          <span
+            style={{
+              fontFamily: "var(--fw-font-body), system-ui, sans-serif",
+              fontSize: 16, fontWeight: 700, color: "#D4FF4F",
+            }}
+          >
+            {getInitials(clientName || "L")}
+          </span>
         </div>
 
-        {/* Gallery — all photos (cover already shown as hero) */}
-        {galleryMedia.length > 0 && (
-          <div className="mb-10 sm:mb-12">
-            <p className="mb-4 font-mono text-[11px] uppercase tracking-[0.18em] text-gray-400">
-              Photos · {media.length}
-            </p>
-            <div className="columns-2 gap-2 sm:columns-2 sm:gap-3 lg:columns-3 lg:gap-4">
-              {galleryMedia.map((item, idx) => (
-                <div key={item.id} className="mb-2 overflow-hidden rounded-lg sm:mb-3 sm:rounded-xl">
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img
-                    src={item.public_url}
-                    alt={item.caption ?? `Photo ${idx + 2}`}
-                    className="w-full object-cover"
-                    loading={idx < 4 ? "eager" : "lazy"}
-                  />
-                  {item.caption && (
-                    <p className="mt-1 px-1 text-[10px] text-gray-400 sm:text-xs">{item.caption}</p>
-                  )}
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
+        <h2
+          style={{
+            fontFamily: "var(--fw-font-display), Georgia, serif",
+            fontSize: "clamp(24px, 4vw, 36px)",
+            color: "#FFFFFF", margin: "0 0 12px", lineHeight: 1.2,
+          }}
+        >
+          Interested in a project like this?
+        </h2>
 
-        {/* Single photo — show it in gallery too if no cover was rendered */}
-        {!cover && media.length === 1 && (
-          <div className="mb-10 overflow-hidden rounded-xl">
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src={media[0].public_url} alt={media[0].caption ?? project.title as string} className="w-full object-cover rounded-xl" />
-          </div>
-        )}
+        <p
+          style={{
+            fontFamily: "var(--fw-font-body), system-ui, sans-serif",
+            fontSize: 15, color: "rgba(255,255,255,0.55)",
+            margin: "0 auto 32px", maxWidth: 400, lineHeight: 1.6,
+          }}
+        >
+          Get a free quote from {clientName || "us"} today.
+        </p>
 
-        {/* CTA */}
-        {profileSlug && (
-          <div
-            className="rounded-2xl px-5 py-8 text-center sm:p-10"
-            style={{ backgroundColor: `${accentColor}22` }}
+        {ctaProfileSlug && (
+          <a
+            href={`/p/${ctaProfileSlug}`}
+            style={{
+              display: "inline-flex", alignItems: "center", gap: 8,
+              height: 52, padding: "0 28px",
+              background: "#D4FF4F", color: "#1C1410",
+              borderRadius: 14, fontSize: 15, fontWeight: 700,
+              fontFamily: "var(--fw-font-body), system-ui, sans-serif",
+              textDecoration: "none",
+            }}
           >
-            <h2 className="mb-2 text-xl font-semibold text-gray-900 sm:mb-3 sm:text-2xl">
-              Interested in a project like this?
-            </h2>
-            <p className="mb-5 text-sm text-gray-600 sm:mb-6 sm:text-base">
-              Get a free quote from {client?.name ?? "us"} today.
-            </p>
-            <a
-              href={`/p/${profileSlug}#contact`}
-              className="inline-flex items-center gap-2 rounded-xl px-6 py-3 text-sm font-semibold transition-opacity hover:opacity-90 sm:px-8 sm:py-4"
-              style={{ backgroundColor: accentColor, color: "#0a0a0a" }}
-            >
-              Get a Free Quote
-            </a>
-          </div>
+            Get a Free Quote
+            <ArrowRight size={16} />
+          </a>
         )}
       </div>
 
-      <footer className="border-t border-gray-100 py-6 sm:py-8">
-        <div className="mx-auto max-w-7xl px-4 text-center text-xs text-gray-400 sm:px-6 sm:text-sm lg:px-10">
-          {client?.name} &middot;{" "}
-          <a href="https://cloud.leadstaq.tech" className="hover:text-gray-600">
-            Powered by Leadstaq Cloud
+      {/* ── Section 7: Footer ── */}
+      <div
+        style={{
+          background: "#1C1410",
+          borderTop: "0.5px solid rgba(255,255,255,0.06)",
+          padding: "16px 28px",
+          display: "flex", alignItems: "center", justifyContent: "center",
+        }}
+      >
+        <p
+          style={{
+            fontFamily: "var(--fw-font-body), system-ui, sans-serif",
+            fontSize: 11, color: "rgba(255,255,255,0.25)", margin: 0, textAlign: "center",
+          }}
+        >
+          {clientName} &middot; Powered by{" "}
+          <a
+            href="https://cloud.leadstaq.tech"
+            style={{ color: "rgba(212,255,79,0.5)", textDecoration: "none" }}
+          >
+            Leadstaq Cloud
           </a>
-        </div>
-      </footer>
+        </p>
+      </div>
     </div>
   );
 }

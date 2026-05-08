@@ -45,6 +45,21 @@ function formatRelativeTime(dateStr: string): string {
   return `${days}d ago`;
 }
 
+function getGreeting(): string {
+  const h = new Date().getHours();
+  if (h < 12) return "Good morning";
+  if (h < 17) return "Good afternoon";
+  return "Good evening";
+}
+
+function formatTodayDate(): string {
+  return new Date().toLocaleDateString("en-GB", {
+    weekday: "long",
+    day: "numeric",
+    month: "long",
+  });
+}
+
 export default function CloudDashboardHome() {
   const { data: session, status } = useSession();
   const router = useRouter();
@@ -53,6 +68,7 @@ export default function CloudDashboardHome() {
   const [loading, setLoading] = useState(false);
   const [showNew, setShowNew] = useState(false);
   const [teamMembers, setTeamMembers] = useState<TeamMember[]>([]);
+  const [clientName, setClientName] = useState<string>("");
 
   const fetchProjects = useCallback(() => {
     if (!session?.clientId) { setLoading(false); return; }
@@ -81,6 +97,21 @@ export default function CloudDashboardHome() {
       .catch(() => {});
   }, [session?.userId]);
 
+  useEffect(() => {
+    if (!session?.clientId) return;
+    fetch("/api/clients")
+      .then((r) => r.json())
+      .then((list: unknown) => {
+        if (Array.isArray(list) && list.length > 0) {
+          const client = (list as { id: string; name: string }[]).find(
+            (c) => c.id === session?.clientId
+          ) ?? (list as { id: string; name: string }[])[0];
+          if (client?.name) setClientName(client.name);
+        }
+      })
+      .catch(() => {});
+  }, [session?.clientId]);
+
   const storageUsed = stats?.total_bytes ?? 0;
   const storageLimit = 5 * 1024 * 1024 * 1024;
   const percentUsed = Math.round((storageUsed / storageLimit) * 100 * 10) / 10;
@@ -105,6 +136,43 @@ export default function CloudDashboardHome() {
 
   return (
     <div style={{ minHeight: "100vh", background: "#F5F5F0", fontFamily: F, paddingBottom: 100, overflowX: "hidden", width: "100%" }}>
+
+      {/* ── GREETING HERO ── */}
+      <div style={{ padding: "32px 20px 24px", background: "#F7F4EF" }}>
+        <p style={{ fontFamily: F, fontSize: 11, fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase", color: "#8C7B6B", margin: "0 0 6px" }}>
+          {getGreeting()}
+        </p>
+        <h1 style={{ fontFamily: S, fontSize: "clamp(24px, 5vw, 32px)", color: "#1C1410", margin: "0 0 4px", lineHeight: 1.1, letterSpacing: "-0.01em" }}>
+          {clientName || session?.user?.name || ""}
+        </h1>
+        <p style={{ fontFamily: F, fontSize: 13, color: "#8C7B6B", margin: 0 }}>
+          {formatTodayDate()} · {projectCount} project{projectCount !== 1 ? "s" : ""} · {photoCount} photos
+        </p>
+      </div>
+
+      {/* ── QUICK ACTION PILLS ── */}
+      <div
+        className="pills-scroll"
+        style={{ overflowX: "auto", WebkitOverflowScrolling: "touch", scrollbarWidth: "none", touchAction: "pan-x", padding: "0 20px 14px", width: "100%", boxSizing: "border-box" } as React.CSSProperties}
+      >
+        <div style={{ display: "flex", gap: 8, width: "max-content" }}>
+        {([
+          { label: "New project", Icon: Plus,      bg: "var(--fw-soil)", color: "var(--fw-lime)",          border: "none",                              action: () => setShowNew(true) },
+          { label: "Projects",    Icon: FolderOpen, bg: "var(--fw-card)", color: "var(--fw-text-primary)",  border: "0.5px solid var(--fw-border-strong)", href: "/cloud/dashboard/projects" },
+          { label: "Upload",      Icon: Camera,     bg: "var(--fw-lime)", color: "var(--fw-soil)",          border: "none",                              href: "/cloud/dashboard/upload" },
+          { label: "Invite",      Icon: UserPlus,   bg: "var(--fw-card)", color: "var(--fw-text-primary)",  border: "0.5px solid var(--fw-border-strong)", href: "/cloud/dashboard/team" },
+        ] as { label: string; Icon: React.ElementType; bg: string; color: string; border: string; href?: string; action?: () => void }[]).map((a) => (
+          <button
+            key={a.label}
+            onClick={a.action ? a.action : () => router.push(a.href!)}
+            style={{ display: "flex", alignItems: "center", gap: 8, height: 40, padding: "0 16px", background: a.bg, color: a.color, borderRadius: 20, border: a.border, cursor: "pointer", flexShrink: 0, fontFamily: F, fontSize: 12, fontWeight: 700, whiteSpace: "nowrap" }}
+          >
+            <a.Icon size={15} strokeWidth={2.2} aria-hidden="true" />
+            {a.label}
+          </button>
+        ))}
+        </div>
+      </div>
 
       {/* ── STORAGE CARD (dark anchor) ── */}
       <div style={{ margin: "0 20px 20px", borderRadius: 24, background: "#1C1410", padding: 20, position: "relative", overflow: "hidden", border: "0.5px solid rgba(255,255,255,0.07)" }}>
@@ -144,30 +212,6 @@ export default function CloudDashboardHome() {
               <p style={{ fontFamily: stat.serif ? S : F, fontSize: stat.serif ? 22 : 13, margin: 0, lineHeight: 1, color: "#FFFFFF", fontWeight: stat.serif ? 400 : 600 }}>{stat.value}</p>
             </div>
           ))}
-        </div>
-      </div>
-
-      {/* ── QUICK ACTION PILLS ── */}
-      <div
-        className="pills-scroll"
-        style={{ overflowX: "auto", WebkitOverflowScrolling: "touch", scrollbarWidth: "none", touchAction: "pan-x", padding: "8px 20px 14px", width: "100%", boxSizing: "border-box" } as React.CSSProperties}
-      >
-        <div style={{ display: "flex", gap: 8, width: "max-content" }}>
-        {([
-          { label: "New project", Icon: Plus,      bg: "var(--fw-soil)", color: "var(--fw-lime)",          border: "none",                              action: () => setShowNew(true) },
-          { label: "Projects",    Icon: FolderOpen, bg: "var(--fw-card)", color: "var(--fw-text-primary)",  border: "0.5px solid var(--fw-border-strong)", href: "/cloud/dashboard/projects" },
-          { label: "Upload",      Icon: Camera,     bg: "var(--fw-lime)", color: "var(--fw-soil)",          border: "none",                              href: "/cloud/dashboard/upload" },
-          { label: "Invite",      Icon: UserPlus,   bg: "var(--fw-card)", color: "var(--fw-text-primary)",  border: "0.5px solid var(--fw-border-strong)", href: "/cloud/dashboard/team" },
-        ] as { label: string; Icon: React.ElementType; bg: string; color: string; border: string; href?: string; action?: () => void }[]).map((a) => (
-          <button
-            key={a.label}
-            onClick={a.action ? a.action : () => router.push(a.href!)}
-            style={{ display: "flex", alignItems: "center", gap: 8, height: 40, padding: "0 16px", background: a.bg, color: a.color, borderRadius: 20, border: a.border, cursor: "pointer", flexShrink: 0, fontFamily: F, fontSize: 12, fontWeight: 700, whiteSpace: "nowrap" }}
-          >
-            <a.Icon size={15} strokeWidth={2.2} aria-hidden="true" />
-            {a.label}
-          </button>
-        ))}
         </div>
       </div>
 

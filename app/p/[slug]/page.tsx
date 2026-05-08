@@ -2,8 +2,19 @@ import type { Metadata } from "next";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { notFound } from "next/navigation";
 import Link from "next/link";
-import { Star, MapPin, Calendar, ArrowRight } from "lucide-react";
+import { MapPin, Calendar, ArrowRight } from "lucide-react";
 import { ProfilePageForm } from "./ProfilePageForm";
+import { getCategoryStyle } from "@/app/cloud/lib/category-styles";
+
+function getInitials(name: string): string {
+  const parts = name.trim().split(" ").filter(Boolean);
+  if (parts.length >= 2) return (parts[0]![0]! + parts[parts.length - 1]![0]!).toUpperCase();
+  return name.slice(0, 2).toUpperCase();
+}
+
+function formatDate(d: string): string {
+  return new Date(d).toLocaleDateString("en-US", { month: "short", year: "numeric" });
+}
 
 export const dynamic = "force-dynamic";
 
@@ -108,173 +119,192 @@ export default async function ProfilePage({ params }: { params: { slug: string }
   const typedTestimonials = (testimonials ?? []) as unknown as Testimonial[];
   const typedFormSteps = (formSteps ?? []) as unknown as FormStepDef[];
 
+  const firstProjectCover = typedProjects[0]?.project_media
+    ? [...typedProjects[0].project_media].sort((a, b) => a.display_order - b.display_order)[0]?.public_url ?? null
+    : null;
+  const heroImageUrl = (profile.hero_image_url as string | null) ?? firstProjectCover;
+
   return (
-    <div className="min-h-screen bg-white font-sans">
-      {/* Hero */}
-      <section className="relative flex min-h-[88vh] items-center overflow-hidden bg-gray-950">
-        {profile.hero_image_url && (
-          <div
-            className="absolute inset-0 bg-cover bg-center"
-            style={{ backgroundImage: `url(${profile.hero_image_url as string})`, opacity: 0.28 }}
+    <div style={{ fontFamily: "var(--fw-font-body), system-ui, sans-serif" }}>
+
+      {/* ── Section 1: Hero ── */}
+      <section style={{ width: "100%", height: "clamp(320px, 50vw, 480px)", position: "relative", overflow: "hidden", background: "#1C1410" }}>
+        {heroImageUrl && (
+          // eslint-disable-next-line @next/next/no-img-element
+          <img
+            src={heroImageUrl}
+            alt={clientName}
+            style={{ position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "cover", objectPosition: "center" }}
           />
         )}
-        <div className="relative mx-auto w-full max-w-7xl px-6 py-28 lg:px-10 lg:py-40">
-          <div className="max-w-2xl">
-            <p className="mb-4 font-mono text-xs uppercase tracking-[0.22em] text-white/50">{clientName}</p>
-            <h1 className="mb-6 text-5xl font-light leading-[1.08] tracking-tight text-white lg:text-6xl">
-              {(profile.headline as string | null) ?? clientName}
-            </h1>
-            {profile.subheadline && (
-              <p className="mb-10 text-lg leading-relaxed text-white/70">{profile.subheadline as string}</p>
-            )}
-            <a
-              href="#contact"
-              className="inline-flex items-center gap-2.5 rounded-sm px-8 py-4 text-sm font-semibold transition-opacity hover:opacity-90"
-              style={{ backgroundColor: accentColor, color: "#0a0a0a" }}
-            >
-              {ctaText}
-              <ArrowRight className="h-4 w-4" />
-            </a>
-          </div>
+        <div style={{ position: "absolute", inset: 0, background: "linear-gradient(to top, rgba(28,20,16,0.92) 0%, rgba(28,20,16,0.4) 60%, rgba(28,20,16,0.2) 100%)" }} />
+        <div style={{ position: "absolute", bottom: 36, left: "clamp(20px, 5vw, 60px)", right: "clamp(20px, 5vw, 60px)", maxWidth: 640 }}>
+          <p style={{ fontFamily: "var(--fw-font-body), system-ui, sans-serif", fontSize: 11, fontWeight: 700, letterSpacing: "0.12em", textTransform: "uppercase", color: "rgba(255,255,255,0.5)", margin: "0 0 10px" }}>
+            {clientName}
+          </p>
+          <h1 style={{ fontFamily: "var(--fw-font-display), Georgia, serif", fontSize: "clamp(28px, 5vw, 52px)", color: "#FFFFFF", margin: "0 0 14px", lineHeight: 1.1, letterSpacing: "-0.01em" }}>
+            {(profile.headline as string | null) ?? clientName}
+          </h1>
+          {profile.subheadline && (
+            <p style={{ fontFamily: "var(--fw-font-body), system-ui, sans-serif", fontSize: 16, color: "rgba(255,255,255,0.65)", margin: "0 0 24px", lineHeight: 1.6, maxWidth: 500 }}>
+              {profile.subheadline as string}
+            </p>
+          )}
+          <a href="#contact" style={{ display: "inline-flex", alignItems: "center", gap: 8, height: 50, padding: "0 24px", background: "#D4FF4F", color: "#1C1410", borderRadius: 14, fontSize: 14, fontWeight: 700, fontFamily: "var(--fw-font-body), system-ui, sans-serif", textDecoration: "none" }}>
+            {ctaText}
+            <ArrowRight size={15} />
+          </a>
         </div>
       </section>
 
-      {/* Featured Projects */}
+      {/* ── Section 2: Featured Projects ── */}
       {typedProjects.length > 0 && (
-        <section className="py-24 lg:py-32">
-          <div className="mx-auto max-w-7xl px-6 lg:px-10">
-            <div className="mb-14">
-              <p className="mb-2 font-mono text-[11px] uppercase tracking-[0.18em] text-gray-400">Our Work</p>
-              <h2 className="text-4xl font-light tracking-tight text-gray-900">Projects we&apos;re proud of</h2>
-            </div>
-            <div className="grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-3">
-              {typedProjects.map((project) => {
-                const sortedMedia = [...project.project_media].sort((a, b) => a.display_order - b.display_order);
-                const coverUrl = sortedMedia[0]?.public_url;
-                return (
-                  <Link
-                    key={project.id}
-                    href={`/share/projects/${project.slug}`}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="group overflow-hidden rounded-xl border border-gray-100 bg-white shadow-sm transition-shadow hover:shadow-lg"
-                  >
-                    <div className="relative aspect-[4/3] overflow-hidden bg-gray-100">
-                      {coverUrl ? (
+        <section style={{ background: "#F7F4EF", padding: "clamp(40px, 6vw, 72px) clamp(20px, 5vw, 60px)" }}>
+          <div style={{ marginBottom: 32 }}>
+            <p style={{ fontFamily: "var(--fw-font-body), system-ui, sans-serif", fontSize: 10, fontWeight: 700, letterSpacing: "0.12em", textTransform: "uppercase", color: "#8C7B6B", margin: "0 0 8px" }}>
+              Our Work
+            </p>
+            <h2 style={{ fontFamily: "var(--fw-font-display), Georgia, serif", fontSize: "clamp(24px, 4vw, 38px)", color: "#1C1410", margin: 0, lineHeight: 1.15 }}>
+              Projects we&apos;re proud of
+            </h2>
+          </div>
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(280px, 1fr))", gap: 16, maxWidth: 1100 }}>
+            {typedProjects.map((project) => {
+              const cat = getCategoryStyle(project.category);
+              const sortedMedia = [...project.project_media].sort((a, b) => a.display_order - b.display_order);
+              const coverUrl = sortedMedia[0]?.public_url;
+              const photoCount = project.project_media.length;
+              const showDesc = project.description && project.description.trim() !== "" && project.description.trim() !== "Everything";
+              return (
+                <Link key={project.id} href={`/cloud/share/${project.id}`} target="_blank" rel="noopener noreferrer" style={{ textDecoration: "none" }}>
+                  <div style={{ background: "#FFFFFF", borderRadius: 18, border: "0.5px solid rgba(28,20,16,0.08)", overflow: "hidden" }}>
+                    <div style={{ height: 220, background: cat.sceneBg, position: "relative", overflow: "hidden" }}>
+                      {coverUrl && (
                         // eslint-disable-next-line @next/next/no-img-element
-                        <img
-                          src={coverUrl}
-                          alt={project.title}
-                          className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
-                        />
-                      ) : (
-                        <div className="flex h-full items-center justify-center text-gray-300">
-                          <svg className="h-14 w-14" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
-                          </svg>
-                        </div>
+                        <img src={coverUrl} alt={project.title} style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }} />
                       )}
+                      <div style={{ position: "absolute", inset: 0, background: `linear-gradient(to top, ${cat.overlayFrom} 0%, transparent 55%)` }} />
                       {project.category && (
-                        <span className="absolute left-3 top-3 rounded-full bg-white/90 px-3 py-1 text-xs font-medium text-gray-700 backdrop-blur-sm">
+                        <span style={{ position: "absolute", top: 12, left: 12, background: cat.badge, color: cat.labelColor, fontSize: 9, fontWeight: 700, padding: "3px 9px", borderRadius: 20, letterSpacing: "0.04em", textTransform: "uppercase", fontFamily: "var(--fw-font-body), system-ui, sans-serif" }}>
                           {project.category}
                         </span>
                       )}
+                      {photoCount > 0 && (
+                        <span style={{ position: "absolute", top: 12, right: 12, background: "#D4FF4F", color: "#1C1410", fontSize: 9, fontWeight: 700, padding: "3px 8px", borderRadius: 20, fontFamily: "var(--fw-font-body), system-ui, sans-serif" }}>
+                          {photoCount} {photoCount === 1 ? "photo" : "photos"}
+                        </span>
+                      )}
                     </div>
-                    <div className="p-5">
-                      <h3 className="mb-2 font-semibold text-gray-900 group-hover:text-gray-600">{project.title}</h3>
-                      <div className="flex flex-wrap items-center gap-3 text-xs text-gray-400">
+                    <div style={{ padding: "16px 18px 18px" }}>
+                      <h3 style={{ fontFamily: "var(--fw-font-display), Georgia, serif", fontSize: 18, color: "#1C1410", margin: "0 0 6px", lineHeight: 1.2 }}>
+                        {project.title}
+                      </h3>
+                      {showDesc && (
+                        <p className="line-clamp-2" style={{ fontFamily: "var(--fw-font-body), system-ui, sans-serif", fontSize: 13, color: "#8C7B6B", margin: "0 0 12px", lineHeight: 1.5 }}>
+                          {project.description}
+                        </p>
+                      )}
+                      <div style={{ display: "flex", alignItems: "center", gap: 12, fontSize: 12, color: "#8C7B6B", fontFamily: "var(--fw-font-body), system-ui, sans-serif" }}>
                         {project.location && (
-                          <span className="flex items-center gap-1">
-                            <MapPin className="h-3 w-3" />{project.location}
+                          <span style={{ display: "flex", alignItems: "center", gap: 4 }}>
+                            <MapPin size={12} color="#8C7B6B" />{project.location}
                           </span>
                         )}
                         {project.completion_date && (
-                          <span className="flex items-center gap-1">
-                            <Calendar className="h-3 w-3" />
-                            {new Date(project.completion_date).toLocaleDateString("en-US", { month: "short", year: "numeric" })}
+                          <span style={{ display: "flex", alignItems: "center", gap: 4 }}>
+                            <Calendar size={12} color="#8C7B6B" />{formatDate(project.completion_date)}
                           </span>
                         )}
                       </div>
-                      {project.description && (
-                        <p className="mt-2 line-clamp-2 text-sm text-gray-500">{project.description}</p>
-                      )}
-                    </div>
-                  </Link>
-                );
-              })}
-            </div>
-          </div>
-        </section>
-      )}
-
-      {/* Testimonials */}
-      {typedTestimonials.length > 0 && (
-        <section className="bg-gray-50 py-24 lg:py-32">
-          <div className="mx-auto max-w-7xl px-6 lg:px-10">
-            <div className="mb-14">
-              <p className="mb-2 font-mono text-[11px] uppercase tracking-[0.18em] text-gray-400">Reviews</p>
-              <h2 className="text-4xl font-light tracking-tight text-gray-900">What our clients say</h2>
-            </div>
-            <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
-              {typedTestimonials.map((t) => (
-                <div key={t.id} className="rounded-xl bg-white p-7 shadow-sm">
-                  {t.rating != null && (
-                    <div className="mb-4 flex gap-0.5">
-                      {Array.from({ length: t.rating }).map((_, i) => (
-                        <Star key={i} className="h-4 w-4 fill-yellow-400 text-yellow-400" />
-                      ))}
-                    </div>
-                  )}
-                  <p className="mb-5 text-[15px] leading-relaxed text-gray-700">&ldquo;{t.content}&rdquo;</p>
-                  <div className="flex items-center gap-3">
-                    {t.photo_url && (
-                      // eslint-disable-next-line @next/next/no-img-element
-                      <img src={t.photo_url} alt={t.author_name} className="h-10 w-10 rounded-full object-cover" />
-                    )}
-                    <div>
-                      <p className="font-semibold text-gray-900">{t.author_name}</p>
-                      {t.author_role && <p className="text-sm text-gray-500">{t.author_role}</p>}
                     </div>
                   </div>
-                </div>
-              ))}
-            </div>
+                </Link>
+              );
+            })}
           </div>
         </section>
       )}
 
-      {/* Multi-step form */}
-      <section id="contact" className="py-24 lg:py-32">
-        <div className="mx-auto max-w-xl px-6 lg:px-10">
-          <div className="mb-10">
-            <p className="mb-2 font-mono text-[11px] uppercase tracking-[0.18em] text-gray-400">Get in touch</p>
-            <h2 className="text-4xl font-light tracking-tight text-gray-900">{formTitle}</h2>
-            <p className="mt-3 text-gray-500">Fill in a few details and we&apos;ll be in touch within the hour.</p>
+      {/* ── Section 3: Testimonials ── */}
+      {typedTestimonials.length > 0 && (
+        <section style={{ background: "#FFFFFF", padding: "clamp(40px, 6vw, 72px) clamp(20px, 5vw, 60px)" }}>
+          <p style={{ fontFamily: "var(--fw-font-body), system-ui, sans-serif", fontSize: 10, fontWeight: 700, letterSpacing: "0.12em", textTransform: "uppercase", color: "#8C7B6B", margin: "0 0 8px" }}>
+            What clients say
+          </p>
+          <h2 style={{ fontFamily: "var(--fw-font-display), Georgia, serif", fontSize: "clamp(22px, 3.5vw, 34px)", color: "#1C1410", margin: "0 0 32px", lineHeight: 1.2 }}>
+            Trusted by our clients
+          </h2>
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(300px, 1fr))", gap: 16, maxWidth: 900 }}>
+            {typedTestimonials.map((t) => (
+              <div key={t.id} style={{ background: "#F7F4EF", borderRadius: 16, border: "0.5px solid rgba(28,20,16,0.07)", padding: 24 }}>
+                {t.rating != null && (
+                  <div style={{ display: "flex", gap: 3, marginBottom: 14 }}>
+                    {Array.from({ length: 5 }).map((_, i) => (
+                      <svg key={i} width="14" height="14" viewBox="0 0 24 24" fill={i < t.rating! ? "#C49A3C" : "none"} stroke={i < t.rating! ? "#C49A3C" : "#D1C8BE"} strokeWidth="1.5">
+                        <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
+                      </svg>
+                    ))}
+                  </div>
+                )}
+                <p style={{ fontFamily: "var(--fw-font-body), system-ui, sans-serif", fontSize: 15, color: "#1C1410", lineHeight: 1.65, margin: "0 0 20px", fontStyle: "italic" }}>
+                  &ldquo;{t.content}&rdquo;
+                </p>
+                <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+                  {t.photo_url ? (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img src={t.photo_url} alt={t.author_name} style={{ width: 36, height: 36, borderRadius: "50%", objectFit: "cover" }} />
+                  ) : (
+                    <div style={{ width: 36, height: 36, borderRadius: "50%", background: "#1C1410", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 11, fontWeight: 700, color: "#D4FF4F", fontFamily: "var(--fw-font-body), system-ui, sans-serif", flexShrink: 0 }}>
+                      {getInitials(t.author_name)}
+                    </div>
+                  )}
+                  <div>
+                    <p style={{ fontSize: 13, fontWeight: 600, color: "#1C1410", margin: 0, fontFamily: "var(--fw-font-body), system-ui, sans-serif" }}>{t.author_name}</p>
+                    {t.author_role && (
+                      <p style={{ fontSize: 11, color: "#8C7B6B", margin: 0, fontFamily: "var(--fw-font-body), system-ui, sans-serif" }}>{t.author_role}</p>
+                    )}
+                  </div>
+                </div>
+              </div>
+            ))}
           </div>
-          <ProfilePageForm
-            clientId={clientId}
-            accentColor={accentColor}
-            ctaText={ctaText}
-            formSteps={typedFormSteps}
-          />
+        </section>
+      )}
+
+      {/* ── Section 4: Contact form ── */}
+      <section id="contact" style={{ background: "#F7F4EF", padding: "clamp(40px, 6vw, 72px) clamp(20px, 5vw, 60px)" }}>
+        <div style={{ maxWidth: 580, margin: "0 auto" }}>
+          <p style={{ fontFamily: "var(--fw-font-body), system-ui, sans-serif", fontSize: 10, fontWeight: 700, letterSpacing: "0.12em", textTransform: "uppercase", color: "#8C7B6B", margin: "0 0 8px" }}>
+            Get in touch
+          </p>
+          <h2 style={{ fontFamily: "var(--fw-font-display), Georgia, serif", fontSize: "clamp(24px, 4vw, 38px)", color: "#1C1410", margin: "0 0 8px", lineHeight: 1.2 }}>
+            {formTitle}
+          </h2>
+          <p style={{ fontFamily: "var(--fw-font-body), system-ui, sans-serif", fontSize: 14, color: "#8C7B6B", margin: "0 0 32px", lineHeight: 1.6 }}>
+            Fill in a few details and we&apos;ll be in touch within the hour.
+          </p>
+          <div style={{ background: "#FFFFFF", borderRadius: 20, border: "0.5px solid rgba(28,20,16,0.08)", padding: "clamp(24px, 4vw, 40px)" }}>
+            <ProfilePageForm
+              clientId={clientId}
+              accentColor={accentColor}
+              ctaText={ctaText}
+              formSteps={typedFormSteps}
+            />
+          </div>
         </div>
       </section>
 
-      {/* Footer */}
-      <footer className="border-t border-gray-100 py-10">
-        <div className="mx-auto max-w-7xl px-6 text-center text-sm text-gray-400 lg:px-10">
-          <p>
-            {clientName} &middot;{" "}
-            <a
-              href="https://leadstaq.tech"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="hover:text-gray-600"
-            >
-              Powered by Leadstaq
-            </a>
-          </p>
-        </div>
+      {/* ── Section 5: Footer ── */}
+      <footer style={{ background: "#1C1410", padding: "20px clamp(20px, 5vw, 60px)", display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: 12 }}>
+        <p style={{ fontFamily: "var(--fw-font-body), system-ui, sans-serif", fontSize: 12, color: "rgba(255,255,255,0.3)", margin: 0 }}>
+          {clientName}
+        </p>
+        <p style={{ fontFamily: "var(--fw-font-body), system-ui, sans-serif", fontSize: 12, color: "rgba(255,255,255,0.25)", margin: 0 }}>
+          Powered by{" "}
+          <a href="https://leadstaq.tech" target="_blank" rel="noopener noreferrer" style={{ color: "rgba(212,255,79,0.45)", textDecoration: "none" }}>
+            Leadstaq
+          </a>
+        </p>
       </footer>
     </div>
   );
