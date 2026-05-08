@@ -1,8 +1,8 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { useSession, signOut } from "next-auth/react";
-import { Loader2, Save, ExternalLink, Eye, EyeOff, HardDrive, Droplets, LogOut } from "lucide-react";
+import { Loader2, Save, ExternalLink, Eye, EyeOff, HardDrive, Droplets, LogOut, Upload, Camera, X } from "lucide-react";
 
 type ClientData = {
   id: string;
@@ -15,6 +15,8 @@ type ClientData = {
 type ProfileData = {
   slug: string | null;
   is_published: boolean;
+  headline: string | null;
+  cta_text: string | null;
 };
 
 const INDUSTRIES = [
@@ -27,6 +29,14 @@ export default function CloudSettingsPage() {
 
   const [client, setClient] = useState<ClientData | null>(null);
   const [profile, setProfile] = useState<ProfileData | null>(null);
+
+  const logoInputRef = useRef<HTMLInputElement>(null);
+  const [logoFile, setLogoFile] = useState<File | null>(null);
+  const [logoPreview, setLogoPreview] = useState<string | null>(null);
+  const [logoUrl, setLogoUrl] = useState<string | null>(null);
+  const [uploadingLogo, setUploadingLogo] = useState(false);
+  const [logoSaved, setLogoSaved] = useState(false);
+  const [logoError, setLogoError] = useState("");
 
   const [bizName, setBizName] = useState("");
   const [bizIndustry, setBizIndustry] = useState("");
@@ -49,6 +59,11 @@ export default function CloudSettingsPage() {
   const [pwSaved, setPwSaved] = useState(false);
 
   const [togglingPublish, setTogglingPublish] = useState(false);
+  const [headline, setHeadline] = useState("");
+  const [ctaText, setCtaText] = useState("");
+  const [savingProfile, setSavingProfile] = useState(false);
+  const [profileSaved, setProfileSaved] = useState(false);
+  const [profileError, setProfileError] = useState("");
   const [stats, setStats] = useState<{
     plan: string; limit_bytes: number; total_bytes: number;
     total_photos: number; total_projects: number; pct: number;
@@ -82,11 +97,14 @@ export default function CloudSettingsPage() {
         setClient(c);
         setBizName(c.name);
         setBizIndustry(c.industry);
+        setLogoUrl(c.logo_url ?? null);
       }
     }
     if (profileRes.ok) {
       const p = (await profileRes.json()) as ProfileData;
       setProfile(p);
+      if (p.headline) setHeadline(p.headline);
+      if (p.cta_text) setCtaText(p.cta_text);
     }
     if (statsRes.ok) {
       const s = (await statsRes.json()) as typeof stats;
@@ -106,6 +124,64 @@ export default function CloudSettingsPage() {
   }, [session?.clientId, session?.user?.name]);
 
   useEffect(() => { void fetchData(); }, [fetchData]);
+
+  function handleLogoFileChange(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    if (file.size > 5 * 1024 * 1024) { setLogoError("File too large. Max 5 MB."); return; }
+    setLogoError("");
+    setLogoFile(file);
+    setLogoPreview(URL.createObjectURL(file));
+  }
+
+  async function uploadLogo() {
+    if (!logoFile || !session?.clientId) return;
+    setUploadingLogo(true);
+    setLogoError("");
+    try {
+      const presignRes = await fetch("/api/storage/presign", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ filename: logoFile.name, contentType: logoFile.type, clientId: session.clientId, purpose: "logo" }),
+      });
+      if (!presignRes.ok) throw new Error("Failed to get upload URL");
+      const { uploadUrl, publicUrl } = (await presignRes.json()) as { uploadUrl: string; publicUrl: string };
+      await fetch(uploadUrl, { method: "PUT", body: logoFile, headers: { "Content-Type": logoFile.type } });
+      await fetch("/api/cloud/settings/client", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ logo_url: publicUrl }),
+      });
+      setLogoUrl(publicUrl);
+      setLogoFile(null);
+      setLogoPreview(null);
+      setLogoSaved(true);
+      setTimeout(() => setLogoSaved(false), 2000);
+    } catch {
+      setLogoError("Upload failed. Please try again.");
+    } finally {
+      setUploadingLogo(false);
+    }
+  }
+
+  async function saveProfile() {
+    if (!session?.clientId) return;
+    setSavingProfile(true);
+    setProfileError("");
+    const res = await fetch(`/api/clients/${session.clientId}/profile`, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ headline: headline.trim(), cta_text: ctaText.trim() }),
+    });
+    setSavingProfile(false);
+    if (!res.ok) {
+      const d = (await res.json()) as { error?: string };
+      setProfileError(d.error ?? "Failed to save.");
+      return;
+    }
+    setProfileSaved(true);
+    setTimeout(() => setProfileSaved(false), 2000);
+  }
 
   async function saveBusiness() {
     if (!session?.clientId || !bizName.trim()) return;
@@ -224,6 +300,41 @@ export default function CloudSettingsPage() {
                 {INDUSTRIES.map((ind) => <option key={ind} value={ind}>{ind}</option>)}
               </select>
             </div>
+            <div>
+              <label className={labelCls}>Business logo</label>
+              <input ref={logoInputRef} type="file" accept="image/png,image/jpeg,image/jpg,image/svg+xml" className="hidden" onChange={handleLogoFileChange} />
+              {(logoPreview ?? logoUrl) ? (
+                <div className="flex items-center gap-4 rounded-xl border border-black/[0.08] bg-[#F5F5F0] px-4 py-3">
+                  <div className="flex h-12 w-20 flex-shrink-0 items-center justify-center overflow-hidden rounded-lg border border-black/[0.06] bg-white p-1">
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img src={logoPreview ?? logoUrl!} alt="Logo" className="h-full w-full object-contain" />
+                  </div>
+                  <div className="flex flex-1 flex-col gap-1.5">
+                    {logoFile ? (
+                      <button onClick={() => void uploadLogo()} disabled={uploadingLogo} className={saveBtnCls}>
+                        {uploadingLogo ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Upload className="h-3.5 w-3.5" />}
+                        {logoSaved ? "Saved!" : uploadingLogo ? "Uploading…" : "Save logo"}
+                      </button>
+                    ) : (
+                      <button onClick={() => logoInputRef.current?.click()} className="text-left text-[12px] font-semibold text-[#666660] font-cloud-body hover:text-[#0a0a0a]">
+                        Change logo
+                      </button>
+                    )}
+                  </div>
+                  {logoFile && (
+                    <button onClick={() => { setLogoFile(null); setLogoPreview(null); }} className="text-[#BBBBAA] hover:text-[#666660]">
+                      <X className="h-4 w-4" />
+                    </button>
+                  )}
+                </div>
+              ) : (
+                <button onClick={() => logoInputRef.current?.click()} className="flex w-full items-center gap-3 rounded-xl border border-dashed border-black/[0.15] bg-[#F5F5F0] px-4 py-4 text-left text-[13px] text-[#999990] font-cloud-body hover:border-black/[0.25] transition-colors">
+                  <Camera className="h-4 w-4 flex-shrink-0" />
+                  Upload logo (PNG, JPG, SVG — max 5 MB)
+                </button>
+              )}
+              {logoError && <p className="mt-1 text-[12px] text-red-500 font-cloud-body">{logoError}</p>}
+            </div>
             <button onClick={() => void saveBusiness()} disabled={savingBiz} className={saveBtnCls}>
               {savingBiz ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Save className="h-3.5 w-3.5" />}
               {bizSaved ? "Saved!" : "Save"}
@@ -291,6 +402,20 @@ export default function CloudSettingsPage() {
           <section>
             <p className="text-[10px] font-bold tracking-[0.08em] text-[#999990] uppercase mb-3 font-cloud-body">Public profile</p>
             <div className={sectionCardCls + " !space-y-3"}>
+              <div>
+                <label className={labelCls}>Profile headline</label>
+                <input type="text" value={headline} onChange={(e) => setHeadline(e.target.value)} placeholder="We build remarkable spaces for people to live and work" className={inputCls} />
+              </div>
+              <div>
+                <label className={labelCls}>CTA button text</label>
+                <input type="text" value={ctaText} onChange={(e) => setCtaText(e.target.value)} placeholder="Get a Free Quote" className={inputCls} />
+              </div>
+              <button onClick={() => void saveProfile()} disabled={savingProfile} className={saveBtnCls}>
+                {savingProfile ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Save className="h-3.5 w-3.5" />}
+                {profileSaved ? "Saved!" : "Save"}
+              </button>
+              {profileError && <p className="text-[12px] text-red-500 font-cloud-body">{profileError}</p>}
+              <div className="h-px bg-black/[0.06]" />
               {profileUrl && (
                 <div className="flex items-center justify-between rounded-xl bg-white/60 border border-black/[0.06] px-4 py-3">
                   <div>
