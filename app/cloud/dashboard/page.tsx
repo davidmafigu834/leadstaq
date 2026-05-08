@@ -194,7 +194,7 @@ export default function CloudDashboardHome() {
       {/* ── QUICK ACTION PILLS ── */}
       <div
         className="pills-scroll"
-        style={{ overflowX: "auto", WebkitOverflowScrolling: "touch", scrollbarWidth: "none", touchAction: "pan-x", padding: "14px 20px 6px", width: "100%", boxSizing: "border-box" } as React.CSSProperties}
+        style={{ overflowX: "auto", WebkitOverflowScrolling: "touch", scrollbarWidth: "none", padding: "14px 20px 6px", width: "100%", boxSizing: "border-box" } as React.CSSProperties}
       >
         <div style={{ display: "flex", gap: 8, width: "max-content" }}>
         {([
@@ -240,7 +240,7 @@ export default function CloudDashboardHome() {
       ) : (
         <div
           className="pills-scroll"
-          style={{ overflowX: "auto", WebkitOverflowScrolling: "touch", scrollbarWidth: "none", touchAction: "pan-x", padding: "0 20px 12px", width: "100%", boxSizing: "border-box" } as React.CSSProperties}
+          style={{ overflowX: "auto", WebkitOverflowScrolling: "touch", scrollbarWidth: "none", padding: "0 20px 12px", width: "100%", boxSizing: "border-box" } as React.CSSProperties}
         >
           <div style={{ display: "flex", gap: 10, width: "max-content" }}>
           {projects.slice(0, 5).map((p) => {
