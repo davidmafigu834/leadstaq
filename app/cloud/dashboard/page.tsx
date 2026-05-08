@@ -104,7 +104,7 @@ export default function CloudDashboardHome() {
   const S = "var(--fw-font-display), Georgia, serif";
 
   return (
-    <div style={{ minHeight: "100vh", background: "#F5F5F0", fontFamily: F, paddingBottom: 100 }}>
+    <div style={{ minHeight: "100vh", background: "#F5F5F0", fontFamily: F, paddingBottom: 100, overflowX: "hidden", width: "100%" }}>
 
       {/* ── STORAGE CARD (dark anchor) ── */}
       <div style={{ margin: "0 20px 20px", borderRadius: 24, background: "#1C1410", padding: 20, position: "relative", overflow: "hidden", border: "0.5px solid rgba(255,255,255,0.07)" }}>
@@ -150,7 +150,7 @@ export default function CloudDashboardHome() {
       {/* ── QUICK ACTION PILLS ── */}
       <div
         className="pills-scroll"
-        style={{ overflowX: "auto", overflowY: "visible", WebkitOverflowScrolling: "touch", scrollbarWidth: "none", touchAction: "pan-x", padding: "8px 20px 14px" } as React.CSSProperties}
+        style={{ overflowX: "auto", WebkitOverflowScrolling: "touch", scrollbarWidth: "none", touchAction: "pan-x", padding: "8px 20px 14px", width: "100%", boxSizing: "border-box" } as React.CSSProperties}
       >
         <div style={{ display: "flex", gap: 8, width: "max-content" }}>
         {([
@@ -196,7 +196,7 @@ export default function CloudDashboardHome() {
       ) : (
         <div
           className="pills-scroll"
-          style={{ overflowX: "auto", overflowY: "visible", WebkitOverflowScrolling: "touch", scrollbarWidth: "none", touchAction: "pan-x", padding: "0 20px 12px" } as React.CSSProperties}
+          style={{ overflowX: "auto", WebkitOverflowScrolling: "touch", scrollbarWidth: "none", touchAction: "pan-x", padding: "0 20px 12px", width: "100%", boxSizing: "border-box" } as React.CSSProperties}
         >
           <div style={{ display: "flex", gap: 10, width: "max-content" }}>
           {projects.slice(0, 5).map((p) => {
@@ -250,8 +250,8 @@ export default function CloudDashboardHome() {
             </div>
             <p style={{ fontSize: 11, fontWeight: 500, color: "#8C7B6B", textAlign: "center", lineHeight: 1.4, margin: 0, fontFamily: F }}>New<br />project</p>
           </div>
-          </div>{/* inner flex div */}
-        </div>{/* outer scroll div */}
+          </div>
+        </div>
       )}
 
       {/* ── TEAM + ACTIVITY ROW ── */}
