@@ -15,7 +15,7 @@ type Project = {
   updated_at: string;
   project_media: MediaItem[];
 };
-type Stats = { total_projects: number; total_photos: number; total_bytes: number };
+type Stats = { total_projects: number; total_photos: number; total_bytes: number; plan?: string; limit_bytes?: number };
 type TeamMember = { id: string; name: string; email: string };
 
 function formatBytes(bytes: number): string {
@@ -113,7 +113,7 @@ export default function CloudDashboardHome() {
   }, [session?.clientId]);
 
   const storageUsed = stats?.total_bytes ?? 0;
-  const storageLimit = 5 * 1024 * 1024 * 1024;
+  const storageLimit = stats?.limit_bytes ?? 20 * 1024 * 1024 * 1024;
   const percentUsed = Math.round((storageUsed / storageLimit) * 100 * 10) / 10;
   const projectCount = stats?.total_projects ?? 0;
   const photoCount = stats?.total_photos ?? 0;
@@ -150,32 +150,8 @@ export default function CloudDashboardHome() {
         </p>
       </div>
 
-      {/* ── QUICK ACTION PILLS ── */}
-      <div
-        className="pills-scroll"
-        style={{ overflowX: "auto", WebkitOverflowScrolling: "touch", scrollbarWidth: "none", touchAction: "pan-x", padding: "0 20px 14px", width: "100%", boxSizing: "border-box" } as React.CSSProperties}
-      >
-        <div style={{ display: "flex", gap: 8, width: "max-content" }}>
-        {([
-          { label: "New project", Icon: Plus,      bg: "var(--fw-soil)", color: "var(--fw-lime)",          border: "none",                              action: () => setShowNew(true) },
-          { label: "Projects",    Icon: FolderOpen, bg: "var(--fw-card)", color: "var(--fw-text-primary)",  border: "0.5px solid var(--fw-border-strong)", href: "/cloud/dashboard/projects" },
-          { label: "Upload",      Icon: Camera,     bg: "var(--fw-lime)", color: "var(--fw-soil)",          border: "none",                              href: "/cloud/dashboard/upload" },
-          { label: "Invite",      Icon: UserPlus,   bg: "var(--fw-card)", color: "var(--fw-text-primary)",  border: "0.5px solid var(--fw-border-strong)", href: "/cloud/dashboard/team" },
-        ] as { label: string; Icon: React.ElementType; bg: string; color: string; border: string; href?: string; action?: () => void }[]).map((a) => (
-          <button
-            key={a.label}
-            onClick={a.action ? a.action : () => router.push(a.href!)}
-            style={{ display: "flex", alignItems: "center", gap: 8, height: 40, padding: "0 16px", background: a.bg, color: a.color, borderRadius: 20, border: a.border, cursor: "pointer", flexShrink: 0, fontFamily: F, fontSize: 12, fontWeight: 700, whiteSpace: "nowrap" }}
-          >
-            <a.Icon size={15} strokeWidth={2.2} aria-hidden="true" />
-            {a.label}
-          </button>
-        ))}
-        </div>
-      </div>
-
       {/* ── STORAGE CARD (dark anchor) ── */}
-      <div style={{ margin: "0 20px 20px", borderRadius: 24, background: "#1C1410", padding: 20, position: "relative", overflow: "hidden", border: "0.5px solid rgba(255,255,255,0.07)" }}>
+      <div style={{ margin: "0 20px 0", borderRadius: 24, background: "#1C1410", padding: 20, position: "relative", overflow: "hidden", border: "0.5px solid rgba(255,255,255,0.07)" }}>
         <div style={{ position: "absolute", top: -40, right: -40, width: 120, height: 120, borderRadius: "50%", background: "rgba(212,255,79,0.05)", pointerEvents: "none" }} />
         <div style={{ position: "absolute", bottom: -20, right: 20, width: 80, height: 80, borderRadius: "50%", background: "rgba(212,255,79,0.03)", pointerEvents: "none" }} />
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 16 }}>
@@ -205,13 +181,37 @@ export default function CloudDashboardHome() {
           {([
             { label: "Projects", value: String(projectCount), serif: true },
             { label: "Photos",   value: String(photoCount),   serif: true },
-            { label: "Plan",     value: "Free",               serif: false },
+            { label: "Plan",     value: stats?.plan ? stats.plan.charAt(0).toUpperCase() + stats.plan.slice(1) : "Starter", serif: false },
           ] as { label: string; value: string; serif: boolean }[]).map((stat, i) => (
             <div key={stat.label} style={{ borderRight: i < 2 ? "1px solid rgba(255,255,255,0.08)" : "none", paddingRight: i < 2 ? 12 : 0, paddingLeft: i > 0 ? 12 : 0 }}>
               <p style={{ fontSize: 9, color: "rgba(255,255,255,0.35)", margin: "0 0 4px", textTransform: "uppercase", letterSpacing: "0.06em", fontFamily: F }}>{stat.label}</p>
               <p style={{ fontFamily: stat.serif ? S : F, fontSize: stat.serif ? 22 : 13, margin: 0, lineHeight: 1, color: "#FFFFFF", fontWeight: stat.serif ? 400 : 600 }}>{stat.value}</p>
             </div>
           ))}
+        </div>
+      </div>
+
+      {/* ── QUICK ACTION PILLS ── */}
+      <div
+        className="pills-scroll"
+        style={{ overflowX: "auto", WebkitOverflowScrolling: "touch", scrollbarWidth: "none", touchAction: "pan-x", padding: "14px 20px 6px", width: "100%", boxSizing: "border-box" } as React.CSSProperties}
+      >
+        <div style={{ display: "flex", gap: 8, width: "max-content" }}>
+        {([
+          { label: "New project", Icon: Plus,      bg: "var(--fw-soil)", color: "var(--fw-lime)",          border: "none",                              action: () => setShowNew(true) },
+          { label: "Projects",    Icon: FolderOpen, bg: "var(--fw-card)", color: "var(--fw-text-primary)",  border: "0.5px solid var(--fw-border-strong)", href: "/cloud/dashboard/projects" },
+          { label: "Upload",      Icon: Camera,     bg: "var(--fw-lime)", color: "var(--fw-soil)",          border: "none",                              href: "/cloud/dashboard/upload" },
+          { label: "Invite",      Icon: UserPlus,   bg: "var(--fw-card)", color: "var(--fw-text-primary)",  border: "0.5px solid var(--fw-border-strong)", href: "/cloud/dashboard/team" },
+        ] as { label: string; Icon: React.ElementType; bg: string; color: string; border: string; href?: string; action?: () => void }[]).map((a) => (
+          <button
+            key={a.label}
+            onClick={a.action ? a.action : () => router.push(a.href!)}
+            style={{ display: "flex", alignItems: "center", gap: 8, height: 40, padding: "0 16px", background: a.bg, color: a.color, borderRadius: 20, border: a.border, cursor: "pointer", flexShrink: 0, fontFamily: F, fontSize: 12, fontWeight: 700, whiteSpace: "nowrap" }}
+          >
+            <a.Icon size={15} strokeWidth={2.2} aria-hidden="true" />
+            {a.label}
+          </button>
+        ))}
         </div>
       </div>
 
