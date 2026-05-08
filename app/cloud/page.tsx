@@ -95,7 +95,7 @@ export default function CloudLandingPage() {
               href="/cloud/signup"
               className="rounded-lg bg-[#D4FF4F] px-5 py-2 text-sm font-semibold text-black hover:bg-[#c4ef3f] transition-colors"
             >
-              Get started free
+              Get started
             </Link>
           </div>
 
@@ -123,7 +123,7 @@ export default function CloudLandingPage() {
               className="rounded-lg bg-[#D4FF4F] py-3 text-center text-sm font-semibold text-black"
               onClick={() => setMenuOpen(false)}
             >
-              Get started free
+              Get started
             </Link>
           </div>
         )}
@@ -146,8 +146,8 @@ export default function CloudLandingPage() {
           </h1>
 
           <p className="mx-auto mt-6 max-w-xl text-base text-white/55 md:text-lg">
-            Upload photos from the field. Share professional project galleries with clients.
-            Build a portfolio that wins new business.
+            Upload from the field. Store every project forever.<br />
+            Share professional galleries that win new business.
           </p>
 
           <div className="mt-10 flex flex-col items-center gap-3 sm:flex-row sm:justify-center">
@@ -155,7 +155,7 @@ export default function CloudLandingPage() {
               href="/cloud/signup"
               className="flex items-center gap-2 rounded-xl bg-[#D4FF4F] px-8 py-3.5 text-sm font-semibold text-black hover:bg-[#c4ef3f] transition-colors"
             >
-              Start for free
+              Start documenting
               <ArrowRight className="h-4 w-4" />
             </Link>
             <a
@@ -279,27 +279,26 @@ export default function CloudLandingPage() {
 
           <div className="mx-auto mb-16 max-w-2xl rounded-2xl border border-white/10 bg-[#111111] p-8 text-center">
             <p className="mb-6 text-xl font-light italic leading-relaxed text-white/80">
-              &ldquo;Since using Leadstaq Cloud, I&apos;ve closed two deals just by sending a portfolio link.
-              Clients actually call me back now.&rdquo;
+              &ldquo;We are launching in Zimbabwe and looking for our first clients. If you are a contractor, solar installer, landscaper, or trade business owner &mdash; we built this for you. Be among the first.&rdquo;
             </p>
             <div className="flex items-center justify-center gap-3">
               <div className="flex h-9 w-9 items-center justify-center rounded-full bg-[#D4FF4F] text-sm font-bold text-black">
-                J
+                LC
               </div>
               <div className="text-left">
-                <p className="text-sm font-medium text-white">Jason M.</p>
-                <p className="text-xs text-white/40">Solar Installation, Cape Town</p>
+                <p className="text-sm font-medium text-white">Leadstaq Cloud</p>
+                <p className="text-xs text-white/40">Launching in Zimbabwe &middot; 2026</p>
               </div>
             </div>
           </div>
 
           <div className="grid gap-6 text-center sm:grid-cols-3">
             {([
-              { value: "2,400+", label: "Projects documented" },
-              { value: "38,000+", label: "Photos uploaded" },
-              { value: "180+", label: "Contractors trust Leadstaq" },
+              { value: "Stores forever", label: "Your project archive never disappears — not when a phone breaks, not when an employee leaves, not ever." },
+              { value: "One-tap sharing", label: "Every project gets a professional gallery link. Send it to any prospect in seconds. No login required to view." },
+              { value: "Builds itself", label: "Your public portfolio page updates automatically every time you upload a new project. No design work needed." },
             ] as { value: string; label: string }[]).map(({ value, label }) => (
-              <div key={label} className="rounded-2xl border border-white/10 bg-[#111111] p-6">
+              <div key={value} className="rounded-2xl border border-white/10 bg-[#111111] p-6">
                 <div className="mb-1 text-3xl font-semibold text-white">{value}</div>
                 <div className="text-sm text-white/40">{label}</div>
               </div>
@@ -323,19 +322,19 @@ export default function CloudLandingPage() {
             const pricingPlans = [
               {
                 name: "Starter", monthlyPrice: 20, annualPrice: 200, annualMonthly: 16.67, saving: 40,
-                storage: "20 GB", team: "Up to 3 members",
+                storage: "50 GB", team: "Up to 3 members",
                 features: ["Unlimited projects", "Public share links", "Basic watermarking", "Public profile page", "Mobile PWA app"],
                 cta: "Get started", highlight: false, note: null,
               },
               {
                 name: "Professional", monthlyPrice: 49, annualPrice: 490, annualMonthly: 40.83, saving: 98,
-                storage: "100 GB", team: "Up to 10 members",
+                storage: "200 GB", team: "Up to 10 members",
                 features: ["Everything in Starter", "Custom logo watermark", "Project analytics", "AI photo enhancement", "Priority support"],
                 cta: "Get started", highlight: true, note: "Most popular",
               },
               {
                 name: "Business", monthlyPrice: 99, annualPrice: 990, annualMonthly: 82.50, saving: 198,
-                storage: "500 GB", team: "Unlimited members",
+                storage: "1 TB", team: "Unlimited members",
                 features: ["Everything in Professional", "Custom domain", "Video URL embeds", "Testimonials manager", "CSV data export", "Dedicated onboarding"],
                 cta: "Get started", highlight: false, note: null,
               },
@@ -427,17 +426,17 @@ export default function CloudLandingPage() {
           <h2 className="mb-4 text-3xl font-light text-white md:text-4xl">
             Start documenting your work today.
           </h2>
-          <p className="mb-10 text-base text-white/50">Free to get started. No credit card required.</p>
+          <p className="mb-10 text-base text-white/50">Join contractors across Africa who are building their business archive on Leadstaq Cloud.</p>
           <Link
             href="/cloud/signup"
             className="inline-flex items-center gap-2 rounded-xl bg-[#D4FF4F] px-10 py-4 text-base font-semibold text-black hover:bg-[#c4ef3f] transition-colors"
           >
-            Create your free account
+            Create your account
             <ArrowRight className="h-4 w-4" />
           </Link>
 
           <div className="mt-10 flex flex-wrap justify-center gap-x-8 gap-y-3 text-sm text-white/30">
-            {["No credit card required", "Free to start", "Cancel anytime"].map((t) => (
+            {["No hidden fees", "Cancel any time", "Setup in under 5 minutes"].map((t) => (
               <span key={t} className="flex items-center gap-1.5">
                 <Check className="h-3.5 w-3.5 text-[#D4FF4F]" />
                 {t}
