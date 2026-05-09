@@ -2,9 +2,13 @@
 
 import { useRouter } from "next/navigation";
 import { signOut, useSession } from "next-auth/react";
+import {
+  UserCircle, CreditCard, Users, BarChart2,
+  HelpCircle, MessageCircle, ChevronRight, LogOut,
+} from "lucide-react";
 
 type MenuItem = {
-  icon: string;
+  icon: React.ElementType;
   label: string;
   description: string;
   href: string;
@@ -21,13 +25,13 @@ const menuSections: MenuSection[] = [
     label: "Account",
     items: [
       {
-        icon: "ti-user-circle",
+        icon: UserCircle,
         label: "Profile & Settings",
         description: "Name, password, logo, business info",
         href: "/cloud/dashboard/settings",
       },
       {
-        icon: "ti-credit-card",
+        icon: CreditCard,
         label: "Billing & Plan",
         description: "Current plan, upgrade, payment history",
         href: "/cloud/dashboard/billing",
@@ -38,13 +42,13 @@ const menuSections: MenuSection[] = [
     label: "Business",
     items: [
       {
-        icon: "ti-users",
+        icon: Users,
         label: "Team",
         description: "Invite and manage your team members",
         href: "/cloud/dashboard/team",
       },
       {
-        icon: "ti-chart-bar",
+        icon: BarChart2,
         label: "Analytics",
         description: "Project views, storage usage, performance",
         href: "/cloud/dashboard/analytics",
@@ -55,13 +59,13 @@ const menuSections: MenuSection[] = [
     label: "Support",
     items: [
       {
-        icon: "ti-help-circle",
+        icon: HelpCircle,
         label: "Help & FAQ",
         description: "How to use Leadstaq Cloud",
         href: "/cloud/help",
       },
       {
-        icon: "ti-brand-whatsapp",
+        icon: MessageCircle,
         label: "Contact support",
         description: "Chat with us on WhatsApp",
         href: "https://wa.me/27000000000",
@@ -116,7 +120,7 @@ export default function MorePage() {
             onClick={() => router.push("/cloud/dashboard/settings")}
             style={{ width: 32, height: 32, borderRadius: "50%", background: "rgba(255,255,255,0.08)", border: "none", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}
           >
-            <i className="ti ti-chevron-right" style={{ fontSize: 14, color: "rgba(255,255,255,0.5)" }} />
+            <ChevronRight size={14} color="rgba(255,255,255,0.5)" />
           </button>
         </div>
       </div>
@@ -141,7 +145,7 @@ export default function MorePage() {
                 style={{ width: "100%", display: "flex", alignItems: "center", gap: 14, padding: "14px 16px", background: "none", border: "none", borderBottom: index < section.items.length - 1 ? "0.5px solid rgba(28,20,16,0.06)" : "none", cursor: "pointer", textAlign: "left" }}
               >
                 <div style={{ width: 40, height: 40, borderRadius: 12, background: "#F7F4EF", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
-                  <i className={`ti ${item.icon}`} style={{ fontSize: 18, color: "#1C1410" }} />
+                  <item.icon size={18} color="#1C1410" strokeWidth={1.8} />
                 </div>
                 <div style={{ flex: 1, minWidth: 0 }}>
                   <p style={{ fontFamily: F, fontSize: 14, fontWeight: 600, color: "#1C1410", margin: "0 0 2px", lineHeight: 1.2 }}>
@@ -151,7 +155,7 @@ export default function MorePage() {
                     {item.description}
                   </p>
                 </div>
-                <i className="ti ti-chevron-right" style={{ fontSize: 14, color: "#B4A898", flexShrink: 0 }} />
+                <ChevronRight size={14} color="#B4A898" style={{ flexShrink: 0 }} />
               </button>
             ))}
           </div>
@@ -164,7 +168,7 @@ export default function MorePage() {
           onClick={() => void signOut({ callbackUrl: "/cloud/login" })}
           style={{ width: "100%", height: 52, background: "#FFFFFF", border: "0.5px solid rgba(232,96,44,0.25)", borderRadius: 16, display: "flex", alignItems: "center", justifyContent: "center", gap: 8, cursor: "pointer" }}
         >
-          <i className="ti ti-logout" style={{ fontSize: 16, color: "#E8602C" }} />
+          <LogOut size={16} color="#E8602C" />
           <span style={{ fontFamily: F, fontSize: 14, fontWeight: 700, color: "#E8602C" }}>
             Sign out
           </span>

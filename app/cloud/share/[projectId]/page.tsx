@@ -111,18 +111,36 @@ export default async function CloudSharePage({ params }: { params: { projectId: 
         fontFamily: "var(--fw-font-body), system-ui, sans-serif",
       }}
     >
+      <style>{`
+        .sp-nav { padding: 0 24px; }
+        .sp-nav-lc { display: inline-flex; }
+        .sp-meta { padding: 14px 24px; }
+        .sp-desc-inner { padding: 28px 24px 0; }
+        .sp-gallery { padding: 28px 20px; }
+        .sp-cta { padding: 56px 24px; }
+        .sp-footer { padding: 16px 24px; }
+        @media (max-width: 600px) {
+          .sp-nav { padding: 0 16px; }
+          .sp-nav-lc { display: none; }
+          .sp-meta { padding: 12px 16px; flex-wrap: wrap; gap: 8px !important; }
+          .sp-desc-inner { padding: 20px 16px 0; max-width: 100% !important; }
+          .sp-gallery { padding: 20px 16px; }
+          .sp-cta { padding: 40px 20px; }
+          .sp-footer { padding: 14px 16px; }
+        }
+      `}</style>
       <ViewRecorder projectId={project.id as string} />
 
       {/* ── Section 1: Navbar ── */}
       <nav
+        className="sp-nav"
         style={{
-          height: 60,
+          height: 56,
           background: "#FFFFFF",
           borderBottom: "0.5px solid rgba(28,20,16,0.08)",
           display: "flex",
           alignItems: "center",
           justifyContent: "space-between",
-          padding: "0 24px",
           position: "sticky",
           top: 0,
           zIndex: 50,
@@ -155,9 +173,10 @@ export default async function CloudSharePage({ params }: { params: { projectId: 
         </div>
 
         {/* Right — brand link + CTA */}
-        <div style={{ display: "flex", alignItems: "center", gap: 14 }}>
+        <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
           <Link
             href="/cloud"
+            className="sp-nav-lc"
             style={{
               fontFamily: "var(--fw-font-body), system-ui, sans-serif",
               fontSize: 11, color: "#8C7B6B", textDecoration: "none",
@@ -221,9 +240,9 @@ export default async function CloudSharePage({ params }: { params: { projectId: 
 
       {/* ── Section 3: Metadata row ── */}
       <div
+        className="sp-meta"
         style={{
           background: "#FFFFFF",
-          padding: "18px 28px",
           borderBottom: "0.5px solid rgba(28,20,16,0.06)",
           display: "flex", alignItems: "center", gap: 12, flexWrap: "wrap",
         }}
@@ -280,8 +299,8 @@ export default async function CloudSharePage({ params }: { params: { projectId: 
 
       {/* ── Section 4: Description (conditional) ── */}
       {showDescription && (
-        <div style={{ background: "#FFFFFF", paddingBottom: 32 }}>
-          <div style={{ maxWidth: 720, margin: "0 auto", padding: "32px 28px 0" }}>
+        <div style={{ background: "#FFFFFF", paddingBottom: 28 }}>
+          <div className="sp-desc-inner" style={{ maxWidth: 720, margin: "0 auto" }}>
             <p
               style={{
                 fontFamily: "var(--fw-font-body), system-ui, sans-serif",
@@ -296,7 +315,7 @@ export default async function CloudSharePage({ params }: { params: { projectId: 
 
       {/* ── Section 5: Photo gallery ── */}
       {media.length > 0 && (
-        <div style={{ background: "#F7F4EF", padding: "32px 24px" }}>
+        <div className="sp-gallery" style={{ background: "#F7F4EF" }}>
           <p
             style={{
               fontFamily: "var(--fw-font-body), system-ui, sans-serif",
@@ -315,7 +334,8 @@ export default async function CloudSharePage({ params }: { params: { projectId: 
       {/* ── Section 6: CTA ── */}
       <div
         id="cta"
-        style={{ background: "#1C1410", padding: "56px 28px", textAlign: "center" }}
+        className="sp-cta"
+        style={{ background: "#1C1410", textAlign: "center" }}
       >
         <div
           style={{
@@ -376,10 +396,10 @@ export default async function CloudSharePage({ params }: { params: { projectId: 
 
       {/* ── Section 7: Footer ── */}
       <div
+        className="sp-footer"
         style={{
           background: "#1C1410",
           borderTop: "0.5px solid rgba(255,255,255,0.06)",
-          padding: "16px 28px",
           display: "flex", alignItems: "center", justifyContent: "center",
         }}
       >

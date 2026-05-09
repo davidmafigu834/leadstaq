@@ -3,8 +3,11 @@
 import { useCallback, useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
-import { ArrowLeft, Eye, TrendingUp, BarChart2, Loader2 } from "lucide-react";
+import { ArrowLeft, Eye, TrendingUp, BarChart2 } from "lucide-react";
 import Link from "next/link";
+
+const F = "var(--fw-font-body), system-ui, sans-serif";
+const S = "var(--fw-font-display), Georgia, serif";
 
 type DailyView = { date: string; views: number };
 type ViewStats = {
@@ -19,26 +22,32 @@ function BarChart({ data }: { data: DailyView[] }) {
   const recent = data.slice(-30);
 
   return (
-    <div className="flex h-[120px] items-end gap-[2px] sm:gap-1">
+    <div style={{ display: "flex", height: 120, alignItems: "flex-end", gap: 2 }}>
       {recent.map((d, i) => {
         const pct = (d.views / max) * 100;
         const isToday = i === recent.length - 1;
         return (
           <div
             key={d.date}
-            className="group relative flex flex-1 flex-col items-center justify-end"
+            title={d.views > 0 ? `${d.views} view${d.views !== 1 ? "s" : ""}` : undefined}
+            style={{
+              flex: 1,
+              display: "flex",
+              flexDirection: "column",
+              alignItems: "center",
+              justifyContent: "flex-end",
+              height: "100%",
+            }}
           >
             <div
-              className={`w-full rounded-t-sm transition-all ${
-                isToday ? "bg-[#D4FF4F]" : d.views > 0 ? "bg-white/30" : "bg-white/[0.05]"
-              }`}
-              style={{ height: `${Math.max(pct, d.views > 0 ? 4 : 2)}%` }}
+              style={{
+                width: "100%",
+                borderRadius: "2px 2px 0 0",
+                height: `${Math.max(pct, d.views > 0 ? 4 : 2)}%`,
+                background: isToday ? "#1C1410" : d.views > 0 ? "rgba(28,20,16,0.25)" : "rgba(28,20,16,0.06)",
+                transition: "height 0.3s ease",
+              }}
             />
-            {d.views > 0 && (
-              <div className="pointer-events-none absolute bottom-full left-1/2 mb-1 -translate-x-1/2 rounded bg-[#222] px-1.5 py-0.5 text-[11px] text-white opacity-0 group-hover:opacity-100 whitespace-nowrap">
-                {d.views}
-              </div>
-            )}
           </div>
         );
       })}
@@ -89,97 +98,90 @@ export default function ProjectAnalyticsPage() {
     : null;
 
   return (
-    <div className="px-6 py-6 lg:px-8">
-      <div className="mx-auto max-w-2xl">
-        <div className="mb-6 flex items-center gap-3">
-          <button
-            onClick={() => router.back()}
-            className="rounded-lg p-1.5 text-white/40 hover:bg-white/10 hover:text-white transition-colors"
-          >
-            <ArrowLeft className="h-4 w-4" />
-          </button>
-          <div>
-            <h1 className="text-[15px] font-semibold text-white">
-              Analytics{projectTitle ? ` — ${projectTitle}` : ""}
-            </h1>
-            <p className="text-[12px] text-white/40">Public page view statistics</p>
-          </div>
+    <div style={{ minHeight: "100vh", background: "#F5F5F0", fontFamily: F, paddingBottom: 100 }}>
+
+      {/* Back + title */}
+      <div style={{ padding: "16px 20px 0", display: "flex", alignItems: "center", gap: 12 }}>
+        <button
+          onClick={() => router.back()}
+          style={{ width: 36, height: 36, borderRadius: 10, background: "#FFFFFF", border: "0.5px solid rgba(28,20,16,0.08)", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0, cursor: "pointer" }}
+        >
+          <ArrowLeft size={16} color="#1C1410" />
+        </button>
+        <div>
+          <p style={{ fontFamily: F, fontSize: 10, fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase", color: "#8C7B6B", margin: "0 0 2px" }}>Analytics</p>
+          {projectTitle && <p style={{ fontFamily: S, fontSize: 15, color: "#1C1410", margin: 0, lineHeight: 1.2 }}>{projectTitle}</p>}
         </div>
-
-        {loading ? (
-          <div className="flex justify-center py-20">
-            <Loader2 className="h-5 w-5 animate-spin text-white/30" />
-          </div>
-        ) : stats ? (
-          <div className="space-y-6">
-            <div className="grid grid-cols-2 gap-4 sm:grid-cols-3">
-              <div className="rounded-2xl border border-white/[0.08] bg-[#111] p-5">
-                <div className="mb-2 flex items-center gap-1.5 text-[12px] text-white/40">
-                  <Eye className="h-3.5 w-3.5" />
-                  Total views
-                </div>
-                <p className="text-[28px] font-semibold text-white">{stats.total.toLocaleString()}</p>
-              </div>
-              <div className="rounded-2xl border border-white/[0.08] bg-[#111] p-5">
-                <div className="mb-2 flex items-center gap-1.5 text-[12px] text-white/40">
-                  <TrendingUp className="h-3.5 w-3.5" />
-                  Last 30 days
-                </div>
-                <p className="text-[28px] font-semibold text-white">{stats.last_30_days.toLocaleString()}</p>
-              </div>
-              <div className="rounded-2xl border border-white/[0.08] bg-[#111] p-5 col-span-2 sm:col-span-1">
-                <div className="mb-2 flex items-center gap-1.5 text-[12px] text-white/40">
-                  <BarChart2 className="h-3.5 w-3.5" />
-                  Avg / day
-                </div>
-                <p className="text-[28px] font-semibold text-white">
-                  {(stats.last_30_days / 30).toFixed(1)}
-                </p>
-              </div>
-            </div>
-
-            <div className="rounded-2xl border border-white/[0.08] bg-[#111] p-5">
-              <p className="mb-4 text-[13px] font-medium text-white/60">Daily views — last 30 days</p>
-              {stats.daily.every((d) => d.views === 0) ? (
-                <div className="flex h-[120px] flex-col items-center justify-center gap-2 text-white/20">
-                  <BarChart2 className="h-6 w-6" strokeWidth={1.5} />
-                  <p className="text-[13px]">No views recorded yet</p>
-                </div>
-              ) : (
-                <>
-                  <BarChart data={stats.daily} />
-                  {xLabels && (
-                    <div className="mt-2 flex justify-between text-[11px] text-white/25">
-                      <span>{xLabels.first}</span>
-                      <span>{xLabels.last}</span>
-                    </div>
-                  )}
-                </>
-              )}
-            </div>
-
-            <div className="rounded-2xl border border-white/[0.08] bg-[#111] p-5">
-              <p className="mb-4 text-[13px] font-medium text-white/60">Share link</p>
-              <div className="flex items-center gap-3 rounded-xl bg-white/5 px-4 py-3">
-                <p className="flex-1 truncate text-[13px] text-white/50 font-mono">
-                  leadstaq.tech/cloud/share/{params.projectId}
-                </p>
-                <Link
-                  href={`/cloud/share/${params.projectId}`}
-                  target="_blank"
-                  className="text-[12px] font-medium text-[#D4FF4F] hover:underline shrink-0"
-                >
-                  Open →
-                </Link>
-              </div>
-            </div>
-          </div>
-        ) : (
-          <p className="text-[13px] text-white/40 text-center py-20">
-            Could not load analytics. Ensure this project exists.
-          </p>
-        )}
       </div>
+
+      {loading ? (
+        <div style={{ display: "flex", justifyContent: "center", padding: "80px 0" }}>
+          <div className="h-6 w-6 animate-spin rounded-full border-2 border-black/10 border-t-[#1C1410]" />
+        </div>
+      ) : stats ? (
+        <div style={{ padding: "16px 20px 0", display: "flex", flexDirection: "column", gap: 12 }}>
+
+          {/* Stat cards */}
+          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 10 }}>
+            {([
+              { label: "Total views",  value: stats.total.toLocaleString(),           Icon: Eye },
+              { label: "Last 30 days", value: stats.last_30_days.toLocaleString(),    Icon: TrendingUp },
+              { label: "Avg / day",    value: (stats.last_30_days / 30).toFixed(1),   Icon: BarChart2 },
+            ] as { label: string; value: string; Icon: React.ElementType }[]).map((s) => (
+              <div key={s.label} style={{ background: "#FFFFFF", borderRadius: 18, border: "0.5px solid rgba(28,20,16,0.08)", padding: "14px 12px" }}>
+                <div style={{ width: 30, height: 30, borderRadius: 8, background: "#F7F4EF", display: "flex", alignItems: "center", justifyContent: "center", marginBottom: 10 }}>
+                  <s.Icon size={14} color="#4A3828" strokeWidth={1.8} />
+                </div>
+                <p style={{ fontFamily: S, fontSize: 22, color: "#1C1410", margin: "0 0 2px", lineHeight: 1 }}>{s.value}</p>
+                <p style={{ fontFamily: F, fontSize: 10, color: "#8C7B6B", margin: 0 }}>{s.label}</p>
+              </div>
+            ))}
+          </div>
+
+          {/* Daily chart */}
+          <div style={{ background: "#FFFFFF", borderRadius: 20, border: "0.5px solid rgba(28,20,16,0.08)", padding: 20 }}>
+            <p style={{ fontFamily: F, fontSize: 10, fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase", color: "#8C7B6B", margin: "0 0 16px" }}>Daily views — last 30 days</p>
+            {stats.daily.every((d) => d.views === 0) ? (
+              <div style={{ height: 120, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 8 }}>
+                <BarChart2 size={24} color="#B4A898" strokeWidth={1.5} />
+                <p style={{ fontFamily: F, fontSize: 13, color: "#8C7B6B", margin: 0 }}>No views recorded yet</p>
+              </div>
+            ) : (
+              <>
+                <BarChart data={stats.daily} />
+                {xLabels && (
+                  <div style={{ marginTop: 8, display: "flex", justifyContent: "space-between", fontFamily: F, fontSize: 11, color: "#B4A898" }}>
+                    <span>{xLabels.first}</span>
+                    <span>{xLabels.last}</span>
+                  </div>
+                )}
+              </>
+            )}
+          </div>
+
+          {/* Share link */}
+          <div style={{ background: "#FFFFFF", borderRadius: 20, border: "0.5px solid rgba(28,20,16,0.08)", padding: 20 }}>
+            <p style={{ fontFamily: F, fontSize: 10, fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase", color: "#8C7B6B", margin: "0 0 12px" }}>Share link</p>
+            <div style={{ display: "flex", alignItems: "center", gap: 12, background: "#F7F4EF", borderRadius: 12, padding: "12px 16px" }}>
+              <p style={{ flex: 1, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", fontFamily: F, fontSize: 12, color: "#4A3828", margin: 0 }}>
+                leadstaq.tech/cloud/share/{params.projectId}
+              </p>
+              <Link
+                href={`/cloud/share/${params.projectId}`}
+                target="_blank"
+                style={{ fontFamily: F, fontSize: 12, fontWeight: 700, color: "#1C1410", textDecoration: "none", flexShrink: 0 }}
+              >
+                Open →
+              </Link>
+            </div>
+          </div>
+
+        </div>
+      ) : (
+        <p style={{ fontFamily: F, fontSize: 13, color: "#8C7B6B", textAlign: "center", padding: "80px 20px" }}>
+          Could not load analytics. Ensure this project exists.
+        </p>
+      )}
     </div>
   );
 }
