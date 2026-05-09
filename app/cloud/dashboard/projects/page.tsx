@@ -165,9 +165,10 @@ export default function CloudProjectsPage() {
               <button
                 key={cat}
                 onClick={() => setActiveCategory(activeCategory === cat ? null : cat)}
-                className={`flex-shrink-0 rounded-full px-3.5 py-1.5 text-[12px] font-semibold transition-colors font-cloud-body border ${
-                  isAct ? `${s.gradient} ${s.border} ${s.text}` : "border-black/[0.08] bg-white text-[#666660] hover:border-black/[0.15]"
+                className={`flex-shrink-0 rounded-full px-3.5 py-1.5 text-[12px] font-semibold transition-colors font-cloud-body ${
+                  isAct ? '' : 'border border-black/[0.08] bg-white text-[#666660] hover:border-black/[0.15]'
                 }`}
+                style={isAct ? { background: '#1C1410', color: '#FFFFFF', border: 'none' } : {}}
               >
                 {cat}
               </button>
@@ -283,9 +284,9 @@ export default function CloudProjectsPage() {
                     </div>
 
                     {/* Info */}
-                    <div className="px-3.5 py-3">
-                      <p className="font-cloud-display text-[15px] leading-tight truncate" style={{ color: "var(--fw-text-primary)" }}>{p.title}</p>
-                      <div className="mt-1 flex items-center gap-2 text-[11px] font-cloud-body" style={{ color: "var(--fw-text-tertiary)" }}>
+                    <div style={{ padding: '10px 12px 18px' }}>
+                      <p className="font-cloud-display text-[15px] leading-tight truncate" style={{ color: "var(--fw-text-primary)", margin: '0 0 6px' }}>{p.title}</p>
+                      <div className="mt-1 flex items-center gap-2 text-[11px] font-cloud-body" style={{ color: "#4A3828" }}>
                         {p.location && <span className="truncate">{p.location}</span>}
                         <span className="ml-auto flex items-center gap-1">
                           {p.project_media?.length ?? 0} photos

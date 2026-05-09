@@ -289,7 +289,7 @@ export default function CloudDashboardLayout({ children }: { children: React.Rea
               {isCenter ? (
                 <div
                   className="flex items-center justify-center rounded-full bg-[#D4FF4F]"
-                  style={{ width: 52, height: 52, marginTop: -22, boxShadow: '0 6px 20px rgba(212,255,79,0.45)' }}
+                  style={{ width: 52, height: 52, marginTop: -22, boxShadow: '0 4px 16px rgba(212,255,79,0.28)' }}
                 >
                   <Icon className="h-[22px] w-[22px] text-[#111111]" strokeWidth={2} />
                 </div>

@@ -203,8 +203,8 @@ export default function CloudUploadPage() {
         {allDone ? (
           /* ── All done state ── */
           <div className="flex min-h-[50vh] flex-col items-center justify-center text-center">
-            <div className="mb-5 flex h-16 w-16 items-center justify-center rounded-full bg-[#D4FF4F]" style={{ boxShadow: '0 8px 24px rgba(212,255,79,0.5)' }}>
-              <Check className="h-8 w-8 text-black" />
+            <div className="mb-5 flex h-16 w-16 items-center justify-center rounded-full bg-[#1C1410]" style={{ boxShadow: '0 8px 24px rgba(28,20,16,0.25)' }}>
+              <Check className="h-8 w-8 text-[#D4FF4F]" />
             </div>
             <h2 className="mb-2 font-cloud-display text-[26px] text-[#0a0a0a]">Upload complete!</h2>
             <p className="mb-8 text-[14px] text-[#666660] font-cloud-body">
@@ -220,7 +220,7 @@ export default function CloudUploadPage() {
               </button>
               <button
                 onClick={() => router.push(`/cloud/dashboard/projects/${selectedProject!.id}`)}
-                className="flex w-full items-center justify-center gap-2 rounded-xl bg-[#D4FF4F] py-3 text-[14px] font-bold text-black hover:bg-[#C8F244] transition-colors font-cloud-body"
+                className="flex w-full items-center justify-center gap-2 rounded-xl bg-[#1C1410] py-3 text-[14px] font-bold text-[#D4FF4F] hover:bg-[#2E2218] transition-colors font-cloud-body"
               >
                 View project <ArrowRight className="h-4 w-4" />
               </button>
@@ -311,7 +311,7 @@ export default function CloudUploadPage() {
                 <button
                   onClick={() => void handleCreateProject()}
                   disabled={!newTitle.trim() || creatingProject}
-                  className="flex w-full items-center justify-center gap-2 rounded-xl bg-[#D4FF4F] py-3 text-[13px] font-bold text-black disabled:opacity-60 hover:bg-[#C8F244] transition-colors font-cloud-body"
+                  className="flex w-full items-center justify-center gap-2 rounded-xl bg-[#1C1410] py-3 text-[13px] font-bold text-[#D4FF4F] disabled:opacity-60 hover:bg-[#2E2218] transition-colors font-cloud-body"
                 >
                   {creatingProject ? <Loader2 className="h-4 w-4 animate-spin" /> : null}
                   {creatingProject ? "Creating…" : "Create & continue →"}
@@ -348,8 +348,8 @@ export default function CloudUploadPage() {
 
             {/* Big upload zone */}
             <label className="flex flex-col items-center justify-center gap-4 rounded-[20px] border-2 border-dashed border-[#60E8A0]/40 bg-gradient-to-br from-[#F0FFF8] via-[#E0FFF0] to-[#C8FFE0] py-16 cursor-pointer hover:border-[#60E8A0]/70 transition-colors">
-              <div className="flex h-16 w-16 items-center justify-center rounded-full bg-white" style={{ boxShadow: 'var(--cloud-shadow-elevated)' }}>
-                <Camera className="h-8 w-8 text-[#00875A]" strokeWidth={1.5} />
+              <div className="flex h-16 w-16 items-center justify-center rounded-full bg-[#D4FF4F]" style={{ boxShadow: 'var(--cloud-shadow-elevated)' }}>
+                <Camera className="h-8 w-8 text-[#1C1410]" strokeWidth={1.5} />
               </div>
               <div className="text-center">
                 <p className="font-cloud-display text-[20px] text-[#004D30]">Select photos</p>
@@ -398,7 +398,7 @@ export default function CloudUploadPage() {
               {uploading && (
                 <div className="h-1.5 w-full rounded-full bg-black/10 overflow-hidden">
                   <div
-                    className="h-full rounded-full bg-[#D4FF4F] transition-all"
+                    className="h-full rounded-full bg-[#1C1410] transition-all"
                     style={{ width: `${queue.length ? (doneFiles.length / queue.length) * 100 : 0}%` }}
                   />
                 </div>
@@ -413,7 +413,7 @@ export default function CloudUploadPage() {
                   <img src={f.previewUrl} alt="" className="h-full w-full object-cover" />
                   {f.status === "uploading" && (
                     <div className="absolute inset-x-0 bottom-0 h-1 bg-black/10">
-                      <div className="h-full bg-[#D4FF4F] transition-all duration-200" style={{ width: `${f.progress}%` }} />
+                      <div className="h-full bg-[#1C1410] transition-all duration-200" style={{ width: `${f.progress}%` }} />
                     </div>
                   )}
                   {f.status === "done" && (
@@ -434,7 +434,7 @@ export default function CloudUploadPage() {
               <button
                 onClick={() => void uploadAll()}
                 disabled={pendingCount === 0}
-                className="flex w-full items-center justify-center gap-2 rounded-xl bg-[#D4FF4F] py-4 text-[14px] font-bold text-black disabled:opacity-50 hover:bg-[#C8F244] transition-colors font-cloud-body"
+                className="flex w-full items-center justify-center gap-2 rounded-xl bg-[#1C1410] py-4 text-[14px] font-bold text-[#D4FF4F] disabled:opacity-50 hover:bg-[#2E2218] transition-colors font-cloud-body"
               >
                 Upload {queue.length} photo{queue.length !== 1 ? "s" : ""}
               </button>

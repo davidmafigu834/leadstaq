@@ -52,13 +52,6 @@ function getGreeting(): string {
   return "Good evening";
 }
 
-function formatTodayDate(): string {
-  return new Date().toLocaleDateString("en-GB", {
-    weekday: "long",
-    day: "numeric",
-    month: "long",
-  });
-}
 
 export default function CloudDashboardHome() {
   const { data: session, status } = useSession();
@@ -145,8 +138,10 @@ export default function CloudDashboardHome() {
         <h1 style={{ fontFamily: S, fontSize: "clamp(24px, 5vw, 32px)", color: "#1C1410", margin: "0 0 4px", lineHeight: 1.1, letterSpacing: "-0.01em" }}>
           {clientName || session?.user?.name || ""}
         </h1>
-        <p style={{ fontFamily: F, fontSize: 13, color: "#8C7B6B", margin: 0 }}>
-          {formatTodayDate()} · {projectCount} project{projectCount !== 1 ? "s" : ""} · {photoCount} photos
+        <p style={{ fontFamily: F, fontSize: 12, color: "#8C7B6B", margin: 0, lineHeight: 1 }}>
+          {projectCount > 0
+            ? `${projectCount} project${projectCount !== 1 ? 's' : ''} · ${photoCount} photos stored`
+            : 'No projects yet · Upload your first job'}
         </p>
       </div>
 
@@ -163,19 +158,19 @@ export default function CloudDashboardHome() {
           <div style={{ position: "relative", width: 64, height: 64, flexShrink: 0 }}>
             <svg width="64" height="64" viewBox="0 0 64 64">
               <circle cx="32" cy="32" r="26" fill="none" stroke="rgba(255,255,255,0.08)" strokeWidth="6" />
-              <circle cx="32" cy="32" r="26" fill="none" stroke="#D4FF4F" strokeWidth="6" strokeLinecap="round"
+              <circle cx="32" cy="32" r="26" fill="none" stroke="rgba(255,255,255,0.6)" strokeWidth="6" strokeLinecap="round"
                 strokeDasharray={`${2 * Math.PI * 26}`}
                 strokeDashoffset={`${2 * Math.PI * 26 * (1 - Math.min(percentUsed / 100, 1))}`}
                 transform="rotate(-90 32 32)"
               />
             </svg>
             <div style={{ position: "absolute", inset: 0, display: "flex", alignItems: "center", justifyContent: "center" }}>
-              <span style={{ fontSize: 11, fontWeight: 700, color: "#D4FF4F", fontFamily: F }}>{percentUsed < 1 ? "<1" : Math.round(percentUsed)}%</span>
+              <span style={{ fontSize: 11, fontWeight: 700, color: "#FFFFFF", fontFamily: F }}>{percentUsed < 1 ? "<1" : Math.round(percentUsed)}%</span>
             </div>
           </div>
         </div>
         <div style={{ height: 4, background: "rgba(255,255,255,0.08)", borderRadius: 2, marginBottom: 16 }}>
-          <div style={{ height: 4, background: "#D4FF4F", borderRadius: 2, width: `${Math.max(Math.min(percentUsed, 100), 0.5)}%` }} />
+          <div style={{ height: 4, background: "rgba(255,255,255,0.6)", borderRadius: 2, width: `${Math.max(Math.min(percentUsed, 100), 0.5)}%` }} />
         </div>
         <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr" }}>
           {([
@@ -219,7 +214,7 @@ export default function CloudDashboardHome() {
       <div style={{ padding: "12px 20px 8px", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
         <p style={{ fontSize: 10, fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase", color: "#8C7B6B", margin: 0, fontFamily: F }}>Recent projects</p>
         {projects.length > 0 && (
-          <button onClick={() => router.push("/cloud/dashboard/projects")} style={{ fontSize: 11, color: "#8C7B6B", background: "none", border: "none", cursor: "pointer", padding: 0, fontFamily: F, fontWeight: 600 }}>View all →</button>
+          <button onClick={() => router.push("/cloud/dashboard/projects")} style={{ fontSize: 11, color: "#4A3828", background: "none", border: "none", cursor: "pointer", padding: 0, fontFamily: F, fontWeight: 600 }}>View all →</button>
         )}
       </div>
 
@@ -240,7 +235,7 @@ export default function CloudDashboardHome() {
       ) : (
         <div
           className="pills-scroll"
-          style={{ overflowX: "auto", WebkitOverflowScrolling: "touch", scrollbarWidth: "none", padding: "0 20px 12px", width: "100%", boxSizing: "border-box" } as React.CSSProperties}
+          style={{ overflowX: "auto", WebkitOverflowScrolling: "touch", scrollbarWidth: "none", padding: "0 20px 12px", paddingRight: 48, scrollSnapType: "x mandatory", width: "100%", boxSizing: "border-box" } as React.CSSProperties}
         >
           <div style={{ display: "flex", gap: 10, width: "max-content" }}>
           {projects.slice(0, 5).map((p) => {
@@ -251,7 +246,7 @@ export default function CloudDashboardHome() {
               <div
                 key={p.id}
                 onClick={() => router.push(`/cloud/dashboard/projects/${p.id}`)}
-                style={{ minWidth: 148, maxWidth: 148, borderRadius: 20, background: "#FFFFFF", border: "0.5px solid rgba(28,20,16,0.08)", overflow: "hidden", flexShrink: 0, cursor: "pointer" }}
+                style={{ minWidth: 152, maxWidth: 152, borderRadius: 20, background: "#FFFFFF", border: "0.5px solid rgba(28,20,16,0.08)", overflow: "hidden", flexShrink: 0, cursor: "pointer", scrollSnapAlign: "start" }}
               >
                 {/* Image area */}
                 <div style={{ height: 108, background: cat.sceneBg, position: "relative", overflow: "hidden" }}>
@@ -266,16 +261,16 @@ export default function CloudDashboardHome() {
                     {p.category || "Project"}
                   </span>
                   {/* Photo count badge — top right */}
-                  <span style={{ position: "absolute", top: 8, right: 8, background: "#D4FF4F", color: "#1C1410", fontSize: 8, fontWeight: 700, padding: "2px 6px", borderRadius: 20, fontFamily: F }}>
+                  <span style={{ position: "absolute", top: 8, right: 8, background: "#1C1410", color: "#FFFFFF", fontSize: 8, fontWeight: 700, padding: "2px 6px", borderRadius: 20, fontFamily: F }}>
                     {pCount}
                   </span>
                 </div>
                 {/* Info below */}
-                <div style={{ padding: "10px 12px 13px" }}>
-                  <p style={{ fontFamily: S, fontSize: 13, color: "#1C1410", lineHeight: 1.2, margin: "0 0 3px", display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical", overflow: "hidden" }}>{p.title}</p>
-                  <p style={{ fontSize: 9, color: "#8C7B6B", margin: "0 0 8px", fontFamily: F }}>In progress</p>
+                <div style={{ padding: "10px 12px 18px" }}>
+                  <p style={{ fontFamily: S, fontSize: 13, color: "#1C1410", lineHeight: 1.2, margin: "0 0 6px", display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical", overflow: "hidden" }}>{p.title}</p>
+                  <p style={{ fontSize: 9, color: "#4A3828", margin: "0 0 8px", fontFamily: F }}>In progress</p>
                   <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-                    <span style={{ fontSize: 9, fontWeight: 700, color: "#8C7B6B", fontFamily: F }}>{pCount} photos</span>
+                    <span style={{ fontSize: 9, fontWeight: 700, color: "#4A3828", fontFamily: F }}>{pCount} photos</span>
                     <div style={{ width: 22, height: 22, borderRadius: "50%", background: "#EDE9E3", display: "flex", alignItems: "center", justifyContent: "center" }}>
                       <ArrowRight size={11} color="#4A3828" strokeWidth={2} />
                     </div>
