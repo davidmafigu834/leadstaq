@@ -284,7 +284,7 @@ export default function CloudDashboardLayout({ children }: { children: React.Rea
             <Link
               key={href}
               href={href}
-              className="flex flex-1 flex-col items-center gap-[3px]"
+              className="flex flex-1 flex-col items-center gap-[3px] relative"
             >
               {isCenter ? (
                 <div
@@ -295,10 +295,13 @@ export default function CloudDashboardLayout({ children }: { children: React.Rea
                 </div>
               ) : (
                 <>
+                  {active && (
+                    <div style={{ width: 4, height: 4, borderRadius: '50%', background: '#D4FF4F', position: 'absolute', top: 6, left: '50%', transform: 'translateX(-50%)' }} />
+                  )}
                   <div className="relative flex items-center justify-center h-[22px] w-[22px]">
                     <Icon
                       className="h-[22px] w-[22px]"
-                      style={{ color: active ? '#111111' : '#C0C0BE' }}
+                      style={{ color: active ? '#1C1410' : '#B4A898' }}
                       strokeWidth={active ? 2.2 : 1.8}
                     />
                     {href === "/cloud/dashboard/notifications" && unreadCount > 0 && (
@@ -306,10 +309,7 @@ export default function CloudDashboardLayout({ children }: { children: React.Rea
                     )}
                   </div>
                   {label && (
-                    <span
-                      className="text-[12px] font-semibold"
-                      style={{ color: active ? '#111111' : '#C0C0BE' }}
-                    >
+                    <span style={{ fontSize: 9, fontWeight: active ? 700 : 500, color: active ? '#1C1410' : '#B4A898', fontFamily: 'var(--fw-font-body), system-ui, sans-serif' }}>
                       {label}
                     </span>
                   )}

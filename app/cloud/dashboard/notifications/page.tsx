@@ -129,7 +129,7 @@ export default function NotificationsPage() {
                     <span className={`text-[11px] font-semibold font-cloud-body ${n.read ? "text-[#999990]" : "text-[#7B5EA7]"}`}>
                       {TYPE_LABEL[n.type] ?? n.type}
                     </span>
-                    <span className={`flex-shrink-0 text-[11px] font-cloud-body ${n.read ? "text-[#CCCCBB]" : "text-[#7B5EA7]/70"}`}>{timeAgo(n.created_at)}</span>
+                    <span className="flex-shrink-0 text-[11px] font-cloud-body text-[#8C7B6B]">{timeAgo(n.created_at)}</span>
                   </div>
                   <p className={`mt-0.5 text-[13px] leading-snug font-cloud-body ${n.read ? "text-[#666660]" : "text-[#2D1B6B]"}`}>
                     {n.message}

@@ -158,7 +158,7 @@ export default function CloudDashboardHome() {
           <div>
             <p style={{ fontSize: 9, color: "rgba(255,255,255,0.4)", textTransform: "uppercase", letterSpacing: "0.1em", margin: "0 0 8px", fontFamily: F }}>Cloud storage</p>
             <p style={{ fontFamily: S, fontSize: 36, color: "#FFFFFF", margin: 0, lineHeight: 1 }}>{formatBytes(storageUsed)}</p>
-            <p style={{ fontSize: 11, color: "rgba(255,255,255,0.35)", margin: "6px 0 0", fontFamily: F }}>used of {formatBytes(storageLimit)}</p>
+            <p style={{ fontSize: 11, color: "rgba(255,255,255,0.55)", margin: "6px 0 0", fontFamily: F }}>used of {formatBytes(storageLimit)}</p>
           </div>
           <div style={{ position: "relative", width: 64, height: 64, flexShrink: 0 }}>
             <svg width="64" height="64" viewBox="0 0 64 64">
@@ -184,7 +184,7 @@ export default function CloudDashboardHome() {
             { label: "Plan",     value: stats?.plan ? stats.plan.charAt(0).toUpperCase() + stats.plan.slice(1) : "Starter", serif: false },
           ] as { label: string; value: string; serif: boolean }[]).map((stat, i) => (
             <div key={stat.label} style={{ borderRight: i < 2 ? "1px solid rgba(255,255,255,0.08)" : "none", paddingRight: i < 2 ? 12 : 0, paddingLeft: i > 0 ? 12 : 0 }}>
-              <p style={{ fontSize: 9, color: "rgba(255,255,255,0.35)", margin: "0 0 4px", textTransform: "uppercase", letterSpacing: "0.06em", fontFamily: F }}>{stat.label}</p>
+              <p style={{ fontSize: 9, color: "rgba(255,255,255,0.45)", margin: "0 0 4px", textTransform: "uppercase", letterSpacing: "0.06em", fontFamily: F }}>{stat.label}</p>
               <p style={{ fontFamily: stat.serif ? S : F, fontSize: stat.serif ? 22 : 13, margin: 0, lineHeight: 1, color: "#FFFFFF", fontWeight: stat.serif ? 400 : 600 }}>{stat.value}</p>
             </div>
           ))}
@@ -272,7 +272,7 @@ export default function CloudDashboardHome() {
                 </div>
                 {/* Info below */}
                 <div style={{ padding: "10px 12px 13px" }}>
-                  <p style={{ fontFamily: S, fontSize: 13, color: "#1C1410", lineHeight: 1.2, margin: "0 0 3px", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{p.title}</p>
+                  <p style={{ fontFamily: S, fontSize: 13, color: "#1C1410", lineHeight: 1.2, margin: "0 0 3px", display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical", overflow: "hidden" }}>{p.title}</p>
                   <p style={{ fontSize: 9, color: "#8C7B6B", margin: "0 0 8px", fontFamily: F }}>In progress</p>
                   <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
                     <span style={{ fontSize: 9, fontWeight: 700, color: "#8C7B6B", fontFamily: F }}>{pCount} photos</span>
@@ -347,7 +347,7 @@ export default function CloudDashboardHome() {
                 <div style={{ width: 6, height: 6, borderRadius: "50%", flexShrink: 0, marginTop: 5, background: i === 0 ? "var(--fw-lime)" : "var(--fw-text-muted)" }} />
                 <div style={{ flex: 1, minWidth: 0 }}>
                   <p style={{ fontSize: 10, fontWeight: 600, color: "#1C1410", margin: "0 0 1px", lineHeight: 1.3, fontFamily: F, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{item.message}</p>
-                  <p style={{ fontSize: 9, color: "#B4A898", margin: 0, fontFamily: F }}>{item.time}</p>
+                  <p style={{ fontSize: 9, color: "#8C7B6B", margin: 0, fontFamily: F }}>{item.time}</p>
                 </div>
               </div>
             )) : (

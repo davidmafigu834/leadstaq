@@ -391,6 +391,7 @@ export default function ProjectDetailPage() {
             ? "border-[#60E8A0]/60 bg-gradient-to-br from-[#E0FFF0] to-[#A8FFD0]"
             : "border-[#60E8A0]/30 bg-gradient-to-br from-[#F0FFF8] via-[#E0FFF0] to-[#C8FFE0]"
         }`}
+        style={{ minHeight: 100 }}
       >
         <input
           ref={fileInputRef}
@@ -400,12 +401,12 @@ export default function ProjectDetailPage() {
           className="hidden"
           onChange={(e) => { addFiles(Array.from(e.target.files ?? [])); e.target.value = ""; }}
         />
-        <div className="flex flex-col items-center justify-center py-7 px-5">
-          <div className="mb-2 flex h-12 w-12 items-center justify-center rounded-full bg-white/70" style={{ boxShadow: 'var(--cloud-shadow-card)' }}>
-            <Camera className={`h-6 w-6 ${draggingOver ? "text-[#00875A]" : "text-[#00875A]"}`} strokeWidth={1.8} />
+        <div className="flex flex-col items-center justify-center py-3 px-5">
+          <div className="mb-2 flex h-9 w-9 items-center justify-center rounded-full bg-white/70" style={{ boxShadow: 'var(--cloud-shadow-card)' }}>
+            <Camera className={`h-5 w-5 ${draggingOver ? "text-[#00875A]" : "text-[#00875A]"}`} strokeWidth={1.8} />
           </div>
-          <p className="font-cloud-display text-[16px] text-[#004D30]">Add photos</p>
-          <p className="mt-0.5 text-[12px] text-[#00875A] font-cloud-body">
+          <p className="font-cloud-display" style={{ fontSize: 15, color: '#1C1410', margin: 0 }}>Add photos</p>
+          <p className="mt-0.5 font-cloud-body" style={{ fontSize: 11, color: '#8C7B6B', margin: 0 }}>
             {draggingOver ? "Drop to add" : "Tap to select · or drag & drop"}
           </p>
         </div>

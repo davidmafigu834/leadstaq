@@ -127,7 +127,8 @@ export default function CloudProjectsPage() {
           <select
             value={sortKey}
             onChange={(e) => setSortKey(e.target.value as SortKey)}
-            className="rounded-xl border border-black/[0.08] bg-white px-3 py-2.5 text-[13px] text-[#666660] outline-none font-cloud-body"
+            className="rounded-xl border border-black/[0.08] bg-white text-[13px] text-[#666660] outline-none font-cloud-body"
+            style={{ height: 44, padding: '0 12px', minWidth: 120 }}
           >
             <option value="newest">Newest first</option>
             <option value="oldest">Oldest first</option>
