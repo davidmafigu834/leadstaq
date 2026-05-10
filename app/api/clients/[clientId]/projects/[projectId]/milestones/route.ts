@@ -24,6 +24,9 @@ export async function GET(
       milestone_date,
       display_order,
       is_completed,
+      stat_number,
+      stat_label,
+      phase,
       created_at,
       project_media (
         id,
@@ -58,8 +61,11 @@ export async function POST(
     description?: string;
     milestone_date?: string;
     display_order?: number;
+    stat_number?: string | null;
+    stat_label?: string | null;
+    phase?: string | null;
   };
-  const { title, description, milestone_date, display_order } = body;
+  const { title, description, milestone_date, display_order, stat_number, stat_label, phase } = body;
 
   if (!title || !milestone_date) {
     return NextResponse.json({ error: "Title and date are required" }, { status: 400 });
@@ -76,6 +82,9 @@ export async function POST(
       milestone_date,
       display_order: display_order ?? 0,
       is_completed: false,
+      stat_number: stat_number ?? null,
+      stat_label: stat_label ?? null,
+      phase: phase ?? null,
     })
     .select()
     .single();

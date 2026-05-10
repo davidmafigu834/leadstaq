@@ -20,8 +20,11 @@ export async function PATCH(
     milestone_date?: string;
     display_order?: number;
     is_completed?: boolean;
+    stat_number?: string | null;
+    stat_label?: string | null;
+    phase?: string | null;
   };
-  const { title, description, milestone_date, display_order, is_completed } = body;
+  const { title, description, milestone_date, display_order, is_completed, stat_number, stat_label, phase } = body;
 
   const supabase = createAdminClient();
   const { data, error } = await supabase
@@ -32,6 +35,9 @@ export async function PATCH(
       ...(milestone_date !== undefined && { milestone_date }),
       ...(display_order !== undefined && { display_order }),
       ...(is_completed !== undefined && { is_completed }),
+      ...(stat_number !== undefined && { stat_number }),
+      ...(stat_label !== undefined && { stat_label }),
+      ...(phase !== undefined && { phase }),
       updated_at: new Date().toISOString(),
     })
     .eq("id", params.milestoneId)

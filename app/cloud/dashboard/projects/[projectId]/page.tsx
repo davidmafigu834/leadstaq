@@ -44,6 +44,9 @@ type Milestone = {
   display_order: number;
   is_completed: boolean;
   created_at: string;
+  stat_number?: string | null;
+  stat_label?: string | null;
+  phase?: string | null;
   project_media: MilestoneMedia[];
 };
 
@@ -58,6 +61,9 @@ type Project = {
   is_public: boolean;
   client_id: string;
   slug: string;
+  duration_label?: string | null;
+  budget_range?: string | null;
+  show_budget?: boolean;
   project_media: MediaItem[];
 };
 
@@ -121,6 +127,10 @@ export default function ProjectDetailPage() {
   const [showMediaPicker, setShowMediaPicker] = useState<string | null>(null);
   const [openMilestoneMenu, setOpenMilestoneMenu] = useState<string | null>(null);
 
+  const [durationLabel, setDurationLabel] = useState("");
+  const [budgetRange, setBudgetRange] = useState("");
+  const [showBudget, setShowBudget] = useState(false);
+
   function showToast(msg: string) {
     setToastMsg(msg);
     setTimeout(() => setToastMsg(""), 2500);
@@ -137,6 +147,9 @@ export default function ProjectDetailPage() {
       setProject(found);
       setTitleDraft(found.title);
       setDescDraft(found.description ?? "");
+      setDurationLabel(found.duration_label ?? "");
+      setBudgetRange(found.budget_range ?? "");
+      setShowBudget(found.show_budget ?? false);
       const sorted = [...(found.project_media ?? [])].sort((a, b) => a.display_order - b.display_order);
       setMedia(sorted);
     } finally {
@@ -169,6 +182,21 @@ export default function ProjectDetailPage() {
     });
     setProject((p) => p ? { ...p, title: titleDraft.trim() } : p);
     setEditingTitle(false);
+  }
+
+  async function saveProjectInfo() {
+    if (!project || !session?.clientId) return;
+    await fetch(`/api/clients/${session.clientId}/projects/${project.id}`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        duration_label: durationLabel.trim() || null,
+        budget_range: budgetRange.trim() || null,
+        show_budget: showBudget,
+      }),
+    });
+    setProject((p) => p ? { ...p, duration_label: durationLabel.trim() || null, budget_range: budgetRange.trim() || null, show_budget: showBudget } : p);
+    showToast("Project info saved");
   }
 
   async function saveDesc() {
@@ -405,7 +433,7 @@ export default function ProjectDetailPage() {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => { if (activeTab === "timeline") { void fetchMilestones(); } }, [activeTab]);
 
-  async function createMilestone(data: { title: string; description: string; milestone_date: string }) {
+  async function createMilestone(data: { title: string; description: string; milestone_date: string; stat_number?: string | null; stat_label?: string | null; phase?: string | null }) {
     if (!session?.clientId) return;
     const res = await fetch(`/api/clients/${session.clientId}/projects/${projectId}/milestones`, {
       method: "POST",
@@ -418,7 +446,7 @@ export default function ProjectDetailPage() {
 
   async function updateMilestone(
     milestoneId: string,
-    data: { title?: string; description?: string; milestone_date?: string; is_completed?: boolean }
+    data: { title?: string; description?: string; milestone_date?: string; is_completed?: boolean; stat_number?: string | null; stat_label?: string | null; phase?: string | null }
   ) {
     if (!session?.clientId) return;
     const res = await fetch(
@@ -868,9 +896,24 @@ export default function ProjectDetailPage() {
 
                   {/* Title + date */}
                   <div style={{ flex: 1, minWidth: 0 }}>
-                    <p style={{ fontFamily: "var(--fw-font-display), Georgia, serif", fontSize: 15, color: milestone.is_completed ? "#8C7B6B" : "#1C1410", margin: "0 0 2px", textDecoration: milestone.is_completed ? "line-through" : "none" }}>
-                      {milestone.title}
-                    </p>
+                    <div style={{ display: "flex", alignItems: "center", flexWrap: "wrap", gap: 6, marginBottom: 2 }}>
+                      <p style={{ fontFamily: "var(--fw-font-display), Georgia, serif", fontSize: 15, color: milestone.is_completed ? "#8C7B6B" : "#1C1410", margin: 0, textDecoration: milestone.is_completed ? "line-through" : "none" }}>
+                        {milestone.title}
+                      </p>
+                      {milestone.phase && (
+                        <span style={{
+                          display: "inline-flex", alignItems: "center",
+                          height: 20, padding: "0 8px",
+                          background: milestone.phase === "before" ? "rgba(232,96,44,0.1)" : milestone.phase === "during" ? "rgba(196,154,60,0.1)" : "rgba(46,125,94,0.1)",
+                          color: milestone.phase === "before" ? "#E8602C" : milestone.phase === "during" ? "#C49A3C" : "#2E7D5E",
+                          borderRadius: 20, fontSize: 9, fontWeight: 700,
+                          letterSpacing: "0.08em", textTransform: "uppercase",
+                          fontFamily: "var(--fw-font-body), system-ui, sans-serif",
+                        }}>
+                          {milestone.phase}
+                        </span>
+                      )}
+                    </div>
                     <p style={{ fontFamily: "var(--fw-font-body), system-ui, sans-serif", fontSize: 11, color: "#8C7B6B", margin: 0 }}>
                       {formatMilestoneDate(milestone.milestone_date)}
                     </p>
@@ -878,6 +921,24 @@ export default function ProjectDetailPage() {
                       <p style={{ fontFamily: "var(--fw-font-body), system-ui, sans-serif", fontSize: 12, color: "#4A3828", margin: "6px 0 0", lineHeight: 1.5 }}>
                         {milestone.description}
                       </p>
+                    )}
+                    {(milestone.stat_number || milestone.stat_label) && (
+                      <div style={{
+                        display: "inline-flex", alignItems: "baseline", gap: 5,
+                        marginTop: 6, padding: "4px 10px",
+                        background: "#F7F4EF", borderRadius: 20, width: "fit-content",
+                      }}>
+                        {milestone.stat_number && (
+                          <span style={{ fontFamily: "var(--fw-font-display), Georgia, serif", fontSize: 16, fontWeight: 400, color: "#1C1410" }}>
+                            {milestone.stat_number}
+                          </span>
+                        )}
+                        {milestone.stat_label && (
+                          <span style={{ fontFamily: "var(--fw-font-body), system-ui, sans-serif", fontSize: 11, color: "#8C7B6B" }}>
+                            {milestone.stat_label}
+                          </span>
+                        )}
+                      </div>
                     )}
                   </div>
 
@@ -993,6 +1054,45 @@ export default function ProjectDetailPage() {
         )}
       </div>
 
+      {/* Project info — duration & budget */}
+      <div className="rounded-[20px] border border-[#D0D0C0]/40 bg-gradient-to-br from-[#F8F8F4] via-[#F0F0EA] to-[#E8E8E0] p-5 mb-4">
+        <h3 className="mb-3 font-cloud-body text-[10px] font-bold tracking-[0.08em] text-[#666660] uppercase">Project info</h3>
+        <div style={{ marginBottom: 12 }}>
+          <label style={{ display: "block", fontFamily: "var(--fw-font-body), system-ui, sans-serif", fontSize: 11, fontWeight: 600, color: "#4A3828", marginBottom: 4 }}>
+            Duration <span style={{ fontWeight: 400, color: "#8C7B6B" }}>(optional)</span>
+          </label>
+          <input
+            value={durationLabel}
+            onChange={(e) => setDurationLabel(e.target.value)}
+            onBlur={() => void saveProjectInfo()}
+            placeholder="e.g. 6 months, 3 weeks, 45 days"
+            style={{ width: "100%", height: 40, padding: "0 12px", background: "rgba(255,255,255,0.7)", border: "0.5px solid rgba(28,20,16,0.1)", borderRadius: 10, fontSize: 13, color: "#1C1410", fontFamily: "var(--fw-font-body), system-ui, sans-serif", outline: "none", boxSizing: "border-box" }}
+          />
+        </div>
+        <div style={{ marginBottom: 10 }}>
+          <label style={{ display: "block", fontFamily: "var(--fw-font-body), system-ui, sans-serif", fontSize: 11, fontWeight: 600, color: "#4A3828", marginBottom: 4 }}>
+            Budget range <span style={{ fontWeight: 400, color: "#8C7B6B" }}>(optional)</span>
+          </label>
+          <input
+            value={budgetRange}
+            onChange={(e) => setBudgetRange(e.target.value)}
+            onBlur={() => void saveProjectInfo()}
+            placeholder="e.g. $15,000 – $20,000"
+            style={{ width: "100%", height: 40, padding: "0 12px", background: "rgba(255,255,255,0.7)", border: "0.5px solid rgba(28,20,16,0.1)", borderRadius: 10, fontSize: 13, color: "#1C1410", fontFamily: "var(--fw-font-body), system-ui, sans-serif", outline: "none", boxSizing: "border-box" }}
+          />
+        </div>
+        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "10px 12px", background: "rgba(255,255,255,0.5)", borderRadius: 10 }}>
+          <p style={{ fontFamily: "var(--fw-font-body), system-ui, sans-serif", fontSize: 12, color: "#4A3828", margin: 0 }}>Show budget on public page</p>
+          <input
+            type="checkbox"
+            checked={showBudget}
+            onChange={(e) => { setShowBudget(e.target.checked); }}
+            onBlur={() => void saveProjectInfo()}
+            style={{ width: 16, height: 16, cursor: "pointer" }}
+          />
+        </div>
+      </div>
+
       {/* Analytics teaser — activity SectionCard */}
       <div className="rounded-[20px] border border-[#C4A8FF]/30 bg-gradient-to-br from-[#F5F0FF] via-[#EDE5FF] to-[#DDD0FF] p-4 flex items-center justify-between mb-4">
         <div className="flex items-center gap-3">
@@ -1017,6 +1117,7 @@ export default function ProjectDetailPage() {
         <MilestoneForm
           projectCategory={project.category ?? "Other"}
           mode="create"
+          existingMilestones={milestones}
           onSave={createMilestone}
           onClose={() => setShowMilestoneForm(false)}
         />
@@ -1027,10 +1128,14 @@ export default function ProjectDetailPage() {
         <MilestoneForm
           projectCategory={project.category ?? "Other"}
           mode="edit"
+          existingMilestones={milestones}
           initialData={{
             title: editingMilestone.title,
             description: editingMilestone.description ?? "",
             milestone_date: editingMilestone.milestone_date,
+            stat_number: editingMilestone.stat_number ?? "",
+            stat_label: editingMilestone.stat_label ?? "",
+            phase: editingMilestone.phase ?? null,
           }}
           onSave={(data) => updateMilestone(editingMilestone.id, data)}
           onClose={() => setEditingMilestone(null)}

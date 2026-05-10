@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { notFound } from "next/navigation";
-import { MapPin, Calendar, ArrowRight } from "lucide-react";
+import { MapPin, Calendar, ArrowRight, Clock, DollarSign } from "lucide-react";
 import Link from "next/link";
 import { ViewRecorder } from "./ViewRecorder";
 import { getCategoryStyle } from "@/app/cloud/lib/category-styles";
@@ -60,11 +60,11 @@ export default async function CloudSharePage({ params }: { params: { projectId: 
     .eq("project_id", project.id as string)
     .order("display_order", { ascending: true });
 
-  type MilestoneMedia = { id: string; public_url: string; caption: string | null; display_order: number };
-  type MilestoneRow = { id: string; title: string; description: string | null; milestone_date: string; display_order: number; is_completed: boolean; project_media: MilestoneMedia[] };
+  type MilestoneMedia = { id: string; public_url: string; caption: string | null; display_order: number; thumbnail_url?: string | null; type?: string | null };
+  type MilestoneRow = { id: string; title: string; description: string | null; milestone_date: string; display_order: number; is_completed: boolean; stat_number: string | null; stat_label: string | null; phase: string | null; project_media: MilestoneMedia[] };
   const { data: rawMilestones } = await supabase
     .from("project_milestones")
-    .select("id, title, description, milestone_date, display_order, is_completed, project_media(id, public_url, caption, display_order)")
+    .select("id, title, description, milestone_date, display_order, is_completed, stat_number, stat_label, phase, project_media(id, public_url, caption, display_order, thumbnail_url, type)")
     .eq("project_id", project.id as string)
     .order("milestone_date", { ascending: true });
   const milestones = (rawMilestones ?? []) as MilestoneRow[];
@@ -234,16 +234,49 @@ export default async function CloudSharePage({ params }: { params: { projectId: 
             background: "linear-gradient(to top, rgba(28,20,16,0.85) 0%, rgba(28,20,16,0.2) 50%, transparent 100%)",
           }}
         />
-        <div style={{ position: "absolute", bottom: 28, left: 28, right: 28 }}>
-          <h1
-            style={{
-              fontFamily: "var(--fw-font-display), Georgia, serif",
-              fontSize: "clamp(28px, 5vw, 44px)",
-              color: "#FFFFFF", margin: 0, lineHeight: 1.1, letterSpacing: "-0.01em",
-            }}
-          >
-            {project.title as string}
-          </h1>
+        <div style={{ position: "absolute", bottom: 0, left: 0, right: 0 }}>
+          <div style={{ padding: "0 28px 12px" }}>
+            <h1
+              style={{
+                fontFamily: "var(--fw-font-display), Georgia, serif",
+                fontSize: "clamp(28px, 5vw, 44px)",
+                color: "#FFFFFF", margin: 0, lineHeight: 1.1, letterSpacing: "-0.01em",
+              }}
+            >
+              {project.title as string}
+            </h1>
+          </div>
+          <div style={{
+            display: "flex", alignItems: "center", gap: 14, flexWrap: "wrap",
+            padding: "10px 28px 22px",
+            background: "rgba(28,20,16,0.45)",
+          }}>
+            <span style={{
+              display: "inline-flex", alignItems: "center", gap: 6,
+              height: 28, padding: "0 14px",
+              background: (project.completion_date as string | null) ? "rgba(46,125,94,0.25)" : "rgba(196,154,60,0.25)",
+              border: `0.5px solid ${(project.completion_date as string | null) ? "rgba(46,125,94,0.4)" : "rgba(196,154,60,0.4)"}`,
+              borderRadius: 20, fontSize: 11, fontWeight: 700,
+              letterSpacing: "0.06em", textTransform: "uppercase",
+              color: (project.completion_date as string | null) ? "#6EC87A" : "#E8D040",
+              fontFamily: "var(--fw-font-body), system-ui, sans-serif",
+            }}>
+              <span style={{ width: 6, height: 6, borderRadius: "50%", background: (project.completion_date as string | null) ? "#6EC87A" : "#E8D040", flexShrink: 0 }} />
+              {(project.completion_date as string | null) ? "Completed" : "In progress"}
+            </span>
+            {(project.duration_label as string | null) && (
+              <span style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 13, color: "rgba(255,255,255,0.6)", fontFamily: "var(--fw-font-body), system-ui, sans-serif" }}>
+                <Clock size={13} />
+                {project.duration_label as string}
+              </span>
+            )}
+            {(project.show_budget as boolean | null) && (project.budget_range as string | null) && (
+              <span style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 13, color: "rgba(255,255,255,0.6)", fontFamily: "var(--fw-font-body), system-ui, sans-serif" }}>
+                <DollarSign size={13} />
+                {project.budget_range as string}
+              </span>
+            )}
+          </div>
         </div>
       </div>
 
