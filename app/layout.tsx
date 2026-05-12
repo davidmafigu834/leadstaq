@@ -59,6 +59,7 @@ export default function RootLayout({
     >
       <head>
         <link rel="apple-touch-icon" href="/icons/icon-192.png" />
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.31.0/dist/tabler-icons.min.css" />
       </head>
       <body className="min-h-screen bg-surface-canvas font-sans text-sm text-ink-primary antialiased">
         <Providers>{children}</Providers>

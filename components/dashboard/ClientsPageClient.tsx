@@ -23,12 +23,12 @@ export function ClientsPageClient({ clients }: { clients: ClientsPageListRow[] }
           <Link
             key={c.id}
             href={`/dashboard/clients/${c.id}`}
-            className="group flex items-center gap-4 border border-border bg-surface-card p-5 transition-colors hover:border-border-strong hover:bg-surface-card-alt"
+            className="ag-card-hover group flex items-center gap-4 border border-[var(--ag-border)] bg-surface-card p-5 rounded-lg"
           >
             <ClientAvatar name={c.name} />
             <div>
-              <div className="font-display text-lg text-ink-primary">{c.name}</div>
-              <div className="font-mono text-[11px] uppercase tracking-wide text-ink-tertiary">{c.industry}</div>
+              <div className="text-[13px] font-medium text-[var(--ag-text-primary)]" style={{ fontFamily: "var(--ag-font-body)" }}>{c.name}</div>
+              <div className="text-[11px] font-medium uppercase tracking-[0.06em] text-[var(--ag-text-tertiary)]" style={{ fontFamily: "var(--ag-font-body)" }}>{c.industry}</div>
             </div>
           </Link>
         ))}

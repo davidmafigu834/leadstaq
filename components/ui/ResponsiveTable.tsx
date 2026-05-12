@@ -52,7 +52,7 @@ export function ResponsiveTable<T>({
               onClick={() => onRowClick?.(row)}
               className={[
                 "border-b border-[var(--border)]",
-                onRowClick ? "cursor-pointer hover:bg-surface-card-alt transition-colors" : "",
+                onRowClick ? "ag-row-hover cursor-pointer" : "",
                 rowClassName?.(row) ?? "",
               ]
                 .filter(Boolean)

@@ -1,11 +1,9 @@
 "use client";
 
-import { motion } from "framer-motion";
+import { useEffect, useState } from "react";
 import { Info } from "lucide-react";
 import type { PulseBarMetric } from "@/components/dashboard/pulse-metrics";
 import { EmptyValue } from "@/components/EmptyValue";
-
-const ease = [0.16, 1, 0.3, 1] as const;
 
 export type { PulseBarMetric } from "@/components/dashboard/pulse-metrics";
 
@@ -32,20 +30,75 @@ function normalizeMetric(m: PulseBarMetric | LegacyPulseMetric): PulseBarMetric 
   };
 }
 
+function useCountUp(target: number, duration = 800, delay = 0): number {
+  const [count, setCount] = useState(0);
+
+  useEffect(() => {
+    if (target === 0) {
+      setCount(0);
+      return;
+    }
+    const timer = setTimeout(() => {
+      const startTime = performance.now();
+      function update(currentTime: number) {
+        const elapsed = currentTime - startTime;
+        const progress = Math.min(elapsed / duration, 1);
+        const eased = 1 - Math.pow(1 - progress, 3);
+        setCount(Math.round(eased * target));
+        if (progress < 1) requestAnimationFrame(update);
+      }
+      requestAnimationFrame(update);
+    }, delay);
+    return () => clearTimeout(timer);
+  }, [target, duration, delay]);
+
+  return count;
+}
+
+function CountUpValue({ value, delay }: { value: string; delay: number }) {
+  const trimmed = value.trim();
+  const isInt = /^\d+$/.test(trimmed);
+  const pctMatch = trimmed.match(/^(\d+)%$/);
+  const num = isInt ? parseInt(trimmed, 10) : pctMatch ? parseInt(pctMatch[1]!, 10) : null;
+  const count = useCountUp(num != null && num > 0 ? num : 0, 800, num != null && num > 0 ? delay : 0);
+
+  if (num === null || num === 0) return <>{value}</>;
+  return (
+    <>
+      {count}
+      {pctMatch ? "%" : ""}
+    </>
+  );
+}
+
 export function PulseBar({ metrics }: { metrics: (PulseBarMetric | LegacyPulseMetric)[] }) {
   const list = metrics.map(normalizeMetric);
   return (
-    <div className="mb-8 grid min-h-[88px] grid-cols-1 divide-y divide-[var(--border)] overflow-hidden rounded-lg border border-[var(--border)] sm:grid-cols-2 sm:divide-x sm:divide-y-0 layout:grid-cols-4">
+    <div className="mb-8 grid grid-cols-2 gap-3 layout:grid-cols-4">
       {list.map((m, i) => (
-        <motion.div
+        <div
           key={`${m.eyebrow}-${i}`}
-          initial={{ opacity: 0, y: 12 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.18, delay: i * 0.05, ease }}
-          className="relative flex min-h-[88px] flex-col justify-center px-4 py-4 sm:px-5 sm:py-5 bg-surface-card"
+          style={{
+            background: "var(--ag-surface)",
+            border: "0.5px solid var(--ag-border)",
+            borderRadius: 12,
+            padding: "20px 24px",
+            display: "flex",
+            flexDirection: "column",
+          }}
         >
           <div
-            className="flex items-center gap-1 text-[11px] font-medium uppercase tracking-[0.08em] text-[var(--text-tertiary)]"
+            style={{
+              display: "flex",
+              alignItems: "center",
+              gap: 4,
+              fontFamily: "var(--ag-font-body)",
+              fontSize: 11,
+              fontWeight: 500,
+              letterSpacing: "0.08em",
+              textTransform: "uppercase",
+              color: "var(--ag-text-tertiary)",
+            }}
           >
             <span>{m.eyebrow}</span>
             {"eyebrowTooltip" in m && m.eyebrowTooltip ? (
@@ -54,33 +107,55 @@ export function PulseBar({ metrics }: { metrics: (PulseBarMetric | LegacyPulseMe
               </span>
             ) : null}
           </div>
-          <div className="mt-1 text-[32px] font-semibold leading-none tracking-tight text-[var(--text-primary)]">
-            {m.emptyLabel ? <EmptyValue label={m.emptyLabel} /> : m.value}
+
+          <div
+            style={{
+              fontFamily: "var(--ag-font-display)",
+              fontSize: 42,
+              color: "var(--ag-text-primary)",
+              lineHeight: 1,
+              margin: "8px 0 4px",
+              letterSpacing: "-0.5px",
+            }}
+          >
+            {m.emptyLabel ? (
+              <EmptyValue label={m.emptyLabel} />
+            ) : (
+              <CountUpValue value={m.value} delay={i * 100} />
+            )}
           </div>
-          {m.deltaHidden ? null : m.deltaPlain || m.variant === "dark" ? (
-            <div
-              className={`mt-1.5 text-[11px] font-medium ${
-                m.variant === "dark" && !m.darkDeltaMuted ? "text-accent" : "text-[var(--text-secondary)]"
-              }`}
+
+          {m.deltaHidden ? (
+            <p
+              style={{
+                fontSize: 11,
+                color: "var(--ag-text-muted)",
+                fontFamily: "var(--ag-font-body)",
+                margin: 0,
+              }}
             >
-              {m.deltaLine}
-            </div>
+              No comparison data yet
+            </p>
           ) : (
-            <div className="mt-1.5">
+            <div style={{ display: "flex", alignItems: "center", gap: 6, marginTop: 4 }}>
               <span
-                className={`inline-flex items-center rounded-[var(--radius-sm)] px-1.5 py-0.5 text-[11px] font-medium ${
-                  m.deltaKind === "negative"
-                    ? "bg-[var(--error-muted)] text-[var(--error)]"
-                    : m.deltaKind === "positive"
-                      ? "bg-[var(--success-muted)] text-[var(--success)]"
-                      : "bg-[var(--bg-quaternary)] text-[var(--text-secondary)]"
-                }`}
+                style={{
+                  fontSize: 12,
+                  fontFamily: "var(--ag-font-body)",
+                  fontWeight: 500,
+                  color:
+                    m.deltaKind === "positive"
+                      ? "var(--ag-success)"
+                      : m.deltaKind === "negative"
+                        ? "var(--ag-error)"
+                        : "var(--ag-text-tertiary)",
+                }}
               >
                 {m.deltaLine}
               </span>
             </div>
           )}
-        </motion.div>
+        </div>
       ))}
     </div>
   );

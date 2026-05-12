@@ -4,6 +4,7 @@ import useSWR from "swr";
 import { AnimatePresence, motion } from "framer-motion";
 import type { ActivityEventDTO, ActivityEventKind } from "@/lib/activity-feed-types";
 import { formatTimeAgo } from "@/lib/format";
+import { EmptyState } from "@/app/(agency)/dashboard/components/EmptyState";
 
 const fetcher = (u: string) =>
   fetch(u).then((r) => {
@@ -48,7 +49,7 @@ export function ActivityFeed() {
               transition={{ duration: 1.2, repeat: Infinity, ease: "easeInOut" }}
             />
           </p>
-          <h2 className="mt-1 text-[18px] font-semibold text-[var(--text-primary)]">Activity</h2>
+          <h2 className="mt-1 text-[18px] font-semibold text-[var(--ag-text-primary)]" style={{ fontFamily: "var(--ag-font-body)" }}>Activity</h2>
         </div>
       </div>
 
@@ -97,10 +98,10 @@ export function ActivityFeed() {
                   aria-hidden
                 />
                 <div className="flex items-start justify-between gap-3">
-                  <span className="text-[11px] font-medium uppercase tracking-wide text-[var(--text-tertiary)]">
+                  <span style={{ fontFamily: "var(--ag-font-body)", fontSize: 11, fontWeight: 500, textTransform: "uppercase", letterSpacing: "0.06em", color: "var(--ag-text-tertiary)" }}>
                     {labelFor[e.type]}
                   </span>
-                  <span className="shrink-0 text-[11px] tabular-nums text-[var(--text-tertiary)]">
+                  <span style={{ fontFamily: "var(--ag-font-body)", fontSize: 11, color: "var(--ag-text-tertiary)" }} className="shrink-0 tabular-nums">
                     {formatTimeAgo(e.timestamp)}
                   </span>
                 </div>
@@ -109,7 +110,13 @@ export function ActivityFeed() {
             ))}
           </AnimatePresence>
         </ul>
-        {!events.length ? <p className="py-4 text-[13px] text-[var(--text-tertiary)]">No recent activity.</p> : null}
+        {!events.length ? (
+          <EmptyState
+            icon="ti-activity"
+            title="No activity yet"
+            description="Activity will appear here as your team logs calls, sends messages, and updates leads."
+          />
+        ) : null}
       </div>
     </div>
   );

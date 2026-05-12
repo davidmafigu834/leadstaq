@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { ClientCard } from "./ClientCard";
 import type { ClientPerfRow } from "@/lib/dashboard-data";
+import { EmptyState } from "@/app/(agency)/dashboard/components/EmptyState";
 
 export function ClientPerformanceGrid({ rows }: { rows: ClientPerfRow[] }) {
   return (
@@ -10,7 +11,12 @@ export function ClientPerformanceGrid({ rows }: { rows: ClientPerfRow[] }) {
           <p className="text-[11px] font-medium uppercase tracking-[0.08em] text-[var(--text-tertiary)]">
             03 / PORTFOLIO
           </p>
-          <h2 className="mt-1 text-[18px] font-semibold text-[var(--text-primary)]">Client performance</h2>
+          <h2
+            className="mt-1 text-[18px] font-semibold text-[var(--text-primary)]"
+            style={{ fontFamily: "var(--ag-font-body)" }}
+          >
+            Client performance
+          </h2>
         </div>
         <Link
           href="/dashboard/clients"
@@ -20,11 +26,19 @@ export function ClientPerformanceGrid({ rows }: { rows: ClientPerfRow[] }) {
         </Link>
       </div>
 
-      <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 layout:grid-cols-3">
-        {rows.map((r) => (
-          <ClientCard key={r.id} row={r} />
-        ))}
-      </div>
+      {rows.length === 0 ? (
+        <EmptyState
+          icon="ti-building"
+          title="No clients yet"
+          description="Add your first client to start tracking leads and performance."
+        />
+      ) : (
+        <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 layout:grid-cols-3">
+          {rows.map((r) => (
+            <ClientCard key={r.id} row={r} />
+          ))}
+        </div>
+      )}
     </section>
   );
 }
